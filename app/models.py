@@ -20,7 +20,7 @@ class Material(Base):
     nombre: Mapped[str] = mapped_column(String)
     costo_referencial: Mapped[int] = mapped_column(BigInteger)
 
-    tratamiento_material: Mapped[List['TratamientoMaterial']] = relationship('TratamientoMaterial', back_populates='material')
+    tratamientos: Mapped[List['TratamientoMaterial']] = relationship('TratamientoMaterial', back_populates='material')
 
 
 class Odontologo(Base):
@@ -33,8 +33,8 @@ class Odontologo(Base):
     nombre: Mapped[str] = mapped_column(String)
     tipo_odontologo: Mapped[str] = mapped_column(Enum('Interno', 'Externo', 'Temporal', name='tipo_odontologo_t'))
 
-    tratamiento: Mapped[List['Tratamiento']] = relationship('Tratamiento', back_populates='odontologo')
-    tratamiento_sesion: Mapped[List['TratamientoSesion']] = relationship('TratamientoSesion', back_populates='odontologo')
+    tratamientos: Mapped[List['Tratamiento']] = relationship('Tratamiento', back_populates='odontologo')
+    sesiones: Mapped[List['TratamientoSesion']] = relationship('TratamientoSesion', back_populates='odontologo')
 
 
 class Paciente(Base):
@@ -58,7 +58,7 @@ class Paciente(Base):
     apoderado: Mapped[str] = mapped_column(String)
     novedades: Mapped[str] = mapped_column(Text)
 
-    historia: Mapped[List['Historia']] = relationship('Historia', back_populates='paciente')
+    historias: Mapped[List['Historia']] = relationship('Historia', back_populates='paciente')
 
 
 class Procedimiento(Base):
@@ -71,7 +71,7 @@ class Procedimiento(Base):
     nombre: Mapped[str] = mapped_column(String)
     costo_referencial: Mapped[int] = mapped_column(BigInteger)
 
-    tratamiento_procedimiento: Mapped[List['TratamientoProcedimiento']] = relationship('TratamientoProcedimiento', back_populates='procedimiento')
+    tratamientos: Mapped[List['TratamientoProcedimiento']] = relationship('TratamientoProcedimiento', back_populates='procedimiento')
 
 
 class Historia(Base):
@@ -86,10 +86,10 @@ class Historia(Base):
     paciente_dni: Mapped[str] = mapped_column(String)
 
     paciente: Mapped['Paciente'] = relationship('Paciente', back_populates='historia')
-    historia_contraindicacion: Mapped[List['HistoriaContraindicacion']] = relationship('HistoriaContraindicacion', back_populates='historia')
-    historia_examen: Mapped[List['HistoriaExamen']] = relationship('HistoriaExamen', back_populates='historia')
-    odontograma: Mapped[List['Odontograma']] = relationship('Odontograma', back_populates='historia_clinica')
-    tratamiento: Mapped[List['Tratamiento']] = relationship('Tratamiento', back_populates='historia_clinica')
+    contraindicaciones: Mapped[List['HistoriaContraindicacion']] = relationship('HistoriaContraindicacion', back_populates='historia')
+    examenes: Mapped[List['HistoriaExamen']] = relationship('HistoriaExamen', back_populates='historia')
+    odontogramas: Mapped[List['Odontograma']] = relationship('Odontograma', back_populates='historia_clinica')
+    tratamientos: Mapped[List['Tratamiento']] = relationship('Tratamiento', back_populates='historia_clinica')
 
 
 class HistoriaAntecedentesMedicos(Historia):
@@ -183,11 +183,11 @@ class Odontograma(Base):
     observaciones: Mapped[str] = mapped_column(Text)
 
     historia_clinica: Mapped['Historia'] = relationship('Historia', back_populates='odontograma')
-    odontograma_entrada_areas_diente: Mapped[List['OdontogramaEntradaAreasDiente']] = relationship('OdontogramaEntradaAreasDiente', back_populates='odontograma')
-    odontograma_entrada_bordes_diente: Mapped[List['OdontogramaEntradaBordesDiente']] = relationship('OdontogramaEntradaBordesDiente', back_populates='odontograma')
-    odontograma_entrada_diente: Mapped[List['OdontogramaEntradaDiente']] = relationship('OdontogramaEntradaDiente', back_populates='odontograma')
-    odontograma_entrada_par_dientes: Mapped[List['OdontogramaEntradaParDientes']] = relationship('OdontogramaEntradaParDientes', back_populates='odontograma')
-    odontograma_entrada_rango_dientes: Mapped[List['OdontogramaEntradaRangoDientes']] = relationship('OdontogramaEntradaRangoDientes', back_populates='odontograma')
+    entradas_areas_diente: Mapped[List['OdontogramaEntradaAreasDiente']] = relationship('OdontogramaEntradaAreasDiente', back_populates='odontograma')
+    entradas_bordes_diente: Mapped[List['OdontogramaEntradaBordesDiente']] = relationship('OdontogramaEntradaBordesDiente', back_populates='odontograma')
+    entradas_diente: Mapped[List['OdontogramaEntradaDiente']] = relationship('OdontogramaEntradaDiente', back_populates='odontograma')
+    entradas_par_dientes: Mapped[List['OdontogramaEntradaParDientes']] = relationship('OdontogramaEntradaParDientes', back_populates='odontograma')
+    entradas_rango_dientes: Mapped[List['OdontogramaEntradaRangoDientes']] = relationship('OdontogramaEntradaRangoDientes', back_populates='odontograma')
 
 
 class Tratamiento(Base):
@@ -207,10 +207,10 @@ class Tratamiento(Base):
 
     historia_clinica: Mapped['Historia'] = relationship('Historia', back_populates='tratamiento')
     odontologo: Mapped['Odontologo'] = relationship('Odontologo', back_populates='tratamiento')
-    tratamiento_material: Mapped[List['TratamientoMaterial']] = relationship('TratamientoMaterial', back_populates='tratamiento')
-    tratamiento_pago: Mapped[List['TratamientoPago']] = relationship('TratamientoPago', back_populates='tratamiento')
-    tratamiento_procedimiento: Mapped[List['TratamientoProcedimiento']] = relationship('TratamientoProcedimiento', back_populates='tratamiento')
-    tratamiento_sesion: Mapped[List['TratamientoSesion']] = relationship('TratamientoSesion', back_populates='tratamiento')
+    materiales: Mapped[List['TratamientoMaterial']] = relationship('TratamientoMaterial', back_populates='tratamiento')
+    pagos: Mapped[List['TratamientoPago']] = relationship('TratamientoPago', back_populates='tratamiento')
+    procedimientos: Mapped[List['TratamientoProcedimiento']] = relationship('TratamientoProcedimiento', back_populates='tratamiento')
+    sesiones: Mapped[List['TratamientoSesion']] = relationship('TratamientoSesion', back_populates='tratamiento')
 
 
 class OdontogramaEntradaAreasDiente(Base):
