@@ -1,0 +1,18 @@
+{% from 'bootstrap5/form.html' import render_form %}
+{% extends "base.html" %}
+{% block title %}Inicio{% endblock %}
+{% block content %}
+    <form class="row g-3" action="/" method="post">
+    <div class="col">
+        <select class="form-select" name="paciente_dni">
+        {% for paciente in pacientes %}
+            <option value="{{ paciente.paciente_dni }}">{{ paciente.nombres }} {{ paciente.apellidos }}</option>
+        {% endfor %}
+        </select>
+    </div>
+    <div class="col">
+        <input type="submit" value="Cargar paciente" class="btn btn-primary"/>
+        <a class="btn btn-primary" href="/registrar">Registrar nuevo paciente</a>
+    </div>
+    </form>
+{% endblock %}

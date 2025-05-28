@@ -2,7 +2,14 @@
 
 from typing import List
 
-from sqlalchemy import ARRAY, BigInteger, Boolean, Date, Enum, ForeignKeyConstraint, Integer, PrimaryKeyConstraint, Text, String
+from sqlalchemy import (
+    BigInteger, Boolean, Date, Enum,
+    ForeignKeyConstraint, Integer, PrimaryKeyConstraint,
+    Text, String
+)
+from sqlalchemy_utils import (
+    EmailType, ScalarListType
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 import datetime
 
@@ -46,17 +53,16 @@ class Paciente(Base):
     paciente_dni: Mapped[str] = mapped_column(String, primary_key=True)
     nombres: Mapped[str] = mapped_column(String, info={'label': 'Nombres'})
     apellidos: Mapped[str] = mapped_column(String)
-    edad: Mapped[int] = mapped_column(Integer)
-    fecha_de_nacimiento: Mapped[datetime.date] = mapped_column(Date)
-    lugar_de_nacimiento: Mapped[str] = mapped_column(String)
-    estado_civil: Mapped[str] = mapped_column(Enum('Soltero', 'Casado', 'Conviviente', 'Viudo', 'Divorciado', 'Separado', name='estado_civil_t'))
-    direccion: Mapped[str] = mapped_column(String)
+    fecha_nacimiento: Mapped[datetime.date] = mapped_column(Date)
     telefono: Mapped[str] = mapped_column(String)
-    email: Mapped[str] = mapped_column(String)
-    ocupacion: Mapped[str] = mapped_column(String)
-    lugar_trabajo_estudio: Mapped[str] = mapped_column(String)
-    apoderado: Mapped[str] = mapped_column(String)
-    novedades: Mapped[str] = mapped_column(Text)
+    lugar_nacimiento: Mapped[str | None] = mapped_column(String)
+    estado_civil: Mapped[str | None] = mapped_column(Enum('Soltero', 'Casado', 'Conviviente', 'Viudo', 'Divorciado', 'Separado', name='estado_civil_t'), nullable=True)
+    direccion: Mapped[str | None] = mapped_column(String)
+    email: Mapped[str | None] = mapped_column(EmailType)
+    ocupacion: Mapped[str | None] = mapped_column(String)
+    lugar_trabajo_estudio: Mapped[str | None] = mapped_column(String)
+    apoderado: Mapped[str | None] = mapped_column(String)
+    novedades: Mapped[str] = mapped_column(Text, default='')
 
     historias: Mapped[List['Historia']] = relationship('Historia', back_populates='paciente')
 
@@ -82,17 +88,17 @@ class Historia(Base):
     )
 
     historia_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    fecha_creacion: Mapped[datetime.date] = mapped_column(Date)
+    fecha_creacion: Mapped[datetime.date] = mapped_column(Date, default=datetime.date.today)
     paciente_dni: Mapped[str] = mapped_column(String)
 
-    paciente: Mapped['Paciente'] = relationship('Paciente', back_populates='historia')
+    paciente: Mapped['Paciente'] = relationship('Paciente', back_populates='historias')
     contraindicaciones: Mapped[List['HistoriaContraindicacion']] = relationship('HistoriaContraindicacion', back_populates='historia')
     examenes: Mapped[List['HistoriaExamen']] = relationship('HistoriaExamen', back_populates='historia')
     odontogramas: Mapped[List['Odontograma']] = relationship('Odontograma', back_populates='historia_clinica')
     tratamientos: Mapped[List['Tratamiento']] = relationship('Tratamiento', back_populates='historia_clinica')
 
 
-class HistoriaAntecedentesMedicos(Historia):
+class HistoriaAntecedentesMedicos(Base):
     __tablename__ = 'historia_antecedentes_medicos'
     __table_args__ = (
         ForeignKeyConstraint(['historia_id'], ['historia.historia_id'], name='historia_antecedentes_medicos_historia_id_fkey'),
@@ -100,19 +106,21 @@ class HistoriaAntecedentesMedicos(Historia):
     )
 
     historia_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    enfermedad_cardiaca: Mapped[bool] = mapped_column(Boolean)
-    enfermedad_renal: Mapped[bool] = mapped_column(Boolean)
-    vih: Mapped[bool] = mapped_column(Boolean)
-    alergias: Mapped[bool] = mapped_column(Boolean)
-    hemorragias: Mapped[bool] = mapped_column(Boolean)
-    medicado: Mapped[bool] = mapped_column(Boolean)
-    diabetes: Mapped[bool] = mapped_column(Boolean)
-    hepatitis: Mapped[bool] = mapped_column(Boolean)
-    problemas_hemorragicos: Mapped[bool] = mapped_column(Boolean)
-    presion_alta: Mapped[bool] = mapped_column(Boolean)
-    epilepsia: Mapped[bool] = mapped_column(Boolean)
-    embarazo: Mapped[bool] = mapped_column(Boolean)
-    otros: Mapped[str] = mapped_column(Text)
+    enfermedad_cardiaca: Mapped[bool] = mapped_column(Boolean, default=False)
+    enfermedad_renal: Mapped[bool] = mapped_column(Boolean, default=False)
+    vih: Mapped[bool] = mapped_column(Boolean, default=False)
+    alergias: Mapped[bool] = mapped_column(Boolean, default=False)
+    hemorragias: Mapped[bool] = mapped_column(Boolean, default=False)
+    medicado: Mapped[bool] = mapped_column(Boolean, default=False)
+    diabetes: Mapped[bool] = mapped_column(Boolean, default=False)
+    hepatitis: Mapped[bool] = mapped_column(Boolean, default=False)
+    problemas_hemorragicos: Mapped[bool] = mapped_column(Boolean, default=False)
+    presion_alta: Mapped[bool] = mapped_column(Boolean, default=False)
+    epilepsia: Mapped[bool] = mapped_column(Boolean, default=False)
+    embarazo: Mapped[bool] = mapped_column(Boolean, default=False)
+    otros: Mapped[str] = mapped_column(Text, default='')
+
+    historia: Mapped['Historia'] = relationship('Historia', backref='antecedentes_medicos')
 
 
 class HistoriaContraindicacion(Base):
@@ -127,7 +135,7 @@ class HistoriaContraindicacion(Base):
     descripcion: Mapped[str] = mapped_column(String)
     es_grave: Mapped[bool] = mapped_column(Boolean)
 
-    historia: Mapped['Historia'] = relationship('Historia', back_populates='historia_contraindicacion')
+    historia: Mapped['Historia'] = relationship('Historia', back_populates='contraindicaciones')
 
 
 class HistoriaExamen(Base):
@@ -140,13 +148,13 @@ class HistoriaExamen(Base):
     historia_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     examen_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     titulo: Mapped[str] = mapped_column(String)
-    fecha: Mapped[datetime.date] = mapped_column(Date)
+    fecha: Mapped[datetime.date] = mapped_column(Date, default=datetime.date.today)
     ruta_archivo: Mapped[str] = mapped_column(String)
 
-    historia: Mapped['Historia'] = relationship('Historia', back_populates='historia_examen')
+    historia: Mapped['Historia'] = relationship('Historia', back_populates='examenes')
 
 
-class HistoriaExamenesEstomatologicos(Historia):
+class HistoriaExamenesEstomatologicos(Base):
     __tablename__ = 'historia_examenes_estomatologicos'
     __table_args__ = (
         ForeignKeyConstraint(['historia_id'], ['historia.historia_id'], name='historia_examenes_estomatologicos_historia_id_fkey'),
@@ -154,18 +162,20 @@ class HistoriaExamenesEstomatologicos(Historia):
     )
 
     historia_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    maxilares: Mapped[bool] = mapped_column(Boolean)
-    vestíbulo: Mapped[bool] = mapped_column(Boolean)
-    labios: Mapped[bool] = mapped_column(Boolean)
-    encia: Mapped[bool] = mapped_column(Boolean)
-    paladar: Mapped[bool] = mapped_column(Boolean)
-    oclusión: Mapped[bool] = mapped_column(Boolean)
-    lengua: Mapped[bool] = mapped_column(Boolean)
-    atm: Mapped[bool] = mapped_column(Boolean)
-    piso_de_boca: Mapped[bool] = mapped_column(Boolean)
-    ganglios: Mapped[bool] = mapped_column(Boolean)
-    orifaringe: Mapped[bool] = mapped_column(Boolean)
-    halitosis: Mapped[bool] = mapped_column(Boolean)
+    maxilares: Mapped[bool] = mapped_column(Boolean, default=False)
+    vestíbulo: Mapped[bool] = mapped_column(Boolean, default=False)
+    labios: Mapped[bool] = mapped_column(Boolean, default=False)
+    encia: Mapped[bool] = mapped_column(Boolean, default=False)
+    paladar: Mapped[bool] = mapped_column(Boolean, default=False)
+    oclusión: Mapped[bool] = mapped_column(Boolean, default=False)
+    lengua: Mapped[bool] = mapped_column(Boolean, default=False)
+    atm: Mapped[bool] = mapped_column(Boolean, default=False)
+    piso_de_boca: Mapped[bool] = mapped_column(Boolean, default=False)
+    ganglios: Mapped[bool] = mapped_column(Boolean, default=False)
+    orifaringe: Mapped[bool] = mapped_column(Boolean, default=False)
+    halitosis: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    historia: Mapped['Historia'] = relationship('Historia', backref='examenes_estomatologicos')
 
 
 class Odontograma(Base):
@@ -182,7 +192,7 @@ class Odontograma(Base):
     especificaciones: Mapped[str] = mapped_column(Text)
     observaciones: Mapped[str] = mapped_column(Text)
 
-    historia_clinica: Mapped['Historia'] = relationship('Historia', back_populates='odontograma')
+    historia_clinica: Mapped['Historia'] = relationship('Historia', back_populates='odontogramas')
     entradas_areas_diente: Mapped[List['OdontogramaEntradaAreasDiente']] = relationship('OdontogramaEntradaAreasDiente', back_populates='odontograma')
     entradas_bordes_diente: Mapped[List['OdontogramaEntradaBordesDiente']] = relationship('OdontogramaEntradaBordesDiente', back_populates='odontograma')
     entradas_diente: Mapped[List['OdontogramaEntradaDiente']] = relationship('OdontogramaEntradaDiente', back_populates='odontograma')
@@ -199,14 +209,14 @@ class Tratamiento(Base):
     )
 
     tratamiento_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    fecha_creacion: Mapped[datetime.date] = mapped_column(Date)
+    fecha_creacion: Mapped[datetime.date] = mapped_column(Date, default=datetime.date.today)
     descripcion: Mapped[str] = mapped_column(String)
     en_curso: Mapped[bool] = mapped_column(Boolean)
     odontologo_dni: Mapped[str] = mapped_column(String)
     historia_clinica_id: Mapped[int] = mapped_column(Integer)
 
-    historia_clinica: Mapped['Historia'] = relationship('Historia', back_populates='tratamiento')
-    odontologo: Mapped['Odontologo'] = relationship('Odontologo', back_populates='tratamiento')
+    historia_clinica: Mapped['Historia'] = relationship('Historia', back_populates='tratamientos')
+    odontologo: Mapped['Odontologo'] = relationship('Odontologo', back_populates='tratamientos')
     materiales: Mapped[List['TratamientoMaterial']] = relationship('TratamientoMaterial', back_populates='tratamiento')
     pagos: Mapped[List['TratamientoPago']] = relationship('TratamientoPago', back_populates='tratamiento')
     procedimientos: Mapped[List['TratamientoProcedimiento']] = relationship('TratamientoProcedimiento', back_populates='tratamiento')
@@ -224,10 +234,10 @@ class OdontogramaEntradaAreasDiente(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     diente: Mapped[int] = mapped_column(Integer)
     tipo_entrada: Mapped[str] = mapped_column(String)
-    areas: Mapped[list] = mapped_column(ARRAY(Integer()))
+    areas: Mapped[list[int]] = mapped_column(ScalarListType) # Esto era array
     es_grave: Mapped[bool] = mapped_column(Boolean)
 
-    odontograma: Mapped['Odontograma'] = relationship('Odontograma', back_populates='odontograma_entrada_areas_diente')
+    odontograma: Mapped['Odontograma'] = relationship('Odontograma', back_populates='entradas_areas_diente')
 
 
 class OdontogramaEntradaBordesDiente(Base):
@@ -241,10 +251,10 @@ class OdontogramaEntradaBordesDiente(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     diente: Mapped[int] = mapped_column(Integer)
     tipo_entrada: Mapped[str] = mapped_column(String)
-    bordes: Mapped[list] = mapped_column(ARRAY(Integer()))
+    bordes: Mapped[list[int]] = mapped_column(ScalarListType) # Esto era array
     es_grave: Mapped[bool] = mapped_column(Boolean)
 
-    odontograma: Mapped['Odontograma'] = relationship('Odontograma', back_populates='odontograma_entrada_bordes_diente')
+    odontograma: Mapped['Odontograma'] = relationship('Odontograma', back_populates='entradas_bordes_diente')
 
 
 class OdontogramaEntradaDiente(Base):
@@ -260,7 +270,7 @@ class OdontogramaEntradaDiente(Base):
     tipo_entrada: Mapped[str] = mapped_column(String)
     es_grave: Mapped[bool] = mapped_column(Boolean)
 
-    odontograma: Mapped['Odontograma'] = relationship('Odontograma', back_populates='odontograma_entrada_diente')
+    odontograma: Mapped['Odontograma'] = relationship('Odontograma', back_populates='entradas_diente')
 
 
 class OdontogramaEntradaParDientes(Base):
@@ -277,7 +287,7 @@ class OdontogramaEntradaParDientes(Base):
     tipo_entrada: Mapped[str] = mapped_column(String)
     es_grave: Mapped[bool] = mapped_column(Boolean)
 
-    odontograma: Mapped['Odontograma'] = relationship('Odontograma', back_populates='odontograma_entrada_par_dientes')
+    odontograma: Mapped['Odontograma'] = relationship('Odontograma', back_populates='entradas_par_dientes')
 
 
 class OdontogramaEntradaRangoDientes(Base):
@@ -294,7 +304,7 @@ class OdontogramaEntradaRangoDientes(Base):
     tipo_entrada: Mapped[str] = mapped_column(String)
     es_grave: Mapped[bool] = mapped_column(Boolean)
 
-    odontograma: Mapped['Odontograma'] = relationship('Odontograma', back_populates='odontograma_entrada_rango_dientes')
+    odontograma: Mapped['Odontograma'] = relationship('Odontograma', back_populates='entradas_rango_dientes')
 
 
 class TratamientoMaterial(Base):
@@ -310,8 +320,8 @@ class TratamientoMaterial(Base):
     cantidad: Mapped[int] = mapped_column(Integer)
     costo: Mapped[int] = mapped_column(BigInteger)
 
-    material: Mapped['Material'] = relationship('Material', back_populates='tratamiento_material')
-    tratamiento: Mapped['Tratamiento'] = relationship('Tratamiento', back_populates='tratamiento_material')
+    material: Mapped['Material'] = relationship('Material', back_populates='tratamientos')
+    tratamiento: Mapped['Tratamiento'] = relationship('Tratamiento', back_populates='materiales')
 
 
 class TratamientoPago(Base):
@@ -326,7 +336,7 @@ class TratamientoPago(Base):
     metodo: Mapped[str] = mapped_column(String)
     monto: Mapped[int] = mapped_column(BigInteger)
 
-    tratamiento: Mapped['Tratamiento'] = relationship('Tratamiento', back_populates='tratamiento_pago')
+    tratamiento: Mapped['Tratamiento'] = relationship('Tratamiento', back_populates='pagos')
 
 
 class TratamientoProcedimiento(Base):
@@ -342,8 +352,8 @@ class TratamientoProcedimiento(Base):
     cantidad: Mapped[int] = mapped_column(Integer)
     costo: Mapped[int] = mapped_column(BigInteger)
 
-    procedimiento: Mapped['Procedimiento'] = relationship('Procedimiento', back_populates='tratamiento_procedimiento')
-    tratamiento: Mapped['Tratamiento'] = relationship('Tratamiento', back_populates='tratamiento_procedimiento')
+    procedimiento: Mapped['Procedimiento'] = relationship('Procedimiento', back_populates='tratamientos')
+    tratamiento: Mapped['Tratamiento'] = relationship('Tratamiento', back_populates='procedimientos')
 
 
 class TratamientoSesion(Base):
@@ -356,10 +366,10 @@ class TratamientoSesion(Base):
 
     tratamiento_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     sesion_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    fecha: Mapped[datetime.date] = mapped_column(Date)
+    fecha: Mapped[datetime.date] = mapped_column(Date, default=datetime.date.today)
     descripcion: Mapped[str] = mapped_column(String)
     observaciones: Mapped[str] = mapped_column(Text)
     odontologo_dni: Mapped[str] = mapped_column(Text)
 
-    odontologo: Mapped['Odontologo'] = relationship('Odontologo', back_populates='tratamiento_sesion')
-    tratamiento: Mapped['Tratamiento'] = relationship('Tratamiento', back_populates='tratamiento_sesion')
+    odontologo: Mapped['Odontologo'] = relationship('Odontologo', back_populates='sesiones')
+    tratamiento: Mapped['Tratamiento'] = relationship('Tratamiento', back_populates='sesiones')

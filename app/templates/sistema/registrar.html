@@ -1,0 +1,16 @@
+{% from 'bootstrap5/form.html' import render_field %}
+{% extends "base.html" %}
+{% block title %}Registrar nuevo paciente{% endblock %}
+{% block content %}
+  <form class="row row-cols-2" action="/registrar" method="post">
+    {% for field in form %}
+      <div class="col">
+      {{ render_field(field) }}
+      </div>
+    {% endfor %}
+    <div class="col-12">
+    <input type="submit" class="btn btn-primary" value="Registrar nuevo paciente" />
+    <a class="btn btn-secondary" href="/">Volver</a>
+    </div>
+  </form>
+{% endblock %}
