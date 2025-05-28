@@ -6,7 +6,5 @@ from sqlalchemy import select
 
 @bp.route('/<int:historia_id>')
 def index(historia_id):
-    historia = db.session.query(Historia).get(historia_id)
-    if not historia:
-        return abort(404)
+    historia = db.get_or_404(Historia, historia_id)
     return render_template('historia/index.html', paciente=historia.paciente)
