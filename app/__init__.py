@@ -16,11 +16,17 @@ def create_app(config_class=Config):
         # Descomenta y corre una vez esta funcion
         # gen_fake_data()
 
+    from app.extensions import csrf
+    csrf.init_app(app)
+
     from app.extensions import bootstrap
     bootstrap.init_app(app)
 
     # Register blueprints here
     from app.sistema import bp as sistema_bp
     app.register_blueprint(sistema_bp)
+
+    from app.historia import bp as historia_bp
+    app.register_blueprint(historia_bp, url_prefix='/historia')
 
     return app

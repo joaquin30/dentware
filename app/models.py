@@ -66,6 +66,12 @@ class Paciente(Base):
 
     historias: Mapped[List['Historia']] = relationship('Historia', back_populates='paciente')
 
+    def crear_nueva_historia(self, db):
+        historia = Historia(paciente=self)
+        db.session.add(historia)
+        db.session.add(HistoriaAntecedentesMedicos(historia=historia))
+        db.session.add(HistoriaExamenesEstomatologicos(historia=historia))
+
 
 class Procedimiento(Base):
     __tablename__ = 'procedimiento'

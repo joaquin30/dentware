@@ -3,6 +3,7 @@
 {% block title %}Registrar nuevo paciente{% endblock %}
 {% block content %}
   <form class="row row-cols-2" action="/registrar" method="post">
+    {{ form.csrf_token }}
     {% for field in form %}
       <div class="col">
       {{ render_field(field) }}

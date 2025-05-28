@@ -3,10 +3,12 @@
 {% block title %}Inicio{% endblock %}
 {% block content %}
     <form class="row g-3" action="/" method="post">
+    <!-- Cuando se crea a mano el formulario se usa lo siguiente -->
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
     <div class="col">
-        <select class="form-select" name="paciente_dni">
+        <select class="form-select" name="historia_id">
         {% for paciente in pacientes %}
-            <option value="{{ paciente.paciente_dni }}">{{ paciente.nombres }} {{ paciente.apellidos }}</option>
+            <option value="{{ paciente[0] }}">{{ paciente[1] }} {{ paciente[2] }}</option>
         {% endfor %}
         </select>
     </div>

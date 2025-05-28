@@ -2,6 +2,9 @@ from flask_sqlalchemy import SQLAlchemy
 from app.models import Base
 db = SQLAlchemy(model_class=Base)
 
+from flask_wtf.csrf import CSRFProtect
+csrf = CSRFProtect()
+
 from flask_wtf import FlaskForm
 from wtforms_alchemy import model_form_factory
 
