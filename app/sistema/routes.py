@@ -28,8 +28,11 @@ def registrar_paciente():
         paciente = Paciente(**remove_csrf_token(form.data))
         paciente.crear_nueva_historia(db)
         db.session.commit() 
+        flash('Paciente registrado con éxito', 'success')
         return redirect('/')
     return render_template('sistema/registrar.html', form=form)
+
+
 
 @bp.route('/paciente/<int:paciente_dni>/editar', methods=['GET', 'POST'])
 def editar_paciente(paciente_dni):
