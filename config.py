@@ -9,3 +9,6 @@ class Config:
     # SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg://user:pass@localhost:5432/dentware'
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # Carpeta donde se guardarán los archivos subidos
+    UPLOAD_FOLDER = os.path.join(basedir, 'static', 'examenes')
