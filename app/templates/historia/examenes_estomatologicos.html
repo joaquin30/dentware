@@ -1,0 +1,22 @@
+{% from 'bootstrap5/form.html' import render_field %}
+{% extends "base.html" %}
+{% block title %}Exámenes clínicos estomatológicos{% endblock %}
+{% block content %}
+  <form class="row row-cols-2" action="" method="post">
+    {{ form_examen.csrf_token }}
+
+    <h3>Exámenes clínicos estomatológicos</h3>
+    {% for field in form_examen %}
+      {% if field.name != 'csrf_token' %}
+        <div class="col-6">
+          {{ render_field(field) }}
+        </div>
+      {% endif %}
+    {% endfor %}
+    
+    <div class="col-12 mt-3">
+      <input type="submit" class="btn btn-primary" value="Guardar Exámenes" />
+      <a class="btn btn-secondary" href="{{ url_for('sistema.index') }}">Volver</a>
+    </div>
+  </form>
+{% endblock %}

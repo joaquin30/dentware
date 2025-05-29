@@ -1,9 +1,9 @@
 from flask import flash, url_for
 from flask import render_template, redirect, request, abort
 from app.sistema import bp
-from app.sistema.forms import PacienteForm, AntMedForm
+from app.sistema.forms import PacienteForm, AntMedForm, ExamenesEstomatologicosForm
 from app.extensions import db
-from app.models import Paciente, Historia, HistoriaAntecedentesMedicos
+from app.models import Paciente, Historia, HistoriaAntecedentesMedicos, HistoriaExamenesEstomatologicos
 from sqlalchemy import select
 from app.utils import remove_csrf_token
 
@@ -69,3 +69,33 @@ def editar_paciente(paciente_dni):
                            form_paciente=form_paciente, 
                            form_antmed=form_antmed,
                            paciente=paciente)
+
+@bp.route('/paciente/<int:paciente_dni>/examenes-estomatologicos', methods=['GET', 'POST'])
+def examenes_estomatologicos(paciente_dni):
+    paciente = db.session.get(Paciente, paciente_dni)
+    if not paciente:
+        abort(404)
+
+    if not paciente.historias:
+        flash("No hay historia clínica para este paciente.", "danger")
+        return redirect(url_for('index'))
+
+    historia = paciente.historias[0]
+
+    # Buscar o crear el objeto de examen estomatológico
+    if historia.examenes_estomatologicos:
+        examen = historia.examenes_estomatologicos[0]
+    else:
+        examen = HistoriaExamenesEstomatologicos(historia=historia)
+        historia.examenes_estomatologicos.append(examen)
+
+    form_examen = ExamenesEstomatologicosForm(obj=examen)
+
+    if form_examen.validate_on_submit():
+        form_examen.populate_obj(examen)
+        db.session.add(examen)
+        db.session.commit()
+        flash("Exámenes clínicos estomatológicos guardados correctamente.", "success")
+        return redirect(url_for('historia.index', historia_id=historia.historia_id))
+
+    return render_template('historia/examenes_estomatologicos.html', form_examen=form_examen)

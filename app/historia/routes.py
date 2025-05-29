@@ -1,12 +1,12 @@
 from flask import render_template, abort, redirect, url_for, flash, request, current_app, jsonify
 from app.historia import bp
 from app.extensions import db
-from app.models import Paciente, Historia
+from app.models import Paciente, Historia, HistoriaContraindicacion
 from sqlalchemy import select
 import os
 from werkzeug.utils import secure_filename
 from app.models import HistoriaExamen
-from app.historia.forms import HistoriaExamenForm
+from app.historia.forms import HistoriaExamenForm, HistoriaContraindicacionForm, ContraindicacionesForm
 from datetime import date
 from flask import send_from_directory
 
@@ -90,3 +90,54 @@ def borrar_examen(historia_id, examen_id):
         return jsonify({'status': 'ok'})
     flash("Examen eliminado correctamente.", "success")
     return redirect(url_for('historia.index', historia_id=historia_id))
+
+
+@bp.route('/historia/<int:historia_id>/contraindicaciones', methods=['GET', 'POST'])
+def contraindicaciones(historia_id):
+    historia = db.session.get(Historia, historia_id)
+    if not historia:
+        abort(404)
+
+    form = ContraindicacionesForm()
+    form.historia_id.data = historia_id
+
+    if request.method == 'GET':
+        if not form.contraindicaciones.entries:
+            for c in historia.contraindicaciones:
+                form.contraindicaciones.append_entry({
+                    'descripcion': c.descripcion,
+                    'es_grave': c.es_grave
+                })
+
+    if form.validate_on_submit():
+        # Borrar todas las contraindicaciones
+        db.session.query(HistoriaContraindicacion).filter_by(historia_id=historia_id).delete()
+        db.session.commit()
+
+        # Insertar las nuevas
+        for cform in form.contraindicaciones.entries:
+            last_contra = db.session.query(HistoriaContraindicacion) \
+                .filter_by(historia_id=historia_id) \
+                .order_by(HistoriaContraindicacion.contraindicacion_id.desc()) \
+                .first()
+            new_id = 1 if not last_contra else last_contra.contraindicacion_id + 1
+
+            nueva = HistoriaContraindicacion(
+                historia_id=historia_id,
+                contraindicacion_id=new_id,
+                descripcion=cform.form.descripcion.data,
+                es_grave=cform.form.es_grave.data
+            )
+            db.session.add(nueva)
+        db.session.commit()
+
+        flash("Contraindicaciones guardadas correctamente", "success")
+        # Recargar el objeto historia con los datos actualizados
+        historia = db.session.get(Historia, historia_id)
+        return redirect(url_for('historia.contraindicaciones', historia_id=historia_id))
+
+    return render_template('historia/contraindicaciones.html', form=form, historia=historia, paciente=historia.paciente)
+
+
+
+

@@ -1,5 +1,5 @@
 from app.extensions import ModelForm
-from app.models import Paciente, HistoriaAntecedentesMedicos
+from app.models import Paciente, HistoriaAntecedentesMedicos, HistoriaExamenesEstomatologicos
 from wtforms import SubmitField
 
 class PacienteForm(ModelForm):
@@ -11,3 +11,7 @@ class PacienteForm(ModelForm):
 class AntMedForm(ModelForm):
     class Meta:
         model = HistoriaAntecedentesMedicos
+
+class ExamenesEstomatologicosForm(ModelForm):
+    class Meta:
+        model = HistoriaExamenesEstomatologicos
