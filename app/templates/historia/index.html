@@ -8,5 +8,6 @@
     <a href="{{ url_for('historia.contraindicaciones', historia_id=historia.historia_id) }}" class="btn btn-secondary">Contraindicaciones Médicas</a>
     <a href="{{ url_for('historia.subir_examen', historia_id=historia.historia_id) }}" class="btn btn-primary">Exámenes Auxiliares</a>
     <a href="{{ url_for('sistema.examenes_estomatologicos', paciente_dni=paciente.paciente_dni) }}" class="btn btn-warning">Exámenes clínicos estomatológicos</a>
+    <a href="{{ url_for('historia.paciente_novedades', paciente_dni=paciente.paciente_dni) }}" class="btn btn-info">Novedades</a>
     <a class="btn btn-secondary" href="/">Volver</a>
 {% endblock %}

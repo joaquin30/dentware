@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Novedades de {{ paciente.nombres }} {{ paciente.apellidos }}{% endblock %}
+
+{% block content %}
+  <h1>Novedades de {{ paciente.nombres }} {{ paciente.apellidos }}</h1>
+
+  <form method="post">
+    {{ form.csrf_token }}
+
+    <div class="mb-3">
+      {{ form.novedades.label(class="form-label") }}
+      {{ form.novedades(class="form-control", rows="6") }}
+    </div>
+
+    <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+    <button type="button" onclick="window.history.back()" class="btn btn-secondary">Volver</button>
+  </form>
+{% endblock %}
