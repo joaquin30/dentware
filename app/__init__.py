@@ -6,6 +6,7 @@ from config import Config
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
+    app.config['UPLOAD_FOLDER'] = config_class.UPLOAD_FOLDER
 
     # Initialize Flask extensions here
     from app.extensions import db

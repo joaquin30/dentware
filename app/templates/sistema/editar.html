@@ -1,0 +1,31 @@
+{% from 'bootstrap5/form.html' import render_field %}
+{% extends "base.html" %}
+{% block title %}Editar paciente{% endblock %}
+{% block content %}
+  <form class="row row-cols-2" action="" method="post">
+    {{ form_paciente.csrf_token }}
+    
+    <h3>Datos Personales</h3>
+    {% for field in form_paciente %}
+      <div class="col">
+        {{ render_field(field) }}
+      </div>
+    {% endfor %}
+    
+    <hr class="my-4" />
+    
+    <h3>Antecedentes Médicos</h3>
+    {% for field in form_antmed %}
+      {% if field.name != 'csrf_token' %}
+        <div class="col-6">
+          {{ render_field(field) }}
+        </div>
+      {% endif %}
+    {% endfor %}
+    
+    <div class="col-12 mt-3">
+      <input type="submit" class="btn btn-primary" value="Actualizar datos de paciente" />
+      <a class="btn btn-secondary" href="/">Volver</a>
+    </div>
+  </form>
+{% endblock %}
