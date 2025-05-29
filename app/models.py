@@ -130,6 +130,8 @@ class HistoriaAntecedentesMedicos(Base):
 
 
 class HistoriaContraindicacion(Base):
+    ''' REQ-001 REQ-001
+    '''
     __tablename__ = 'historia_contraindicacion'
     __table_args__ = (
         ForeignKeyConstraint(['historia_id'], ['historia.historia_id'], name='historia_contraindicacion_historia_id_fkey'),

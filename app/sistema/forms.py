@@ -9,6 +9,8 @@ class PacienteForm(ModelForm):
         include_primary_keys = True
 
 class AntMedForm(ModelForm):
+    '''Formulario de antecendes medicos
+    '''
     class Meta:
         model = HistoriaAntecedentesMedicos
 
