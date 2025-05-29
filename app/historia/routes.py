@@ -6,7 +6,7 @@ from sqlalchemy import select
 import os
 from werkzeug.utils import secure_filename
 from app.models import HistoriaExamen
-from app.historia.forms import HistoriaExamenForm, HistoriaContraindicacionForm, ContraindicacionesForm
+from app.historia.forms import HistoriaExamenForm, HistoriaContraindicacionForm, ContraindicacionesForm, NovedadesForm
 from datetime import date
 from flask import send_from_directory
 
@@ -16,7 +16,8 @@ def index(historia_id):
     historia = db.session.query(Historia).get(historia_id)
     if not historia:
         return abort(404)
-    return render_template('historia/index.html', paciente=historia.paciente, historia=historia)
+    tiene_grave = any(c.es_grave for c in historia.contraindicaciones)
+    return render_template('historia/index.html', paciente=historia.paciente, historia=historia, tiene_grave=tiene_grave)
 
 
 @bp.route('/historia/<int:historia_id>/examenes/subir', methods=['GET', 'POST'])
@@ -137,6 +138,25 @@ def contraindicaciones(historia_id):
         return redirect(url_for('historia.contraindicaciones', historia_id=historia_id))
 
     return render_template('historia/contraindicaciones.html', form=form, historia=historia, paciente=historia.paciente)
+
+@bp.route('/paciente/<string:paciente_dni>/novedades', methods=['GET', 'POST'])
+def paciente_novedades(paciente_dni):
+    paciente = db.get_or_404(Paciente, paciente_dni)
+    historia = paciente.historias[0]
+    form = NovedadesForm(obj=paciente)
+
+    if form.validate_on_submit():
+        paciente.novedades = form.novedades.data
+        db.session.commit()
+        flash('Novedades actualizadas correctamente', 'success')
+        return redirect(url_for('historia.paciente_novedades', paciente_dni=paciente_dni))
+
+    return render_template(
+        'historia/novedades.html',
+        paciente=paciente,
+        historia=historia,
+        form=form,
+    )
 
 
 

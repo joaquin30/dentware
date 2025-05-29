@@ -4,7 +4,7 @@ from wtforms import StringField, DateField, BooleanField, FileField, SubmitField
 from wtforms.validators import DataRequired
 from flask_wtf.file import FileAllowed, FileRequired
 from app.models import HistoriaContraindicacion
-from wtforms import FieldList, FormField
+from wtforms import FieldList, FormField, TextAreaField
 
 class HistoriaExamenForm(FlaskForm):
     archivo = FileField('Archivo', validators=[
@@ -27,3 +27,8 @@ class ContraindicacionesForm(FlaskForm):
     contraindicaciones = FieldList(FormField(HistoriaContraindicacionForm))
     submit = SubmitField('Guardar')
     historia_id = HiddenField()
+
+
+class NovedadesForm(FlaskForm):
+    novedades = TextAreaField('Novedades', validators=[DataRequired()])
+    submit = SubmitField('Guardar')

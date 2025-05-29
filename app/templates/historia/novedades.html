@@ -1,14 +1,7 @@
 {% extends "base.html" %}
-{% block title %}{{ paciente.nombres }} {{ paciente.apellidos }}{% endblock %}
-{% block content %}
+{% block title %}Novedades de {{ paciente.nombres }} {{ paciente.apellidos }}{% endblock %}
 
-{% if tiene_grave %}
-<style>
-  body {
-    background-color: #fa8377;  /* rojo claro */
-  }
-</style>
-{% endif %}
+{% block content %}
 
 <style>
   /* Encabezado principal con logo */
@@ -133,17 +126,20 @@
   <h1>Concha Asociados - Centro Odontológico</h1>
 </div>
 
-<!-- Título y botón regresar -->
+<!-- Título y botón volver -->
 <div class="header-main">
-  <a href="{{ url_for('sistema.index') }}" class="back-btn" title="Volver" style="font-size: 1.5rem; text-decoration: none; margin-right: 10px;">&#x2190;</a>
-  <span>Historia clínica de {{ historia.paciente.nombres }} {{ historia.paciente.apellidos }}</span>
+  <a href="{{ url_for('historia.index', historia_id=historia.historia_id) }}" class="back-btn" title="Volver" style="font-size: 1.5rem; text-decoration: none; margin-right: 10px;">&#x2190;</a>
+  <span>Novedades de {{ historia.paciente.nombres }} {{ historia.paciente.apellidos }}</span>
 </div>
 
-    <p><strong>Teléfono:</strong> {{ paciente.telefono }}</p>
-    <p><strong>Fecha de nacimiento:</strong> {{ paciente.fecha_nacimiento }}</p>
-    <a href="{{ url_for('sistema.editar_paciente', paciente_dni=paciente.paciente_dni) }}" class="btn btn-warning">Editar datos</a>
-    <a href="{{ url_for('historia.contraindicaciones', historia_id=historia.historia_id) }}" class="btn btn-secondary">Contraindicaciones Médicas</a>
-    <a href="{{ url_for('historia.subir_examen', historia_id=historia.historia_id) }}" class="btn btn-primary">Exámenes Auxiliares</a>
-    <a href="{{ url_for('sistema.examenes_estomatologicos', paciente_dni=paciente.paciente_dni) }}" class="btn btn-warning">Exámenes clínicos estomatológicos</a>
-    <a href="{{ url_for('historia.paciente_novedades', paciente_dni=paciente.paciente_dni) }}" class="btn btn-info">Novedades</a>
+  <form method="post">
+    {{ form.csrf_token }}
+
+    <div class="mb-3">
+      {{ form.novedades.label(class="form-label") }}
+      {{ form.novedades(class="form-control", rows="6") }}
+    </div>
+
+    <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+  </form>
 {% endblock %}
