@@ -1,4 +1,6 @@
 **/__pycache__/
 .venv/
+venv/
+static/examenes
 .vscode/
 app.db
