@@ -28,8 +28,11 @@ def registrar_paciente():
         paciente = Paciente(**remove_csrf_token(form.data))
         paciente.crear_nueva_historia(db)
         db.session.commit() 
+        flash('Paciente registrado con éxito', 'success')
         return redirect('/')
     return render_template('sistema/registrar.html', form=form)
+
+
 
 @bp.route('/paciente/<int:paciente_dni>/editar', methods=['GET', 'POST'])
 def editar_paciente(paciente_dni):
@@ -68,7 +71,7 @@ def editar_paciente(paciente_dni):
     return render_template('sistema/editar.html', 
                            form_paciente=form_paciente, 
                            form_antmed=form_antmed,
-                           paciente=paciente)
+                           historia=historia, paciente=historia.paciente)
 
 @bp.route('/paciente/<int:paciente_dni>/examenes-estomatologicos', methods=['GET', 'POST'])
 def examenes_estomatologicos(paciente_dni):
@@ -98,4 +101,4 @@ def examenes_estomatologicos(paciente_dni):
         flash("Exámenes clínicos estomatológicos guardados correctamente.", "success")
         return redirect(url_for('historia.index', historia_id=historia.historia_id))
 
-    return render_template('historia/examenes_estomatologicos.html', form_examen=form_examen)
+    return render_template('historia/examenes_estomatologicos.html', form_examen=form_examen, historia=historia, paciente=historia.paciente)

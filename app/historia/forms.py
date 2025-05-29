@@ -15,12 +15,12 @@ class HistoriaExamenForm(FlaskForm):
     submit = SubmitField('Subir examen')
 
 
+
 class HistoriaContraindicacionForm(FlaskForm):
     descripcion = StringField('Descripción', validators=[DataRequired()])
     es_grave = BooleanField('Es grave')
     submit = SubmitField('Guardar')
     historia_id = HiddenField()
-
 
 # Para manejar múltiples contraindicaciones, puedes usar FieldList y FormField:
 class ContraindicacionesForm(FlaskForm):

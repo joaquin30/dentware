@@ -16,7 +16,8 @@ def index(historia_id):
     historia = db.session.query(Historia).get(historia_id)
     if not historia:
         return abort(404)
-    return render_template('historia/index.html', paciente=historia.paciente, historia=historia)
+    tiene_grave = any(c.es_grave for c in historia.contraindicaciones)
+    return render_template('historia/index.html', paciente=historia.paciente, historia=historia, tiene_grave=tiene_grave)
 
 
 @bp.route('/historia/<int:historia_id>/examenes/subir', methods=['GET', 'POST'])
@@ -53,7 +54,6 @@ def subir_examen(historia_id):
     examenes = historia.examenes  # Exámenes ya subidos
     return render_template('examenes_aux/subir_examen.html', form=form, historia=historia, paciente=historia.paciente, examenes=examenes)
 
-
 @bp.route('/historia/<int:historia_id>/examenes/<int:examen_id>/descargar')
 def descargar_examen(historia_id, examen_id):
     examen = db.session.get(HistoriaExamen, (historia_id, examen_id))
@@ -66,6 +66,7 @@ def descargar_examen(historia_id, examen_id):
     
     # Para descargar
     return send_from_directory(upload_folder, examen.ruta_archivo, as_attachment=True)
+
 
 
 @bp.route('/historia/<int:historia_id>/examenes/<int:examen_id>/ver')
@@ -138,10 +139,10 @@ def contraindicaciones(historia_id):
 
     return render_template('historia/contraindicaciones.html', form=form, historia=historia, paciente=historia.paciente)
 
-
 @bp.route('/paciente/<string:paciente_dni>/novedades', methods=['GET', 'POST'])
 def paciente_novedades(paciente_dni):
     paciente = db.get_or_404(Paciente, paciente_dni)
+    historia = paciente.historias[0]
     form = NovedadesForm(obj=paciente)
 
     if form.validate_on_submit():
@@ -153,5 +154,10 @@ def paciente_novedades(paciente_dni):
     return render_template(
         'historia/novedades.html',
         paciente=paciente,
-        form=form
+        historia=historia,
+        form=form,
     )
+
+
+
+
