@@ -1,35 +1,161 @@
+{% from 'bootstrap5/form.html' import render_form %}
 {% extends "base.html" %}
 {% block title %}Inicio{% endblock %}
-
 {% block content %}
-  <!-- Sidebar + contenido principal en un flex -->
-  <div style="display: flex; height: 100%; width: 100%;">
 
-    <!-- Sidebar -->
-    <div id="sidebar">
-      <div class="buttons-container">
-        <a href="{{ url_for('sistema.registrar_paciente') }}">
-          <span style="font-size: 1.5rem;">➕</span> Añadir paciente
-        </a>
-
-        <div class="info">
-          <span style="font-size: 1.5rem;">👤</span> {{ pacientes|length }} Pacientes
-        </div>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<style>
+  body {
+    background-color: #f7f9fc;
+  }
+
+  .header-top {
+    border-bottom: 1px solid #d3d3d3;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: #fff;
+  }
+
+  .header-top img {
+    height: 40px;
+  }
+
+  .header-top h1 {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: #2a2f65;
+    margin: 0;
+  }
+
+  .main-container {
+    display: flex;
+    height: calc(100vh - 70px);
+  }
+
+  .sidebar {
+    width: 300px;
+    background-color: #c9d6f3;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sidebar .btn {
+    width: 100%;
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding: 15px;
+    border-radius: 10px;
+    background-color: white;
+    color: #2a2f65;
+    border: 1px solid #b3c0dd;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .sidebar .btn:hover {
+    background-color: #e6ebf7;
+  }
+
+  .main-content {
+    flex-grow: 1;
+    background-color: white;
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+  }
+
+  .main-content h2 {
+    font-size: 2.5rem;
+    color: #2a2f65;
+    font-weight: bold;
+    margin-bottom: 30px;
+  }
+
+  .search-bar {
+    max-width: 400px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 40px;
+  }
+
+  .search-bar input {
+    flex-grow: 1;
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+  }
+
+  .illustration {
+    position: absolute;
+    bottom: 20px;
+    right: 40px;
+    max-width: 400px;
+    opacity: 0.6;
+  }
+</style>
+
+<!-- Encabezado -->
+<div class="header-top">
+  <img src="{{ url_for('static', filename='img/logo.jpg') }}"/>
+  <h1>Concha Asociados - Centro Odontológico</h1>
+</div>
+
+<!-- Contenido principal -->
+<div class="main-container">
+  <!-- Columna izquierda -->
+  <div class="sidebar">
+    <a href="/registrar" class="btn">
+      <i class="bi bi-person-plus"></i> Añadir paciente
+    </a>
+    <div class="btn" disabled>
+      <i class="bi bi-person"></i> {{ cantidad_pacientes }} Pacientes
     </div>
-
-    <!-- Contenido principal -->
-    <div id="content">
-      <h1>Bienvenido a Dentware!</h1>
-
-      <form action="/" method="post" class="search-form">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-        <div class="input-group mb-3">
-          <input type="text" name="buscar_paciente" placeholder="Buscar paciente" class="form-control" aria-label="Buscar paciente">
-          <button class="btn btn-primary" type="submit">Buscar</button>
-        </div>
-      </form>
-    </div>
-
   </div>
+
+  <!-- Columna derecha -->
+  <div class="main-content">
+    <h2>Bienvenido a Dentware!</h2>
+    <form class="row g-3" action="/" method="post" style="margin-top: 20px;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    
+    <div class="col-12">
+      <label for="historia_id" class="form-label fw-bold">Seleccionar paciente</label>
+      <select class="form-select" id="historia_id" name="historia_id" required>
+        <option value="" disabled selected>-- Elige un paciente --</option>
+        {% for paciente in pacientes %}
+          <option value="{{ paciente[0] }}">{{ paciente[1] }} {{ paciente[2] }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-12 d-flex justify-content-start gap-2">
+      <button type="submit" class="btn btn-primary">Cargar paciente</button>
+    </div>
+  </form>
+    <img src="{{ url_for('static', filename='img/doctor-illustration.png') }}" class="illustration" alt="Ilustración de doctora"/>
+  </div>
+</div>
+
 {% endblock %}

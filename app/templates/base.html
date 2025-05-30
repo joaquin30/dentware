@@ -1,150 +1,19 @@
 <!doctype html>
 <html lang="es">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{% block title %}{% endblock %} - Dentware</title>
-  {{ bootstrap.load_css() }}
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    }
-    body {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-
-    /* Navbar fijo arriba */
-    nav.navbar {
-      background: white;
-      border-bottom: 1px solid #d3d3d3;
-      padding: 1rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex-shrink: 0;
-      z-index: 1000;
-    }
-    nav.navbar img {
-      height: 40px;
-    }
-    nav.navbar small {
-      font-weight: 400;
-      font-size: 0.85rem;
-      line-height: 1.1;
-      display: block;
-      color: #2a2f65;
-    }
-    nav.navbar div {
-      font-weight: 700;
-      color: #2a2f65;
-      font-size: 1.15rem;
-      line-height: 1.2;
-    }
-
-    /* Footer fijo abajo */
-    footer.footer {
-      background: white;
-      border-top: 1px solid #d3d3d3;
-      padding: 0.5rem 2rem;
-      flex-shrink: 0;
-      text-align: center;
-      color: #666;
-      font-size: 0.9rem;
-    }
-
-    /* Contenedor principal ocupa todo lo que queda entre navbar y footer */
-    #app {
-      flex: 1;
-      display: flex;
-      overflow: hidden;
-      background: white;
-    }
-
-    /* Sidebar */
-    #sidebar {
-      width: 280px;
-      background-color: #b5c7f4;
-      padding: 2rem 1.5rem;
-      box-shadow: 2px 0 6px rgb(0 0 0 / 0.1);
-      display: flex;
-      flex-direction: column;
-    }
-    #sidebar .buttons-container {
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 2rem;
-    }
-    #sidebar a, #sidebar .info {
-      background: white;
-      color: #2a2f65;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-weight: 600;
-      box-shadow: 0 4px 6px rgb(0 0 0 / 0.1);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      justify-content: center;
-      font-size: 1.1rem;
-      text-decoration: none;
-      user-select: none;
-      cursor: pointer;
-    }
-    #sidebar a:hover {
-      background-color: #e2e8f7;
-      text-decoration: none;
-    }
-
-    /* Contenido principal */
-    #content {
-      flex-grow: 1;
-      padding: 4rem 3rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      overflow-y: auto;
-    }
-    #content h1 {
-      font-weight: 700;
-      font-size: 2.5rem;
-      color: #2a2f65;
-      margin-bottom: 2rem;
-      text-align: center;
-    }
-
-    /* Formulario de búsqueda ancho fijo */
-    form.search-form {
-      width: 320px;
-    }
-  </style>
-</head>
-<body>
-
-  <!-- Navbar -->
-  <nav class="navbar">
-    <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Logo" />
-    <div>
-      Concha Asociados<br><small>Centro Odontológico</small>
-    </div>
-  </nav>
-
-  <!-- Contenedor principal: sidebar + contenido todo en block content -->
-  <div id="app">
-    {% block content %}{% endblock %}
-  </div>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <!-- Pie de página vacío con línea gris arriba -->
-  </footer>
-
-  {{ bootstrap.load_js() }}
-</body>
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title>{% block title %}{% endblock %} - Dentware</title>
+        <!-- Bootstrap CSS -->
+        {{ bootstrap.load_css() }}
+    </head>
+    <body>
+        <!-- Your page content -->
+        <div class="container">
+        {% block content %}{% endblock %}
+        </div>
+        <!-- Bootstrap Javascript -->
+        {{ bootstrap.load_js() }}
+    </body>
 </html>

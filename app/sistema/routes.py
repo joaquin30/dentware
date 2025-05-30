@@ -14,11 +14,16 @@ def index():
         if not historia_id:
             return abort(404)
         return redirect(f'/historia/{historia_id}')
+    
     pacientes = db.session.execute(
         select(Historia.historia_id, Paciente.nombres, Paciente.apellidos)
         .join(Historia.paciente).order_by(Paciente.nombres, Paciente.apellidos)
     ).all()
-    return render_template('sistema/index.html', pacientes=pacientes)
+    
+    cantidad_pacientes = len(pacientes)  # 👈 aquí contamos
+
+    return render_template('sistema/index.html', pacientes=pacientes, cantidad_pacientes=cantidad_pacientes)
+
 
 
 @bp.route('/registrar', methods=['GET', 'POST'])
