@@ -62,7 +62,7 @@ class Paciente(Base):
     ocupacion: Mapped[str | None] = mapped_column(String, info={'label': 'Ocupación'})
     lugar_trabajo_estudio: Mapped[str | None] = mapped_column(String, info={'label': 'Lugar de Trabajo o Estudio'})
     apoderado: Mapped[str | None] = mapped_column(String, info={'label': 'Apoderado'})
-    novedades: Mapped[str] = mapped_column(Text, default='', info={'label': ''})
+    novedades: Mapped[str] = mapped_column(Text, default='', info={'label': 'Cuéntanos un poco más de ti...'})
 
     historias: Mapped[List['Historia']] = relationship('Historia', back_populates='paciente')
 

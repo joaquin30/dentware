@@ -1,17 +1,63 @@
 {% from 'bootstrap5/form.html' import render_field %}
 {% extends "base.html" %}
 {% block title %}Registrar nuevo paciente{% endblock %}
+
 {% block content %}
-  <form class="row row-cols-2" action="/registrar" method="post">
-    {{ form.csrf_token }}
-    {% for field in form %}
-      <div class="col">
-      {{ render_field(field) }}
+<style>
+  .form-box {
+    border: 1px solid #d3d3d3;
+    border-radius: 8px;
+    padding: 24px;
+    background-color: #fff;
+    margin-top: 20px;
+  }
+
+  .form-title {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: #2a2f65;
+    margin-bottom: 20px;
+  }
+
+  .form-control {
+    font-size: 0.95rem;
+  }
+
+  .btn-primary {
+    background-color: #2a2f65;
+    border-color: #2a2f65;
+  }
+
+  .btn-primary:hover {
+    background-color: #454c9b;
+    border-color: #454c9b;
+  }
+
+  .submit-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    gap: 10px;
+  }
+</style>
+
+<div class="container">
+  <div class="form-box">
+    <div class="form-title">Datos personales</div>
+    <form class="row g-3" action="/registrar" method="post">
+      {{ form.csrf_token }}
+      {% for field in form %}
+        {% if field.type != 'CSRFToken' and field.type != 'SubmitField' %}
+          <div class="col-md-6">
+            {{ render_field(field, class="form-control") }}
+          </div>
+        {% endif %}
+      {% endfor %}
+      <div class="col-12 submit-row">
+        <input type="submit" class="btn btn-primary" value="Registrar" />
+        <a class="btn btn-secondary" href="/">Volver</a>
       </div>
-    {% endfor %}
-    <div class="col-12">
-    <input type="submit" class="btn btn-primary" value="Registrar nuevo paciente" />
-    <a class="btn btn-secondary" href="/">Volver</a>
-    </div>
-  </form>
+    </form>
+  </div>
+</div>
 {% endblock %}

@@ -132,7 +132,7 @@
           {% if examen.ruta_archivo.endswith(('.jpg', '.jpeg', '.png')) %}
             <img src="{{ url_for('static', filename='examenes/' ~ examen.ruta_archivo) }}" class="card-img-top" alt="{{ examen.titulo }}">
           {% else %}
-            <img src="{{ url_for('static', filename='pdf.jpg') }}" class="card-img-top" alt="PDF icon">
+            <img src="{{ url_for('static', filename='img/pdf.jpg') }}" class="card-img-top img-fluid" style="max-height: 120px; object-fit: contain;" alt="PDF icon">
           {% endif %}
           <div class="card-body">
             <h5 class="card-title">{{ examen.titulo }}</h5>
