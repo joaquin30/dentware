@@ -2,142 +2,185 @@
 {% block title %}{{ paciente.nombres }} {{ paciente.apellidos }}{% endblock %}
 {% block content %}
 
-{% if tiene_grave %}
 <style>
   body {
-    background-color: #fa8377;  /* rojo claro */
+    background-color: {% if tiene_grave %}#fa8377{% else %}#f4f6fb{% endif %};
   }
-</style>
-{% endif %}
 
-<style>
-  /* Encabezado principal con logo */
-  .header-top {
-    border-bottom: 1px solid #d3d3d3;
-    padding: 12px 24px;
+  .card-historia {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 1000px;
+    margin: 20px auto;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
     display: flex;
-    align-items: center;
-    gap: 12px;
-    background-color: #fff;
+    justify-content: space-between;
+    gap: 30px;
   }
-  .header-top img {
-    height: 40px;
+
+  .datos-paciente {
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
   }
-  .header-top h1 {
-    font-weight: 700;
-    font-size: 1.25rem;
-    color: #2a2f65;
+
+  .datos-paciente h3 {
+    font-size: 1.2rem;
     margin: 0;
+    font-weight: bold;
   }
 
-  /* Título y botón volver */
-  .header-main {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 24px 0 16px;
-    font-weight: 600;
-    font-size: 1.5rem;
-    color: #2a2f65;
-  }
-  .header-main a.back-btn {
-    font-size: 1.7rem;
-    color: #2a2f65;
-    text-decoration: none;
-    font-weight: 900;
-  }
-  .header-main a.back-btn:hover {
-    color: #5a5f9e;
-  }
-
-  /* Cards estilo */
-  .examenes-lista .card {
+  .paciente-info {
+    background: #f5f7fb;
+    padding: 16px;
     border-radius: 10px;
-    box-shadow: 0 3px 6px rgb(0 0 0 / 0.12);
-    transition: box-shadow 0.25s ease;
-  }
-  .examenes-lista .card:hover {
-    box-shadow: 0 6px 18px rgb(0 0 0 / 0.18);
-  }
-  .examenes-lista .card-img-top {
-    height: 150px;
-    object-fit: cover;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-  }
-  .card-body {
-    padding: 12px 16px;
-  }
-  .card-title {
-    font-size: 1rem;
-    font-weight: 700;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .card-text {
-    font-size: 0.875rem;
-    margin-bottom: 10px;
-  }
-  .card-footer {
-    padding: 8px 16px 16px;
-    display: flex;
-    gap: 6px;
-    justify-content: center;
-  }
-  .card-footer form {
-    margin: 0;
+    font-size: 0.95rem;
   }
 
-  /* Botón subir archivo al centro */
-  .upload-btn-container {
-    margin: 32px 0 16px;
-    display: flex;
-    justify-content: center;
-  }
-  .upload-btn-container button {
+  .btn-editar {
+    width: 110px;
+    text-decoration: none;    /* Sin subrayado */
+    margin-top: 10px;
     background-color: #2a2f65;
     color: white;
     border: none;
-    padding: 10px 28px;
-    border-radius: 28px;
-    font-weight: 600;
-    font-size: 1.05rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  .upload-btn-container button:hover {
-    background-color: #454c9b;
+    padding: 6px 6px;
+    border-radius: 6px;
+    font-size: 0.9rem;
   }
 
-  /* Ajuste formulario archivo para alineación horizontal */
-  form.enviar-examen {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 24px;
+  .tratamientos-box {
+    background: #ffffff;
+    border: 1px solid #dcdcdc;
+    border-radius: 10px;
+    padding: 16px;
+    min-height: 180px;
   }
-  form.enviar-examen label {
-    margin-bottom: 0;
-    font-weight: 600;
+
+  .tratamientos-box h4 {
+    margin-bottom: 8px;
     font-size: 1rem;
+    font-weight: bold;
   }
-  form.enviar-examen input[type="file"] {
-    flex-grow: 1;
+
+  .acciones-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 40%;
+  }
+
+  .acciones-panel a {
+    display: block;
+    text-align: center;
+    background-color: #2a2f65;
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    text-decoration: none;
+  }
+
+  .acciones-panel a:hover {
+    background-color: #2a2f65;
+  }
+
+  .btn-novedades {
+  background: white;           /* fondo blanco */
+  color: #2a2f65;              /* texto azul oscuro */
+  border: 1px solid #2a2f65;  /* borde azul oscuro */
+  font-weight: bold;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  transition: background-color 0.3s, color 0.3s; /* para efectos suaves */
+}
+
+.btn-novedades:hover {
+  background: #2a2f65;    /* fondo azul oscuro al pasar el mouse */
+  color: white;           /* texto blanco */
+}
+
+
+.btn-novedades img.icono-novedad {
+  height: 18px;            /* tamaño acorde al texto */
+  width: 18px;
+  margin-right: 8px;       /* espacio entre imagen y texto */
+  vertical-align: middle;  /* alinea verticalmente con el texto */
+  display: inline-block;
+}
+
+  .alerta {
+    background-color: #d93025 !important;
+  }
+
+  .btn-volver {
+    display: block;
+    max-width: 1000px;
+    margin: 20px auto 0;
+    text-align: left;
+  }
+
+  .btn-volver a {
+    background-color: #6c757d;
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+  }
+
+  .btn-volver a:hover {
+    background-color: #5a6268;
   }
 </style>
 
-<!-- Título y botón regresar -->
-<div class="header-main">
-  <a href="{{ url_for('sistema.index') }}" class="back-btn" title="Volver" style="font-size: 1.5rem; text-decoration: none; margin-right: 10px;">&#x2190;</a>
-  <span>Historia clínica de {{ historia.paciente.nombres }} {{ historia.paciente.apellidos }}</span>
+<div class="btn-volver">
+  <a href="{{ url_for('sistema.index') }}">← Volver</a>
 </div>
 
-    <p><strong>Teléfono:</strong> {{ paciente.telefono }}</p>
-    <p><strong>Fecha de nacimiento:</strong> {{ paciente.fecha_nacimiento }}</p>
-    <a href="{{ url_for('sistema.editar_paciente', paciente_dni=paciente.paciente_dni) }}" class="btn btn-warning">Editar datos</a>
-    <a href="{{ url_for('historia.contraindicaciones', historia_id=historia.historia_id) }}" class="btn btn-secondary">Contraindicaciones Médicas</a>
-    <a href="{{ url_for('historia.subir_examen', historia_id=historia.historia_id) }}" class="btn btn-primary">Exámenes Auxiliares</a>
-    <a href="{{ url_for('sistema.examenes_estomatologicos', paciente_dni=paciente.paciente_dni) }}" class="btn btn-warning">Exámenes clínicos estomatológicos</a>
-    <a href="{{ url_for('historia.paciente_novedades', paciente_dni=paciente.paciente_dni) }}" class="btn btn-info">Novedades</a>
+<div class="card-historia">
+  <div class="datos-paciente">
+    <h3>{{ historia.paciente.nombres }} {{ historia.paciente.apellidos }}</h3>
+    <div class="paciente-info" style="display: flex; gap: 16px; align-items: center;">
+      <img src="{{ url_for('static', filename='img/profile.png') }}" alt="Foto de perfil" style="width: 80px; height: 80px; object-fit: cover; border-radius: 50%;">
+      <div>
+        <p><strong>DNI:</strong> {{ paciente.paciente_dni }}</p>
+        <p><strong>Teléfono:</strong> {{ paciente.telefono }}</p>
+        <p><strong>Fecha de nacimiento:</strong> {{ paciente.fecha_nacimiento }}</p>
+      </div>
+    </div>
+    <a href="{{ url_for('sistema.editar_paciente', paciente_dni=paciente.paciente_dni) }}" class="btn-editar">✎ Editar datos</a>
+
+    <div class="tratamientos-box">
+      <h4>Tratamientos</h4>
+      <!-- Dejar en blanco -->
+    </div>
+  </div>
+
+  <div class="acciones-panel">
+    <a href="{{ url_for('historia.contraindicaciones', historia_id=historia.historia_id) }}">
+      Contraindicaciones Médicas
+    </a>
+
+    <a href="#">Crear Odontograma</a>
+    <a href="#">Actualizar Odontograma</a>
+    <a href="#">Ver Odontograma</a>
+    <a href="{{ url_for('historia.subir_examen', historia_id=historia.historia_id) }}">Exámenes Auxiliares</a>
+    <a href="{{ url_for('sistema.examenes_estomatologicos', paciente_dni=paciente.paciente_dni) }}">Exámenes Estomatológicos</a>
+    <a href="#">Pagos</a>
+    <a href="{{ url_for('historia.paciente_novedades', paciente_dni=paciente.paciente_dni) }}" class="btn-novedades">
+      <img src="{{ url_for('static', filename='img/novedad.png') }}" alt="Novedad" class="icono-novedad">
+      Novedades
+    </a>
+
+
+  </div>
+</div>
+
 {% endblock %}
