@@ -37,8 +37,6 @@ def registrar_paciente():
         return redirect('/')
     return render_template('sistema/registrar.html', form=form)
 
-
-
 @bp.route('/paciente/<int:paciente_dni>/editar', methods=['GET', 'POST'])
 def editar_paciente(paciente_dni):
     paciente = db.session.get(Paciente, paciente_dni)
