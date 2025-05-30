@@ -69,8 +69,8 @@
     padding: 60px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     position: relative;
+    padding-top: 20px; /* Ajusta el espacio superior */
   }
 
   .main-content h2 {
@@ -97,12 +97,15 @@
   }
 
   .illustration {
-    position: absolute;
-    bottom: 20px;
-    right: 40px;
-    max-width: 400px;
+    position: static; /* o elimina esta línea para que tome posición normal */
+    max-width: 200px; /* aumenta el tamaño, puedes ajustar */
+    margin-top: 20px;
     opacity: 0.6;
+    display: block; /* para que respete margenes y esté sola en una línea */
+    margin-left: auto; /* centra horizontalmente */
+    margin-right: auto; /* centra horizontalmente */
   }
+
 </style>
 
 <!-- Contenido principal -->
@@ -110,10 +113,12 @@
   <!-- Columna izquierda -->
   <div class="sidebar">
     <a href="/registrar" class="btn">
-      <i class="bi bi-person-plus"></i> Añadir paciente
+      <img src="{{ url_for('static', filename='img/add_profile.png') }}" alt="Añadir" style="height: 20px; margin-right: 8px;">
+      Añadir paciente
     </a>
     <div class="btn" disabled>
-      <i class="bi bi-person"></i> {{ cantidad_pacientes }} Pacientes
+      <img src="{{ url_for('static', filename='img/profile.png') }}" alt="Pacientes" style="height: 20px; margin-right: 8px;">
+      {{ cantidad_pacientes }} Pacientes
     </div>
   </div>
 
@@ -136,8 +141,10 @@
     <div class="col-12 d-flex justify-content-start gap-2">
       <button type="submit" class="btn btn-primary">Cargar paciente</button>
     </div>
-  </form>
+
     <img src="{{ url_for('static', filename='img/logo_diente.jpg') }}" class="illustration" alt="Ilustración de doctora"/>
+
+  </form>
   </div>
 </div>
 
