@@ -6,6 +6,7 @@ from app.extensions import db
 from app.models import Paciente, Historia, HistoriaAntecedentesMedicos, HistoriaExamenesEstomatologicos
 from sqlalchemy import select
 from app.utils import remove_csrf_token
+from flask import jsonify, request
 
 @bp.route('/', methods=['GET', 'POST'])
 def index():
@@ -30,12 +31,20 @@ def index():
 def registrar_paciente():
     form = PacienteForm()
     if form.validate_on_submit():
+        dni_a_verificar = form.paciente_dni.data
+        check = db.session.query(Paciente).filter_by(paciente_dni=dni_a_verificar).first()
+        if check:
+            flash('Ya existe un paciente registrado con ese DNI.', 'danger')
+            return redirect('/registrar')
+
         paciente = Paciente(**remove_csrf_token(form.data))
         paciente.crear_nueva_historia(db)
-        db.session.commit() 
+        db.session.commit()
         flash('Paciente registrado con éxito', 'success')
         return redirect('/')
     return render_template('sistema/registrar.html', form=form)
+
+
 
 @bp.route('/paciente/<int:paciente_dni>/editar', methods=['GET', 'POST'])
 def editar_paciente(paciente_dni):
@@ -105,3 +114,31 @@ def examenes_estomatologicos(paciente_dni):
         return redirect(url_for('historia.index', historia_id=historia.historia_id))
 
     return render_template('historia/examenes_estomatologicos.html', form_examen=form_examen, historia=historia, paciente=historia.paciente)
+
+
+@bp.route('/sistema/buscar_pacientes')
+def buscar_pacientes():
+    q = request.args.get('q', '').strip()
+    if not q:
+        return jsonify([])
+
+    # Necesitas hacer join para obtener historia_id
+    pacientes = db.session.execute(
+        select(Historia.historia_id, Paciente.paciente_dni, Paciente.nombres, Paciente.apellidos)
+        .join(Historia.paciente)
+        .filter(
+            (Paciente.paciente_dni.ilike(f'%{q}%')) |
+            (Paciente.nombres.ilike(f'%{q}%')) |
+            (Paciente.apellidos.ilike(f'%{q}%'))
+        )
+        .limit(20)
+    ).all()
+
+    resultados = [{
+        'historia_id': p.historia_id,
+        'paciente_dni': p.paciente_dni,
+        'nombres': p.nombres,
+        'apellidos': p.apellidos
+    } for p in pacientes]
+
+    return jsonify(resultados)

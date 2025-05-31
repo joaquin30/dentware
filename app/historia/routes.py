@@ -19,6 +19,7 @@ def index(historia_id):
     tiene_grave = any(c.es_grave for c in historia.contraindicaciones)
     return render_template('historia/index.html', paciente=historia.paciente, historia=historia, tiene_grave=tiene_grave)
 
+
 @bp.route('/historia/<int:historia_id>/examenes/subir', methods=['GET', 'POST'])
 def subir_examen(historia_id):
     historia = db.get_or_404(Historia, historia_id)
