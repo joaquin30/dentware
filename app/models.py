@@ -8,7 +8,7 @@ from sqlalchemy import (
     Text, String
 )
 from sqlalchemy_utils import (
-    EmailType, ScalarListType
+    EmailType, ScalarListType, PhoneNumberType
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 import datetime
@@ -55,7 +55,7 @@ class Paciente(Base):
     nombres: Mapped[str] = mapped_column(String, info={'label': 'Nombres'})
     apellidos: Mapped[str] = mapped_column(String, info={'label': 'Apellidos'})
     fecha_nacimiento: Mapped[datetime.date] = mapped_column(Date, info={'label': 'Fecha de Nacimiento'})
-    telefono: Mapped[str] = mapped_column(String, info={'label': 'Teléfono'})
+    telefono: Mapped[str] = mapped_column(PhoneNumberType, info={'label': 'Teléfono'})
     lugar_nacimiento: Mapped[str | None] = mapped_column(String, info={'label': 'Lugar de Nacimiento'})
     estado_civil: Mapped[str | None] = mapped_column(Enum('Soltero', 'Casado', 'Conviviente', 'Viudo', 'Divorciado', 'Separado', name='estado_civil_t'), nullable=True, info={'label': 'Estado Civil'})
     direccion: Mapped[str | None] = mapped_column(String, info={'label': 'Dirección'})
@@ -63,15 +63,31 @@ class Paciente(Base):
     ocupacion: Mapped[str | None] = mapped_column(String, info={'label': 'Ocupación'})
     lugar_trabajo_estudio: Mapped[str | None] = mapped_column(String, info={'label': 'Lugar de Trabajo o Estudio'})
     apoderado: Mapped[str | None] = mapped_column(String, info={'label': 'Apoderado'})
-    novedades: Mapped[str] = mapped_column(Text, default='', info={'label': 'Cuéntanos un poco más de ti...'})
 
     historias: Mapped[List['Historia']] = relationship('Historia', back_populates='paciente')
+    novedades: Mapped[List['PacienteNovedad']] = relationship('PacienteNovedad', back_populates='paciente')
 
     def crear_nueva_historia(self, db):
         historia = Historia(paciente=self)
         db.session.add(historia)
         db.session.add(HistoriaAntecedentesMedicos(historia=historia))
         db.session.add(HistoriaExamenesEstomatologicos(historia=historia))
+
+
+class PacienteNovedad(Base):
+    __tablename__ = 'paciente_novedades'
+    __table_args__ = (
+        ForeignKeyConstraint(['paciente_id'], ['paciente.paciente_id'], name='paciente_novedad_paciente_id_fkey'),
+        PrimaryKeyConstraint('paciente_id', 'novedad_id', name='paciente_novedad_pkey'),
+    )
+
+    paciente_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    novedad_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    descripcion: Mapped[str] = mapped_column(String)
+    fecha: Mapped[datetime.date] = mapped_column(Date, default=datetime.date.today)
+    es_importante: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    paciente: Mapped['Paciente'] = relationship('Paciente', back_populates='novedades')
 
 
 class Procedimiento(Base):
@@ -157,6 +173,7 @@ class HistoriaExamen(Base):
     titulo: Mapped[str] = mapped_column(String)
     fecha: Mapped[datetime.date] = mapped_column(Date, default=datetime.date.today)
     ruta_archivo: Mapped[str] = mapped_column(String)
+    observaciones: Mapped[str | None] = mapped_column(Text)
 
     historia: Mapped['Historia'] = relationship('Historia', back_populates='examenes')
 

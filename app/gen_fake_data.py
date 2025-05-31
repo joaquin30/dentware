@@ -26,7 +26,6 @@ def gen_fake_data():
             ocupacion=fake.job(),
             lugar_trabajo_estudio=fake.company(),
             apoderado=fake.name() if random.random() < 0.2 else None,
-            novedades=''
         )
         db.session.add(paciente)
         db.session.commit()

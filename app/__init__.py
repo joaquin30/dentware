@@ -15,7 +15,7 @@ def create_app(config_class=Config):
     with app.app_context():
         db.create_all()
         # Descomenta y corre una vez esta funcion
-        #gen_fake_data()
+        gen_fake_data()
 
     from app.extensions import csrf
     csrf.init_app(app)
