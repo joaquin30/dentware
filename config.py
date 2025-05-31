@@ -11,4 +11,4 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Carpeta donde se guardarán los archivos subidos
-    UPLOAD_FOLDER = os.path.join(basedir, 'static', 'examenes')
+    UPLOAD_FOLDER = 'static/examenes'

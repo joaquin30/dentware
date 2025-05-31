@@ -19,7 +19,6 @@ def index(historia_id):
     tiene_grave = any(c.es_grave for c in historia.contraindicaciones)
     return render_template('historia/index.html', paciente=historia.paciente, historia=historia, tiene_grave=tiene_grave)
 
-
 @bp.route('/historia/<int:historia_id>/examenes/subir', methods=['GET', 'POST'])
 def subir_examen(historia_id):
     historia = db.get_or_404(Historia, historia_id)
@@ -28,7 +27,7 @@ def subir_examen(historia_id):
     if form.validate_on_submit():
         archivo = form.archivo.data
         filename = secure_filename(archivo.filename)
-        upload_folder = current_app.config.get('UPLOAD_FOLDER', 'uploads')
+        upload_folder = os.path.join(current_app.root_path, current_app.config['UPLOAD_FOLDER'])
         if not os.path.exists(upload_folder):
             os.makedirs(upload_folder)
         filepath = os.path.join(upload_folder, filename)
