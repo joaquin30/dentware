@@ -226,7 +226,7 @@
                 <div class="paciente-card" tabindex="0">
                   <img src="{{ url_for('static', filename='img/FichaIcon.png') }}" alt="Icono paciente" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 8px;">
                   <div class="paciente-nombre" style="display: inline-block; vertical-align: middle;">${paciente.nombres} ${paciente.apellidos}</div>
-                  <div class="paciente-dni">DNI: ${paciente.paciente_dni}</div>
+                  <div class="paciente-documento-identidad">DNI: ${paciente.documento_identidad}</div>
                 </div>
               `);
               card.on("click keypress", function(e) {

@@ -139,9 +139,9 @@ def contraindicaciones(historia_id):
 
     return render_template('historia/contraindicaciones.html', form=form, historia=historia, paciente=historia.paciente)
 
-@bp.route('/paciente/<string:paciente_dni>/novedades', methods=['GET', 'POST'])
-def paciente_novedades(paciente_dni):
-    paciente = db.get_or_404(Paciente, paciente_dni)
+@bp.route('/paciente/<string:paciente_id>/novedades', methods=['GET', 'POST'])
+def paciente_novedades(paciente_id):
+    paciente = db.get_or_404(Paciente, paciente_id)
     historia = paciente.historias[0]
     form = NovedadesForm(obj=paciente)
 
@@ -149,7 +149,7 @@ def paciente_novedades(paciente_dni):
         paciente.novedades = form.novedades.data
         db.session.commit()
         flash('Novedades actualizadas correctamente', 'success')
-        return redirect(url_for('historia.paciente_novedades', paciente_dni=paciente_dni))
+        return redirect(url_for('historia.paciente_novedades', paciente_id=paciente_id))
 
     return render_template(
         'historia/novedades.html',

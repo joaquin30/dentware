@@ -16,7 +16,7 @@
     <div class="paciente-info" style="display: flex; gap: 16px; align-items: center; margin-bottom: 24px; background: #f9f9f9; padding: 16px; border-radius: 10px;">
       <img src="{{ url_for('static', filename='img/profile.png') }}" alt="Foto de perfil" style="width: 80px; height: 80px; object-fit: cover; border-radius: 50%;">
       <div>
-        <p><strong>DNI:</strong> {{ paciente.paciente_dni }}</p>
+        <p><strong>DNI:</strong> {{ paciente.documento_identidad }}</p>
         <p><strong>Teléfono:</strong> {{ paciente.telefono }}</p>
         <p><strong>Fecha de nacimiento:</strong> {{ paciente.fecha_nacimiento }}</p>
       </div>

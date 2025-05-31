@@ -14,7 +14,7 @@ def gen_fake_data():
     estado_civil = ['Soltero', 'Casado', 'Conviviente', 'Viudo', 'Divorciado', 'Separado']
     for i in range(PACIENTES):
         paciente = Paciente(
-            paciente_dni=str(random.randrange(100000000, 1000000000)),
+            documento_identidad=str(random.randrange(100000000, 1000000000)),
             nombres=fake.first_name(),
             apellidos=fake.last_name(),
             fecha_nacimiento=fake.date_of_birth(minimum_age=18, maximum_age=85),
@@ -26,7 +26,7 @@ def gen_fake_data():
             ocupacion=fake.job(),
             lugar_trabajo_estudio=fake.company(),
             apoderado=fake.name() if random.random() < 0.2 else None,
-            novedades=fake.paragraph()
+            novedades=''
         )
         db.session.add(paciente)
         db.session.commit()

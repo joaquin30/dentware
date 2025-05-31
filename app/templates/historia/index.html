@@ -150,12 +150,12 @@
     <div class="paciente-info" style="display: flex; gap: 16px; align-items: center;">
       <img src="{{ url_for('static', filename='img/profile.png') }}" alt="Foto de perfil" style="width: 80px; height: 80px; object-fit: cover; border-radius: 50%;">
       <div>
-        <p><strong>DNI:</strong> {{ paciente.paciente_dni }}</p>
+        <p><strong>Documento de identidad:</strong> {{ paciente.documento_identidad }}</p>
         <p><strong>Teléfono:</strong> {{ paciente.telefono }}</p>
         <p><strong>Fecha de nacimiento:</strong> {{ paciente.fecha_nacimiento }}</p>
       </div>
     </div>
-    <a href="{{ url_for('sistema.editar_paciente', paciente_dni=paciente.paciente_dni) }}" class="btn-editar">✎ Editar datos</a>
+    <a href="{{ url_for('sistema.editar_paciente', paciente_id=paciente.paciente_id) }}" class="btn-editar">✎ Editar datos</a>
 
     <div class="tratamientos-box">
       <h4>Tratamientos</h4>
@@ -172,9 +172,9 @@
     <a href="#">Actualizar Odontograma</a>
     <a href="#">Ver Odontograma</a>
     <a href="{{ url_for('historia.subir_examen', historia_id=historia.historia_id) }}">Exámenes Auxiliares</a>
-    <a href="{{ url_for('sistema.examenes_estomatologicos', paciente_dni=paciente.paciente_dni) }}">Exámenes Estomatológicos</a>
+    <a href="{{ url_for('sistema.examenes_estomatologicos', paciente_id=paciente.paciente_id) }}">Exámenes Estomatológicos</a>
     <a href="#">Pagos</a>
-    <a href="{{ url_for('historia.paciente_novedades', paciente_dni=paciente.paciente_dni) }}" class="btn-novedades">
+    <a href="{{ url_for('historia.paciente_novedades', paciente_id=paciente.paciente_id) }}" class="btn-novedades">
       <img src="{{ url_for('static', filename='img/novedad.png') }}" alt="Novedad" class="icono-novedad">
       Novedades
     </a>

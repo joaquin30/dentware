@@ -31,10 +31,10 @@ def index():
 def registrar_paciente():
     form = PacienteForm()
     if form.validate_on_submit():
-        dni_a_verificar = form.paciente_dni.data
-        check = db.session.query(Paciente).filter_by(paciente_dni=dni_a_verificar).first()
+        documento_a_verificar = form.documento_identidad.data
+        check = db.session.query(Paciente).filter_by(documento_identidad=documento_a_verificar).first()
         if check:
-            flash('Ya existe un paciente registrado con ese DNI.', 'danger')
+            flash('Ya existe un paciente registrado con ese documento de identidad.', 'danger')
             return redirect('/registrar')
 
         paciente = Paciente(**remove_csrf_token(form.data))
@@ -46,11 +46,9 @@ def registrar_paciente():
 
 
 
-@bp.route('/paciente/<int:paciente_dni>/editar', methods=['GET', 'POST'])
-def editar_paciente(paciente_dni):
-    paciente = db.session.get(Paciente, paciente_dni)
-    if not paciente:
-        abort(404)
+@bp.route('/paciente/<int:paciente_id>/editar', methods=['GET', 'POST'])
+def editar_paciente(paciente_id):
+    paciente = db.get_or_404(Paciente, paciente_id)
 
     if not paciente.historias:
         flash("No hay historia clínica para este paciente.", "danger")
@@ -85,11 +83,9 @@ def editar_paciente(paciente_dni):
                            form_antmed=form_antmed,
                            historia=historia, paciente=historia.paciente)
 
-@bp.route('/paciente/<int:paciente_dni>/examenes-estomatologicos', methods=['GET', 'POST'])
-def examenes_estomatologicos(paciente_dni):
-    paciente = db.session.get(Paciente, paciente_dni)
-    if not paciente:
-        abort(404)
+@bp.route('/paciente/<int:paciente_id>/examenes-estomatologicos', methods=['GET', 'POST'])
+def examenes_estomatologicos(paciente_id):
+    paciente = db.get_or_404(Paciente, paciente_id)
 
     if not paciente.historias:
         flash("No hay historia clínica para este paciente.", "danger")
@@ -124,10 +120,10 @@ def buscar_pacientes():
 
     # Necesitas hacer join para obtener historia_id
     pacientes = db.session.execute(
-        select(Historia.historia_id, Paciente.paciente_dni, Paciente.nombres, Paciente.apellidos)
+        select(Historia.historia_id, Paciente.documento_identidad, Paciente.nombres, Paciente.apellidos)
         .join(Historia.paciente)
         .filter(
-            (Paciente.paciente_dni.ilike(f'%{q}%')) |
+            (Paciente.documento_identidad.ilike(f'%{q}%')) |
             (Paciente.nombres.ilike(f'%{q}%')) |
             (Paciente.apellidos.ilike(f'%{q}%'))
         )
@@ -136,7 +132,7 @@ def buscar_pacientes():
 
     resultados = [{
         'historia_id': p.historia_id,
-        'paciente_dni': p.paciente_dni,
+        'documento_identidad': p.documento_identidad,
         'nombres': p.nombres,
         'apellidos': p.apellidos
     } for p in pacientes]

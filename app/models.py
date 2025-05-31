@@ -47,10 +47,11 @@ class Odontologo(Base):
 class Paciente(Base):
     __tablename__ = 'paciente'
     __table_args__ = (
-        PrimaryKeyConstraint('paciente_dni', name='paciente_pkey'),
+        PrimaryKeyConstraint('paciente_id', name='paciente_pkey'),
     )
 
-    paciente_dni: Mapped[str] = mapped_column(String, primary_key=True, info={'label': 'DNI del Paciente'})
+    paciente_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    documento_identidad: Mapped[str] = mapped_column(String, info={'label': 'Documento de Identidad'})
     nombres: Mapped[str] = mapped_column(String, info={'label': 'Nombres'})
     apellidos: Mapped[str] = mapped_column(String, info={'label': 'Apellidos'})
     fecha_nacimiento: Mapped[datetime.date] = mapped_column(Date, info={'label': 'Fecha de Nacimiento'})
@@ -89,13 +90,13 @@ class Procedimiento(Base):
 class Historia(Base):
     __tablename__ = 'historia'
     __table_args__ = (
-        ForeignKeyConstraint(['paciente_dni'], ['paciente.paciente_dni'], name='historia_paciente_dni_fkey'),
+        ForeignKeyConstraint(['paciente_id'], ['paciente.paciente_id'], name='historia_paciente_id_fkey'),
         PrimaryKeyConstraint('historia_id', name='historia_pkey')
     )
 
     historia_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     fecha_creacion: Mapped[datetime.date] = mapped_column(Date, default=datetime.date.today)
-    paciente_dni: Mapped[str] = mapped_column(String)
+    paciente_id: Mapped[int] = mapped_column(Integer)
 
     paciente: Mapped['Paciente'] = relationship('Paciente', back_populates='historias')
     contraindicaciones: Mapped[List['HistoriaContraindicacion']] = relationship('HistoriaContraindicacion', back_populates='historia')
