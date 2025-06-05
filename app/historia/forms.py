@@ -1,7 +1,7 @@
 from app.extensions import ModelForm
 from flask_wtf import FlaskForm
 from wtforms import StringField, DateField, BooleanField, FileField, SubmitField, HiddenField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Optional
 from flask_wtf.file import FileAllowed, FileRequired
 from app.models import HistoriaContraindicacion
 from wtforms import FieldList, FormField, TextAreaField
@@ -29,6 +29,11 @@ class ContraindicacionesForm(FlaskForm):
     historia_id = HiddenField()
 
 
-class NovedadesForm(FlaskForm):
-    novedades = TextAreaField('Novedades', validators=[DataRequired()])
+class NovedadForm(FlaskForm):
+    novedad_id = HiddenField()
+    descripcion = StringField('Descripción', validators=[DataRequired()])
+    es_importante = BooleanField('Es importante')
+
+class PacienteNovedadesForm(FlaskForm):
+    novedades = FieldList(FormField(NovedadForm), min_entries=1)
     submit = SubmitField('Guardar')

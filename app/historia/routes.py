@@ -5,8 +5,8 @@ from app.models import Paciente, Historia, HistoriaContraindicacion
 from sqlalchemy import select
 import os
 from werkzeug.utils import secure_filename
-from app.models import HistoriaExamen
-from app.historia.forms import HistoriaExamenForm, HistoriaContraindicacionForm, ContraindicacionesForm, NovedadesForm
+from app.models import HistoriaExamen, PacienteNovedad
+from app.historia.forms import HistoriaExamenForm, HistoriaContraindicacionForm, ContraindicacionesForm, NovedadForm, PacienteNovedadesForm
 from datetime import date
 from flask import send_from_directory
 
@@ -142,21 +142,63 @@ def contraindicaciones(historia_id):
 @bp.route('/paciente/<string:paciente_id>/novedades', methods=['GET', 'POST'])
 def paciente_novedades(paciente_id):
     paciente = db.get_or_404(Paciente, paciente_id)
-    historia = paciente.historias[0]
-    form = NovedadesForm(obj=paciente)
+    form = PacienteNovedadesForm()
+
+    if request.method == 'GET':
+        # Cargar las novedades actuales en el formulario
+        for nov in paciente.novedades:
+            form.novedades.append_entry({
+                'novedad_id': getattr(nov, 'novedad_id', None),
+                'descripcion': nov.descripcion,
+                'es_importante': nov.es_importante,
+            })
 
     if form.validate_on_submit():
-        paciente.novedades = form.novedades.data
+        # IDs actuales en BD
+        ids_actuales = {nov.novedad_id for nov in paciente.novedades}
+        # IDs enviados en formulario
+        ids_form = set()
+
+        for entry in form.novedades.data:
+            nid = entry.get('novedad_id')
+            ids_form.add(nid)
+
+            if nid and nid in ids_actuales:
+                # Actualizar novedad existente
+                nov = db.session.query(PacienteNovedad).filter_by(
+                    paciente_id=paciente_id, novedad_id=nid).first()
+                if nov:
+                    nov.descripcion = entry['descripcion']
+                    nov.es_importante = entry.get('es_importante', False)
+                    nov.fecha = datetime.date.today()
+            else:
+                # Crear novedad nueva
+                nueva_novedad = PacienteNovedad(
+                    paciente_id=paciente_id,
+                    descripcion=entry['descripcion'],
+                    es_importante=entry.get('es_importante', False),
+                    fecha=datetime.date.today()
+                )
+                db.session.add(nueva_novedad)
+
+        # Eliminar novedades borradas (no enviadas en formulario)
+        ids_a_eliminar = ids_actuales - ids_form
+        if ids_a_eliminar:
+            db.session.query(PacienteNovedad).filter(
+                PacienteNovedad.paciente_id == paciente_id,
+                PacienteNovedad.novedad_id.in_(ids_a_eliminar)
+            ).delete(synchronize_session=False)
+
         db.session.commit()
         flash('Novedades actualizadas correctamente', 'success')
-        return redirect(url_for('historia.paciente_novedades', paciente_id=paciente_id))
+        return redirect(url_for('sistema.paciente_novedades', paciente_id=paciente_id))
 
     return render_template(
         'historia/novedades.html',
         paciente=paciente,
-        historia=historia,
         form=form,
     )
+
 
 
 

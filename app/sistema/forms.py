@@ -5,7 +5,7 @@ from wtforms import SubmitField
 class PacienteForm(ModelForm):
     class Meta:
         model = Paciente
-        exclude = ['novedades']
+        #exclude = ['novedades']
 
 class AntMedForm(ModelForm):
     class Meta:

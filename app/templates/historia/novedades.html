@@ -129,11 +129,53 @@
   <form method="post">
     {{ form.csrf_token }}
 
-    <div class="mb-3">
-      {{ form.novedades.label(class="form-label") }}
-      {{ form.novedades(class="form-control", rows="6") }}
-    </div>
+    <div id="novedades-list">
+    {% for subform in form.novedades %}
+      <div class="novedad-item">
+        <button type="button" class="btn-remove" onclick="removeNovedad(this)">×</button>
+        <div class="mb-3">
+          {{ subform.descripcion.label(class="form-label") }}
+          {{ subform.descripcion(class="form-control") }}
+        </div>
+        <div class="form-check mb-3">
+          {{ subform.es_importante(class="form-check-input") }}
+          {{ subform.es_importante.label(class="form-check-label") }}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
 
-    <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
-  </form>
+  <button type="button" class="btn btn-secondary" id="add-novedad-btn">Agregar Novedad</button>
+
+  <br><br>
+  <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+</form>
+
+<script>
+  // Función para eliminar novedad
+  function removeNovedad(button) {
+    button.closest('.novedad-item').remove();
+  }
+
+  // Agregar nueva novedad
+  document.getElementById('add-novedad-btn').addEventListener('click', function() {
+    const novedadesList = document.getElementById('novedades-list');
+    const index = novedadesList.children.length;
+    const newNovedadHtml = `
+      <div class="novedad-item">
+        <button type="button" class="btn-remove" onclick="removeNovedad(this)">×</button>
+        <div class="mb-3">
+          <label for="novedades-${index}-descripcion" class="form-label">Descripción</label>
+          <input class="form-control" id="novedades-${index}-descripcion" name="novedades-${index}-descripcion" type="text" required>
+        </div>
+        <div class="form-check mb-3">
+          <input class="form-check-input" id="novedades-${index}-es_importante" name="novedades-${index}-es_importante" type="checkbox" value="y">
+          <label class="form-check-label" for="novedades-${index}-es_importante">Es importante</label>
+        </div>
+      </div>
+    `;
+    novedadesList.insertAdjacentHTML('beforeend', newNovedadHtml);
+  });
+</script>
+
 {% endblock %}
