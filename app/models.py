@@ -141,7 +141,7 @@ class HistoriaAntecedentesMedicos(Base):
     presion_alta: Mapped[bool] = mapped_column(Boolean, default=False)
     epilepsia: Mapped[bool] = mapped_column(Boolean, default=False)
     embarazo: Mapped[bool] = mapped_column(Boolean, default=False)
-    otros: Mapped[str | None] = mapped_column(Text)
+    otros: Mapped[str] = mapped_column(Text, default='')
 
     historia: Mapped['Historia'] = relationship('Historia', backref='antecedentes_medicos')
 
