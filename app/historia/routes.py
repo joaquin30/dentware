@@ -196,6 +196,7 @@ def paciente_novedades(paciente_id):
     return render_template(
         'historia/novedades.html',
         paciente=paciente,
+        historia=paciente.historias[0],
         form=form,
     )
 

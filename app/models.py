@@ -33,10 +33,11 @@ class Material(Base):
 class Odontologo(Base):
     __tablename__ = 'odontologo'
     __table_args__ = (
-        PrimaryKeyConstraint('odontologo_dni', name='odontologo_pkey'),
+        PrimaryKeyConstraint('odontologo_id', name='odontologo_pkey'),
     )
 
-    odontologo_dni: Mapped[str] = mapped_column(String, primary_key=True)
+    odontologo_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    odontologo_dni: Mapped[str] = mapped_column(String)
     nombre: Mapped[str] = mapped_column(String)
     tipo_odontologo: Mapped[str] = mapped_column(Enum('Interno', 'Externo', 'Temporal', name='tipo_odontologo_t'))
 
@@ -64,8 +65,8 @@ class Paciente(Base):
     lugar_trabajo_estudio: Mapped[str] = mapped_column(String, info={'label': 'Lugar de Trabajo o Estudio'}, default='')
     apoderado: Mapped[str] = mapped_column(String, info={'label': 'Apoderado'}, default='')
 
-    historias: Mapped[List['Historia']] = relationship('Historia', back_populates='paciente')
     novedades: Mapped[List['PacienteNovedad']] = relationship('PacienteNovedad', back_populates='paciente')
+    historias: Mapped[List['Historia']] = relationship('Historia', back_populates='paciente')
 
     def crear_nueva_historia(self, db):
         historia = Historia(paciente=self)
@@ -117,8 +118,8 @@ class Historia(Base):
     paciente: Mapped['Paciente'] = relationship('Paciente', back_populates='historias')
     contraindicaciones: Mapped[List['HistoriaContraindicacion']] = relationship('HistoriaContraindicacion', back_populates='historia')
     examenes: Mapped[List['HistoriaExamen']] = relationship('HistoriaExamen', back_populates='historia')
-    odontogramas: Mapped[List['Odontograma']] = relationship('Odontograma', back_populates='historia_clinica')
-    tratamientos: Mapped[List['Tratamiento']] = relationship('Tratamiento', back_populates='historia_clinica')
+    odontogramas: Mapped[List['Odontograma']] = relationship('Odontograma', back_populates='historia')
+    tratamientos: Mapped[List['Tratamiento']] = relationship('Tratamiento', back_populates='historia')
 
 
 class HistoriaAntecedentesMedicos(Base):
@@ -205,18 +206,18 @@ class HistoriaExamenesEstomatologicos(Base):
 class Odontograma(Base):
     __tablename__ = 'odontograma'
     __table_args__ = (
-        ForeignKeyConstraint(['historia_clinica_id'], ['historia.historia_id'], name='odontograma_historia_clinica_id_fkey'),
+        ForeignKeyConstraint(['historia_id'], ['historia.historia_id'], name='odontograma_historia_id_fkey'),
         PrimaryKeyConstraint('odontograma_id', name='odontograma_pkey')
     )
 
     odontograma_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    historia_clinica_id: Mapped[int] = mapped_column(Integer)
+    historia_id: Mapped[int] = mapped_column(Integer)
     tipo_odontograma: Mapped[str] = mapped_column(Enum('Inicial', 'Tratamiento', 'Evolución', name='tipo_odontograma_t'))
     ultima_edicion: Mapped[datetime.date] = mapped_column(Date)
     especificaciones: Mapped[str] = mapped_column(Text)
     observaciones: Mapped[str] = mapped_column(Text)
 
-    historia_clinica: Mapped['Historia'] = relationship('Historia', back_populates='odontogramas')
+    historia: Mapped['Historia'] = relationship('Historia', back_populates='odontogramas')
     entradas_areas_diente: Mapped[List['OdontogramaEntradaAreasDiente']] = relationship('OdontogramaEntradaAreasDiente', back_populates='odontograma')
     entradas_bordes_diente: Mapped[List['OdontogramaEntradaBordesDiente']] = relationship('OdontogramaEntradaBordesDiente', back_populates='odontograma')
     entradas_diente: Mapped[List['OdontogramaEntradaDiente']] = relationship('OdontogramaEntradaDiente', back_populates='odontograma')
@@ -227,8 +228,8 @@ class Odontograma(Base):
 class Tratamiento(Base):
     __tablename__ = 'tratamiento'
     __table_args__ = (
-        ForeignKeyConstraint(['historia_clinica_id'], ['historia.historia_id'], name='tratamiento_historia_clinica_id_fkey'),
-        ForeignKeyConstraint(['odontologo_dni'], ['odontologo.odontologo_dni'], name='tratamiento_odontologo_dni_fkey'),
+        ForeignKeyConstraint(['historia_id'], ['historia.historia_id'], name='tratamiento_historia_id_fkey'),
+        ForeignKeyConstraint(['odontologo_id'], ['odontologo.odontologo_id'], name='tratamiento_odontologo_id_fkey'),
         PrimaryKeyConstraint('tratamiento_id', name='tratamiento_pkey')
     )
 
@@ -236,10 +237,10 @@ class Tratamiento(Base):
     fecha_creacion: Mapped[datetime.date] = mapped_column(Date, default=datetime.date.today)
     descripcion: Mapped[str] = mapped_column(String)
     en_curso: Mapped[bool] = mapped_column(Boolean)
-    odontologo_dni: Mapped[str] = mapped_column(String)
-    historia_clinica_id: Mapped[int] = mapped_column(Integer)
+    odontologo_id: Mapped[str] = mapped_column(String)
+    historia_id: Mapped[int] = mapped_column(Integer)
 
-    historia_clinica: Mapped['Historia'] = relationship('Historia', back_populates='tratamientos')
+    historia: Mapped['Historia'] = relationship('Historia', back_populates='tratamientos')
     odontologo: Mapped['Odontologo'] = relationship('Odontologo', back_populates='tratamientos')
     materiales: Mapped[List['TratamientoMaterial']] = relationship('TratamientoMaterial', back_populates='tratamiento')
     pagos: Mapped[List['TratamientoPago']] = relationship('TratamientoPago', back_populates='tratamiento')
@@ -383,7 +384,7 @@ class TratamientoProcedimiento(Base):
 class TratamientoSesion(Base):
     __tablename__ = 'tratamiento_sesion'
     __table_args__ = (
-        ForeignKeyConstraint(['odontologo_dni'], ['odontologo.odontologo_dni'], name='tratamiento_sesion_odontologo_dni_fkey'),
+        ForeignKeyConstraint(['odontologo_id'], ['odontologo.odontologo_id'], name='tratamiento_sesion_odontologo_id_fkey'),
         ForeignKeyConstraint(['tratamiento_id'], ['tratamiento.tratamiento_id'], name='tratamiento_sesion_tratamiento_id_fkey'),
         PrimaryKeyConstraint('tratamiento_id', 'sesion_id', name='tratamiento_sesion_pkey')
     )
@@ -393,7 +394,7 @@ class TratamientoSesion(Base):
     fecha: Mapped[datetime.date] = mapped_column(Date, default=datetime.date.today)
     descripcion: Mapped[str] = mapped_column(String)
     observaciones: Mapped[str] = mapped_column(Text)
-    odontologo_dni: Mapped[str] = mapped_column(Text)
+    odontologo_id: Mapped[str] = mapped_column(Text)
 
     odontologo: Mapped['Odontologo'] = relationship('Odontologo', back_populates='sesiones')
     tratamiento: Mapped['Tratamiento'] = relationship('Tratamiento', back_populates='sesiones')
