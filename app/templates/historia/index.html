@@ -4,23 +4,24 @@
 
 <style>
   body {
-    background-color: {% if tiene_grave %}#fa8377{% else %}#f4f6fb{% endif %};
+    background-color: {% if tiene_grave %}#D0342C{% else %}#f4f6fb{% endif %};
   }
 
   .card-historia {
     background: white;
     border-radius: 12px;
     padding: 24px;
-    max-width: 1000px;
+    width: 90%;
     margin: 20px auto;
     box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
     display: flex;
     justify-content: space-between;
     gap: 30px;
+    flex-wrap: wrap;
   }
 
   .datos-paciente {
-    width: 40%;
+    flex-basis: 48%;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -41,7 +42,7 @@
 
   .btn-editar {
     width: 110px;
-    text-decoration: none;    /* Sin subrayado */
+    text-decoration: none;
     margin-top: 10px;
     background-color: #2a2f65;
     color: white;
@@ -66,54 +67,56 @@
   }
 
   .acciones-panel {
+    flex-basis: 48%;
     display: flex;
     flex-direction: column;
     gap: 12px;
-    width: 40%;
   }
 
   .acciones-panel a {
-    display: block;
-    text-align: center;
-    background-color: #2a2f65;
-    color: white;
-    padding: 10px;
-    border-radius: 6px;
-    font-weight: bold;
-    text-decoration: none;
-  }
+  display: inline-block; /* cambio importante */
+  width: 360px; /* ajusta según lo que necesites */
+  text-align: center;
+  background-color: #2a2f65;
+  color: white;
+  padding: 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  text-decoration: none;
+  margin-left: 150px; /* centrado */
+}
+
 
   .acciones-panel a:hover {
     background-color: #2a2f65;
   }
 
   .btn-novedades {
-  background: white;           /* fondo blanco */
-  color: #2a2f65;              /* texto azul oscuro */
-  border: 1px solid #2a2f65;  /* borde azul oscuro */
-  font-weight: bold;
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-block;
-  text-align: center;
-  transition: background-color 0.3s, color 0.3s; /* para efectos suaves */
-}
+    background: white;
+    color: #2a2f65;
+    border: 1px solid #2a2f65;
+    font-weight: bold;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    transition: background-color 0.3s, color 0.3s;
+  }
 
-.btn-novedades:hover {
-  background: #2a2f65;    /* fondo azul oscuro al pasar el mouse */
-  color: white;           /* texto blanco */
-}
+  .btn-novedades:hover {
+    background: #2a2f65;
+    color: white;
+  }
 
-
-.btn-novedades img.icono-novedad {
-  height: 18px;            /* tamaño acorde al texto */
-  width: 18px;
-  margin-right: 8px;       /* espacio entre imagen y texto */
-  vertical-align: middle;  /* alinea verticalmente con el texto */
-  display: inline-block;
-}
+  .btn-novedades img.icono-novedad {
+    height: 18px;
+    width: 18px;
+    margin-right: 8px;
+    vertical-align: middle;
+    display: inline-block;
+  }
 
   .alerta {
     background-color: #d93025 !important;
@@ -121,7 +124,7 @@
 
   .btn-volver {
     display: block;
-    max-width: 1000px;
+    width: 90%;
     margin: 20px auto 0;
     text-align: left;
   }
@@ -137,6 +140,16 @@
 
   .btn-volver a:hover {
     background-color: #5a6268;
+  }
+
+  @media (max-width: 768px) {
+    .card-historia {
+      flex-direction: column;
+    }
+
+    .datos-paciente, .acciones-panel {
+      flex-basis: 100%;
+    }
   }
 </style>
 
@@ -178,8 +191,6 @@
       <img src="{{ url_for('static', filename='img/novedad.png') }}" alt="Novedad" class="icono-novedad">
       Novedades
     </a>
-
-
   </div>
 </div>
 

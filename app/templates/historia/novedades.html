@@ -4,7 +4,6 @@
 {% block content %}
 
 <style>
-  /* Encabezado principal con logo */
   .header-top {
     border-bottom: 1px solid #d3d3d3;
     padding: 12px 24px;
@@ -23,7 +22,6 @@
     margin: 0;
   }
 
-  /* Título y botón volver */
   .header-main {
     display: flex;
     align-items: center;
@@ -43,94 +41,38 @@
     color: #5a5f9e;
   }
 
-  /* Cards estilo */
-  .examenes-lista .card {
-    border-radius: 10px;
-    box-shadow: 0 3px 6px rgb(0 0 0 / 0.12);
-    transition: box-shadow 0.25s ease;
+  .novedad-item {
+    position: relative;
+    padding: 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-bottom: 12px;
   }
-  .examenes-lista .card:hover {
-    box-shadow: 0 6px 18px rgb(0 0 0 / 0.18);
-  }
-  .examenes-lista .card-img-top {
-    height: 150px;
-    object-fit: cover;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-  }
-  .card-body {
-    padding: 12px 16px;
-  }
-  .card-title {
-    font-size: 1rem;
-    font-weight: 700;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .card-text {
-    font-size: 0.875rem;
-    margin-bottom: 10px;
-  }
-  .card-footer {
-    padding: 8px 16px 16px;
-    display: flex;
-    gap: 6px;
-    justify-content: center;
-  }
-  .card-footer form {
-    margin: 0;
-  }
-
-  /* Botón subir archivo al centro */
-  .upload-btn-container {
-    margin: 32px 0 16px;
-    display: flex;
-    justify-content: center;
-  }
-  .upload-btn-container button {
-    background-color: #2a2f65;
-    color: white;
+  .btn-remove {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: transparent;
     border: none;
-    padding: 10px 28px;
-    border-radius: 28px;
-    font-weight: 600;
-    font-size: 1.05rem;
+    font-size: 1.25rem;
+    color: #c00;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  .upload-btn-container button:hover {
-    background-color: #454c9b;
-  }
-
-  /* Ajuste formulario archivo para alineación horizontal */
-  form.enviar-examen {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 24px;
-  }
-  form.enviar-examen label {
-    margin-bottom: 0;
-    font-weight: 600;
-    font-size: 1rem;
-  }
-  form.enviar-examen input[type="file"] {
-    flex-grow: 1;
   }
 </style>
 
-<!-- Título y botón volver -->
+<!-- Encabezado -->
 <div class="header-main">
-  <a href="{{ url_for('historia.index', historia_id=historia.historia_id) }}" class="back-btn" title="Volver" style="font-size: 1.5rem; text-decoration: none; margin-right: 10px;">&#x2190;</a>
+  <a href="{{ url_for('historia.index', historia_id=historia.historia_id) }}" class="back-btn" title="Volver">&#x2190;</a>
   <span>Novedades de {{ historia.paciente.nombres }} {{ historia.paciente.apellidos }}</span>
 </div>
 
-  <form method="post">
-    {{ form.csrf_token }}
+<form method="post">
+  {{ form.csrf_token }}
 
-    <div id="novedades-list">
-    {% for subform in form.novedades %}
+  <div id="novedades-list">
+    <h5>Importantes</h5>
+    <div id="importantes">
+      {% for subform in form.novedades if subform.es_importante.data %}
       <div class="novedad-item">
         <button type="button" class="btn-remove" onclick="removeNovedad(this)">×</button>
         <div class="mb-3">
@@ -138,29 +80,57 @@
           {{ subform.descripcion(class="form-control") }}
         </div>
         <div class="form-check mb-3">
-          {{ subform.es_importante(class="form-check-input") }}
+          {{ subform.es_importante(class="form-check-input", onchange="moverNovedad(this)") }}
           {{ subform.es_importante.label(class="form-check-label") }}
         </div>
       </div>
-    {% endfor %}
+      {% endfor %}
+    </div>
+
+    <h5>No importantes</h5>
+    <div id="no-importantes">
+      {% for subform in form.novedades if not subform.es_importante.data %}
+      <div class="novedad-item">
+        <button type="button" class="btn-remove" onclick="removeNovedad(this)">×</button>
+        <div class="mb-3">
+          {{ subform.descripcion.label(class="form-label") }}
+          {{ subform.descripcion(class="form-control") }}
+        </div>
+        <div class="form-check mb-3">
+          {{ subform.es_importante(class="form-check-input", onchange="moverNovedad(this)") }}
+          {{ subform.es_importante.label(class="form-check-label") }}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
   </div>
 
   <button type="button" class="btn btn-secondary" id="add-novedad-btn">Agregar Novedad</button>
-
   <br><br>
   <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
 </form>
 
 <script>
-  // Función para eliminar novedad
   function removeNovedad(button) {
     button.closest('.novedad-item').remove();
   }
 
-  // Agregar nueva novedad
-  document.getElementById('add-novedad-btn').addEventListener('click', function() {
-    const novedadesList = document.getElementById('novedades-list');
-    const index = novedadesList.children.length;
+  function moverNovedad(checkbox) {
+    const novedadItem = checkbox.closest('.novedad-item');
+    const importantesDiv = document.getElementById('importantes');
+    const noImportantesDiv = document.getElementById('no-importantes');
+
+    if (checkbox.checked) {
+      importantesDiv.appendChild(novedadItem);
+    } else {
+      noImportantesDiv.appendChild(novedadItem);
+    }
+  }
+
+  document.getElementById('add-novedad-btn').addEventListener('click', function () {
+    const totalNovedades = document.querySelectorAll('.novedad-item').length;
+    const index = totalNovedades;
+
     const newNovedadHtml = `
       <div class="novedad-item">
         <button type="button" class="btn-remove" onclick="removeNovedad(this)">×</button>
@@ -169,12 +139,13 @@
           <input class="form-control" id="novedades-${index}-descripcion" name="novedades-${index}-descripcion" type="text" required>
         </div>
         <div class="form-check mb-3">
-          <input class="form-check-input" id="novedades-${index}-es_importante" name="novedades-${index}-es_importante" type="checkbox" value="y">
+          <input class="form-check-input" id="novedades-${index}-es_importante" name="novedades-${index}-es_importante" type="checkbox" value="y" onchange="moverNovedad(this)">
           <label class="form-check-label" for="novedades-${index}-es_importante">Es importante</label>
         </div>
       </div>
     `;
-    novedadesList.insertAdjacentHTML('beforeend', newNovedadHtml);
+
+    document.getElementById('no-importantes').insertAdjacentHTML('beforeend', newNovedadHtml);
   });
 </script>
 

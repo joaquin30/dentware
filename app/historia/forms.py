@@ -6,13 +6,18 @@ from flask_wtf.file import FileAllowed, FileRequired
 from app.models import HistoriaContraindicacion
 from wtforms import FieldList, FormField, TextAreaField
 
+from wtforms import TextAreaField
+from wtforms.validators import Optional
+
 class HistoriaExamenForm(FlaskForm):
     archivo = FileField('Archivo', validators=[
         FileRequired(),
         FileAllowed(['pdf', 'jpg', 'jpeg', 'png'], 'Solo archivos PDF, JPG, JPEG o PNG')
     ])
+    observaciones = TextAreaField('Observaciones', validators=[Optional()])
     historia_id = HiddenField(validators=[DataRequired()])
     submit = SubmitField('Subir examen')
+
 
 
 
