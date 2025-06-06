@@ -196,14 +196,23 @@ def paciente_novedades(paciente_id):
                 if nov:
                     nov.descripcion = entry['descripcion']
                     nov.es_importante = entry.get('es_importante', False)
-                    nov.fecha = datetime.date.today()
+                    nov.fecha = date.today()
             else:
-                # Crear novedad nueva
+                # Crear novedad nueva, asignando novedad_id incremental
+                last_novedad = (
+                    db.session.query(PacienteNovedad)
+                    .filter_by(paciente_id=paciente_id)
+                    .order_by(PacienteNovedad.novedad_id.desc())
+                    .first()
+                )
+                new_novedad_id = 1 if last_novedad is None else last_novedad.novedad_id + 1
+
                 nueva_novedad = PacienteNovedad(
                     paciente_id=paciente_id,
+                    novedad_id=new_novedad_id,
                     descripcion=entry['descripcion'],
                     es_importante=entry.get('es_importante', False),
-                    fecha=datetime.date.today()
+                    fecha=date.today()
                 )
                 db.session.add(nueva_novedad)
 
@@ -217,7 +226,7 @@ def paciente_novedades(paciente_id):
 
         db.session.commit()
         flash('Novedades actualizadas correctamente', 'success')
-        return redirect(url_for('sistema.paciente_novedades', paciente_id=paciente_id))
+        return redirect(url_for('historia.paciente_novedades', paciente_id=paciente_id))
 
     return render_template(
         'historia/novedades.html',
@@ -225,7 +234,6 @@ def paciente_novedades(paciente_id):
         historia=paciente.historias[0],
         form=form,
     )
-
 
 
 
