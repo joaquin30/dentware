@@ -148,7 +148,22 @@ def contraindicaciones(historia_id):
         historia = db.session.get(Historia, historia_id)
         return redirect(url_for('historia.contraindicaciones', historia_id=historia_id))
 
-    return render_template('historia/contraindicaciones.html', form=form, historia=historia, paciente=historia.paciente)
+    sugerencias = [
+    "Alergia a AINES", "Alegia a Anestésicos", "Alergia a Penicilina",
+    "Alergia a sulfas", "Hipertensión", "Osteoporosis", "Cardiopatía",
+    "Diabetes", "Insuficiencia renal", "Insuficiencia hepática",
+    "Enfermedad autoimune", "Fiebre reumática", "Asma", "Tiroides",
+    "Gastritis", "Úlsera gástrica", "Anemia", "Terapia oncológica",
+    "Discrasia sanguínea"
+    ]
+
+    return render_template(
+        'historia/contraindicaciones.html',
+        form=form,
+        historia=historia,
+        paciente=historia.paciente,
+        sugerencias=sugerencias
+    )
 
 @bp.route('/paciente/<string:paciente_id>/novedades', methods=['GET', 'POST'])
 def paciente_novedades(paciente_id):

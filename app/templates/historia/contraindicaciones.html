@@ -28,11 +28,18 @@
       <div id="contraindicaciones-lista">
         {% for subform in form.contraindicaciones %}
           <div class="contraindicacion-item" style="margin-bottom: 12px;">
-            {{ subform.descripcion(size=40, placeholder="Descripción", disabled=true) }}
+            {{ subform.descripcion(size=40, placeholder="Descripción", disabled=true, list="sugerencias-lista") }}
             <label>Grave {{ subform.es_grave(disabled=true) }}</label>
           </div>
         {% endfor %}
       </div>
+
+      <!-- Datalist con sugerencias -->
+      <datalist id="sugerencias-lista">
+        {% for sugerencia in sugerencias %}
+          <option value="{{ sugerencia }}"></option>
+        {% endfor %}
+      </datalist>
 
       <div style="margin-top: 24px;">
         <button type="button" id="editar-btn" class="btn btn-secondary">Editar Contraindicaciones</button>
@@ -41,50 +48,74 @@
       </div>
     </form>
 
+
   </div>
 </div>
 
 <!-- Scripts -->
 <script>
   const editarBtn = document.getElementById('editar-btn');
-  const agregarBtn = document.getElementById('agregar-btn');
-  const guardarBtn = document.getElementById('guardar-btn');
-  const contraLista = document.getElementById('contraindicaciones-lista');
+const agregarBtn = document.getElementById('agregar-btn');
+const guardarBtn = document.getElementById('guardar-btn');
+const contraLista = document.getElementById('contraindicaciones-lista');
 
-  function updateBackgroundColor() {
-    const checkboxes = contraLista.querySelectorAll('input[type="checkbox"]:checked');
-    document.body.style.backgroundColor = checkboxes.length > 0 ? '#D0342C' : '';
-  }
+const sugerencias = {{ sugerencias | tojson | safe }};
 
-  updateBackgroundColor();
+function updateBackgroundColor() {
+  const checkboxes = contraLista.querySelectorAll('input[type="checkbox"]:checked');
+  document.body.style.backgroundColor = checkboxes.length > 0 ? '#D0342C' : '';
+}
 
-  editarBtn.addEventListener('click', () => {
-    const inputs = contraLista.querySelectorAll('input[type="text"], input[type="checkbox"]');
-    inputs.forEach(input => input.disabled = false);
-    agregarBtn.style.display = 'inline-block';
-    agregarBtn.disabled = false;
-    guardarBtn.style.display = 'inline-block';
-    editarBtn.style.display = 'none';
+updateBackgroundColor();
 
-    const checkboxes = contraLista.querySelectorAll('input[type="checkbox"]');
-    checkboxes.forEach(chk => {
-      chk.addEventListener('change', updateBackgroundColor);
-    });
+editarBtn.addEventListener('click', () => {
+  const inputs = contraLista.querySelectorAll('input[type="text"], input[type="checkbox"]');
+  inputs.forEach(input => input.disabled = false);
+
+  agregarBtn.style.display = 'inline-block';
+  agregarBtn.disabled = false;
+  guardarBtn.style.display = 'inline-block';
+  editarBtn.style.display = 'none';
+
+  const checkboxes = contraLista.querySelectorAll('input[type="checkbox"]');
+
+  // Para evitar duplicar listeners, primero eliminamos event listeners previos (opcional si no se repite mucho)
+  checkboxes.forEach(chk => {
+    chk.onchange = null;
   });
 
-  function agregarContra() {
-    const cont = document.getElementById('contraindicaciones-lista');
-    const index = cont.children.length;
-    const div = document.createElement('div');
-    div.className = 'contraindicacion-item';
-    div.style.marginBottom = '12px';
-    div.innerHTML = `
-      <input id="contraindicaciones-${index}-descripcion" name="contraindicaciones-${index}-descripcion" size="40" placeholder="Descripción" type="text">
-      <label>Grave <input id="contraindicaciones-${index}-es_grave" name="contraindicaciones-${index}-es_grave" type="checkbox"></label>
-    `;
-    cont.appendChild(div);
-    div.querySelector('input[type="checkbox"]').addEventListener('change', updateBackgroundColor);
-  }
+  checkboxes.forEach(chk => {
+    chk.addEventListener('change', updateBackgroundColor);
+  });
+});
+
+function agregarContra() {
+  const cont = document.getElementById('contraindicaciones-lista');
+  const index = cont.children.length;
+  const div = document.createElement('div');
+  div.className = 'contraindicacion-item';
+  div.style.marginBottom = '12px';
+  div.innerHTML = `
+    <input id="contraindicaciones-${index}-descripcion" name="contraindicaciones-${index}-descripcion" size="40" placeholder="Descripción" type="text" list="sugerencias-lista">
+    <label>Grave <input id="contraindicaciones-${index}-es_grave" name="contraindicaciones-${index}-es_grave" type="checkbox"></label>
+  `;
+  cont.appendChild(div);
+
+  const descripcionInput = div.querySelector(`input[name="contraindicaciones-${index}-descripcion"]`);
+  const checkbox = div.querySelector(`input[name="contraindicaciones-${index}-es_grave"]`);
+
+  descripcionInput.addEventListener('input', () => {
+    if (sugerencias.includes(descripcionInput.value)) {
+      checkbox.checked = true;
+    } else {
+      checkbox.checked = false; // opcional
+    }
+  });
+
+  checkbox.addEventListener('change', updateBackgroundColor);
+}
+
 </script>
+
 
 {% endblock %}
