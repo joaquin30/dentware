@@ -70,13 +70,6 @@
     font-size: 0.875rem;
     margin-bottom: 10px;
   }
-  .observaciones-text {
-    font-size: 0.85rem;
-    font-style: italic;
-    color: #555;
-    margin-top: 6px;
-    white-space: pre-wrap;
-  }
   .card-footer {
     padding: 8px 16px 16px;
     display: flex;
@@ -132,96 +125,79 @@
 </div>
 
 <!-- Lista de exámenes -->
-<div class="examenes-lista row row-cols-1 row-cols-md-4 g-4">
-  {% for examen in examenes %}
-    <div class="col">
-      <div class="card h-100">
-        {% if examen.ruta_archivo.endswith(('.jpg', '.jpeg', '.png')) %}
-          <img src="{{ url_for('static', filename='examenes/' + examen.ruta_archivo) }}" class="card-img-top" alt="{{ examen.titulo }}">
-        {% else %}
-          <img src="{{ url_for('static', filename='img/pdf.jpg') }}" class="card-img-top img-fluid" style="max-height: 120px; object-fit: contain;" alt="PDF icon">
-        {% endif %}
-        <div class="card-body">
-          <h5 class="card-title">{{ examen.titulo }}</h5>
-          <p class="card-text">Fecha: {{ examen.fecha.strftime('%Y-%m-%d') }}</p>
-          {% if examen.observaciones %}
-            <p class="observaciones-text">Observaciones: {{ examen.observaciones }}</p>
+  <div class="examenes-lista row row-cols-1 row-cols-md-4 g-4">
+    {% for examen in examenes %}
+      <div class="col">
+        <div class="card h-100">
+          {% if examen.ruta_archivo.endswith(('.jpg', '.jpeg', '.png')) %}
+            <img src="{{ url_for('static', filename='examenes/' + examen.ruta_archivo) }}" class="card-img-top" alt="{{ examen.titulo }}">
+          {% else %}
+            <img src="{{ url_for('static', filename='img/pdf.jpg') }}" class="card-img-top img-fluid" style="max-height: 120px; object-fit: contain;" alt="PDF icon">
           {% endif %}
-        </div>
-        <div class="card-footer">
-          <a href="{{ url_for('historia.ver_examen', historia_id=historia.historia_id, examen_id=examen.examen_id) }}" class="btn btn-sm btn-primary">Ver</a>
-          <a href="{{ url_for('historia.descargar_examen', historia_id=historia.historia_id, examen_id=examen.examen_id) }}" class="btn btn-sm btn-success">Descargar</a>
-          <form action="{{ url_for('historia.borrar_examen', historia_id=historia.historia_id, examen_id=examen.examen_id) }}" 
-                method="post" 
-                style="display:inline;" 
-                class="form-borrar-examen">
-            {{ form.csrf_token }}
-            <button type="submit" class="btn btn-sm btn-danger">Borrar</button>
-          </form>
+          <div class="card-body">
+            <h5 class="card-title">{{ examen.titulo }}</h5>
+            <p class="card-text">Fecha: {{ examen.fecha.strftime('%Y-%m-%d') }}</p>
+          </div>
+          <div class="card-footer">
+            <a href="{{ url_for('historia.ver_examen', historia_id=historia.historia_id, examen_id=examen.examen_id) }}" class="btn btn-sm btn-primary">Ver</a>
+            <a href="{{ url_for('historia.descargar_examen', historia_id=historia.historia_id, examen_id=examen.examen_id) }}" class="btn btn-sm btn-success">Descargar</a>
+            <form action="{{ url_for('historia.borrar_examen', historia_id=historia.historia_id, examen_id=examen.examen_id) }}" 
+                  method="post" 
+                  style="display:inline;" 
+                  class="form-borrar-examen">
+              {{ form.csrf_token }}
+              <button type="submit" class="btn btn-sm btn-danger">Borrar</button>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
-  {% else %}
-    <p>No hay exámenes auxiliares registrados.</p>
-  {% endfor %}
-</div>
-
-<!-- Formulario subir examen -->
-<form method="post" enctype="multipart/form-data">
-  {{ form.hidden_tag() }}
-
-  <div class="mb-3">
-    {{ form.archivo.label(class="form-label") }}
-    {{ form.archivo(class="form-control") }}
-    
-    <div class="form-text text-muted">
-      Solo se permiten archivos de imagen (PNG, JPG, JPEG) o PDF.
-    </div>
-
-    {% for error in form.archivo.errors %}
-      <div class="text-danger">{{ error }}</div>
+    {% else %}
+      <p>No hay exámenes auxiliares registrados.</p>
     {% endfor %}
   </div>
 
-  <!-- Campo para observaciones -->
-  <div class="mb-3">
-    {{ form.observaciones.label(class="form-label") }}
-    {{ form.observaciones(class="form-control", rows="3") }}
-    {% for error in form.observaciones.errors %}
-      <div class="text-danger">{{ error }}</div>
-    {% endfor %}
-  </div>
+  <!-- Formulario subir examen -->
+  <form method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
 
-  {{ form.historia_id }}
+    <div class="mb-3">
+      {{ form.archivo.label(class="form-label") }}
+      {{ form.archivo(class="form-control") }}
+      {% for error in form.archivo.errors %}
+        <div class="text-danger">{{ error }}</div>
+      {% endfor %}
+    </div>
 
-  <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
-</form>
+    {{ form.historia_id }}
 
-<hr/>
+    <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+  </form>
 
-<script>
-document.querySelectorAll('form.form-borrar-examen').forEach(form => {
-  form.addEventListener('submit', function(event) {
-    event.preventDefault();
-    if (!confirm('¿Estás seguro de eliminar este examen?')) return;
+  <hr/>
 
-    fetch(this.action, {
-      method: 'POST',
-      headers: {
-        'X-CSRFToken': this.querySelector('[name=csrf_token]').value,
-        'X-Requested-With': 'XMLHttpRequest'
-      }
-    })
-    .then(response => {
-      if (response.ok) {
-        this.closest('.card').remove();
-      } else {
-        alert('No se pudo eliminar el examen.');
-      }
-    })
-    .catch(() => alert('Error en la conexión.'));
+  <script>
+  document.querySelectorAll('form.form-borrar-examen').forEach(form => {
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+      if (!confirm('¿Estás seguro de eliminar este examen?')) return;
+
+      fetch(this.action, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': this.querySelector('[name=csrf_token]').value,
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => {
+        if (response.ok) {
+          this.closest('.card').remove();
+        } else {
+          alert('No se pudo eliminar el examen.');
+        }
+      })
+      .catch(() => alert('Error en la conexión.'));
+    });
   });
-});
 </script>
 
 {% endblock %}

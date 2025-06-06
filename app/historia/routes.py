@@ -19,50 +19,39 @@ def index(historia_id):
     tiene_grave = any(c.es_grave for c in historia.contraindicaciones)
     return render_template('historia/index.html', paciente=historia.paciente, historia=historia, tiene_grave=tiene_grave)
 
+
 @bp.route('/historia/<int:historia_id>/examenes/subir', methods=['GET', 'POST'])
 def subir_examen(historia_id):
     historia = db.get_or_404(Historia, historia_id)
+    form = HistoriaExamenForm(historia_id=historia_id)
 
-    if request.method == 'POST':
-        archivos = request.files.getlist('archivos')
-        observaciones_list = request.form.getlist('observaciones')
+    if form.validate_on_submit():
+        archivo = form.archivo.data
+        filename = secure_filename(archivo.filename)
+        upload_folder = os.path.join(current_app.root_path, current_app.config['UPLOAD_FOLDER'])
+        if not os.path.exists(upload_folder):
+            os.makedirs(upload_folder)
+        filepath = os.path.join(upload_folder, filename)
+        archivo.save(filepath)
 
-        if not archivos:
-            flash('Debes subir al menos un archivo.', 'danger')
-            return redirect(url_for('historia.subir_examen', historia_id=historia_id))
-
+        # Generar examen_id incremental para esta historia
         last_examen = db.session.query(HistoriaExamen).filter_by(historia_id=historia_id).order_by(HistoriaExamen.examen_id.desc()).first()
         new_examen_id = 1 if not last_examen else last_examen.examen_id + 1
 
-        for i, archivo in enumerate(archivos):
-            if archivo.filename == '':
-                continue
-            filename = secure_filename(archivo.filename)
-            upload_folder = os.path.join(current_app.root_path, current_app.config['UPLOAD_FOLDER'])
-            if not os.path.exists(upload_folder):
-                os.makedirs(upload_folder)
-            filepath = os.path.join(upload_folder, filename)
-            archivo.save(filepath)
-
-            observaciones = observaciones_list[i] if i < len(observaciones_list) else ''
-
-            nuevo_examen = HistoriaExamen(
-                historia_id=historia_id,
-                examen_id=new_examen_id,
-                titulo=filename,
-                fecha=date.today(),
-                ruta_archivo=filename,
-                observaciones=observaciones
-            )
-            db.session.add(nuevo_examen)
-            new_examen_id += 1
-
+        nuevo_examen = HistoriaExamen(
+            historia_id=historia_id,
+            examen_id=new_examen_id,
+            titulo=filename,  # Usar el nombre del archivo como título automáticamente
+            fecha=date.today(),  # Usar fecha actual
+            ruta_archivo=filename
+        )
+        db.session.add(nuevo_examen)
         db.session.commit()
-        flash('Exámenes subidos correctamente', 'success')
+
+        flash('Examen subido correctamente', 'success')
         return redirect(url_for('historia.subir_examen', historia_id=historia_id))
 
-    form = HistoriaExamenForm(historia_id=historia_id)
-    examenes = historia.examenes
+    examenes = historia.examenes  # Exámenes ya subidos
     return render_template('examenes_aux/subir_examen.html', form=form, historia=historia, paciente=historia.paciente, examenes=examenes)
 
 @bp.route('/historia/<int:historia_id>/examenes/<int:examen_id>/descargar')
