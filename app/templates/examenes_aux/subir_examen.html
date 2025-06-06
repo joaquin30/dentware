@@ -149,7 +149,16 @@
               <button type="submit" class="btn btn-sm btn-danger">Borrar</button>
             </form>
           </div>
+          <div class="card-footer">
+            <form action="{{ url_for('historia.actualizar_observacion', historia_id=historia.historia_id, examen_id=examen.examen_id) }}" method="post" class="w-100 mt-2">
+              {{ form.csrf_token }}
+              <label for="observaciones-{{ examen.examen_id }}" class="form-label mt-2">Observaciones:</label>
+              <textarea name="observaciones" id="observaciones-{{ examen.examen_id }}" rows="3" class="form-control">{{ examen.observaciones }}</textarea>
+              <button type="submit" class="btn btn-sm btn-primary mt-2">Guardar observaciones</button>
+            </form>
+          </div>
         </div>
+        
       </div>
     {% else %}
       <p>No hay exámenes auxiliares registrados.</p>

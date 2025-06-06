@@ -93,6 +93,17 @@ def borrar_examen(historia_id, examen_id):
     return redirect(url_for('historia.index', historia_id=historia_id))
 
 
+@bp.route('/historia/<int:historia_id>/examenes/<int:examen_id>/actualizar-observacion', methods=['POST'])
+def actualizar_observacion(historia_id, examen_id):
+    examen = db.session.query(HistoriaExamen).filter_by(historia_id=historia_id, examen_id=examen_id).first_or_404()
+    observacion = request.form.get('observaciones', '')
+    examen.observaciones = observacion
+    db.session.commit()
+    flash('Observaciones actualizadas correctamente.', 'success')
+    return redirect(url_for('historia.subir_examen', historia_id=historia_id))
+
+
+
 @bp.route('/historia/<int:historia_id>/contraindicaciones', methods=['GET', 'POST'])
 def contraindicaciones(historia_id):
     historia = db.session.get(Historia, historia_id)
