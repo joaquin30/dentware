@@ -2,18 +2,18 @@
 {% block title %}Contraindicaciones de {{ paciente.nombres }} {{ paciente.apellidos }}{% endblock %}
 {% block content %}
 
-<!-- Título + botón volver -->
-<div class="header-main" style="margin-bottom: 16px;">
-  <a href="{{ url_for('historia.index', historia_id=historia.historia_id) }}" class="back-btn" title="Volver">&#x2190;</a>
-  <span>Contraindicaciones</span>
-</div>
+<!-- Contenedor general (box 3) -->
+<div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #eaeaea;">
+  <div style="max-width: 800px; width: 100%; background: #f5f5f5; padding: 24px; border-radius: 12px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); font-family: inherit;">
 
-<!-- Contenedor general de tarjeta -->
-<div style="max-width: 600px; margin: 0 auto;">
-  <div style="background: #ffffff; padding: 24px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); font-family: inherit;">
+    <!-- Título + botón volver -->
+    <div class="header-main" style="margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
+      <a href="{{ url_for('historia.index', historia_id=historia.historia_id) }}" class="back-btn" title="Volver" style="text-decoration: none; font-size: 20px;">&#x2190;</a>
+      <h2 style="margin: 0;">Contraindicaciones</h2>
+    </div>
 
-    <!-- Tarjeta con información del paciente -->
-    <div class="paciente-info" style="display: flex; gap: 16px; align-items: center; margin-bottom: 24px; background: #f9f9f9; padding: 16px; border-radius: 10px;">
+    <!-- Box 1: Tarjeta con información del paciente -->
+    <div class="paciente-info" style="display: flex; gap: 16px; align-items: center; margin-bottom: 24px; background: #ffffff; padding: 16px; border-radius: 10px; box-shadow: 0 1px 6px rgba(0,0,0,0.05);">
       <img src="{{ url_for('static', filename='img/profile.png') }}" alt="Foto de perfil" style="width: 80px; height: 80px; object-fit: cover; border-radius: 50%;">
       <div>
         <p><strong>DNI:</strong> {{ paciente.documento_identidad }}</p>
@@ -22,32 +22,33 @@
       </div>
     </div>
 
-    <!-- Formulario -->
-    <form method="post" id="contra-form">
-      {{ form.hidden_tag() }}
-      <div id="contraindicaciones-lista">
-        {% for subform in form.contraindicaciones %}
-          <div class="contraindicacion-item" style="margin-bottom: 12px;">
-            {{ subform.descripcion(size=40, placeholder="Descripción", disabled=true, list="sugerencias-lista") }}
-            <label>Grave {{ subform.es_grave(disabled=true) }}</label>
-          </div>
-        {% endfor %}
-      </div>
+    <!-- Box 2: Formulario -->
+    <div style="background: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 1px 6px rgba(0,0,0,0.05);">
+      <form method="post" id="contra-form">
+        {{ form.hidden_tag() }}
+        <div id="contraindicaciones-lista">
+          {% for subform in form.contraindicaciones %}
+            <div class="contraindicacion-item" style="margin-bottom: 12px;">
+              {{ subform.descripcion(size=40, placeholder="Descripción", disabled=true, list="sugerencias-lista") }}
+              <label>Grave {{ subform.es_grave(disabled=true) }}</label>
+            </div>
+          {% endfor %}
+        </div>
 
-      <!-- Datalist con sugerencias -->
-      <datalist id="sugerencias-lista">
-        {% for sugerencia in sugerencias %}
-          <option value="{{ sugerencia }}"></option>
-        {% endfor %}
-      </datalist>
+        <!-- Datalist con sugerencias -->
+        <datalist id="sugerencias-lista">
+          {% for sugerencia in sugerencias %}
+            <option value="{{ sugerencia }}"></option>
+          {% endfor %}
+        </datalist>
 
-      <div style="margin-top: 24px;">
-        <button type="button" id="editar-btn" class="btn btn-secondary">Editar Contraindicaciones</button>
-        <button type="button" id="agregar-btn" style="display:none;" onclick="agregarContra()" disabled>Agregar Contraindicación</button>
-        {{ form.submit(class="btn btn-primary", id="guardar-btn", style="display:none;") }}
-      </div>
-    </form>
-
+        <div style="margin-top: 24px;">
+          <button type="button" id="editar-btn" class="btn btn-secondary">Editar Contraindicaciones</button>
+          <button type="button" id="agregar-btn" style="display:none;" onclick="agregarContra()" disabled>Agregar Contraindicación</button>
+          {{ form.submit(class="btn btn-primary", id="guardar-btn", style="display:none;") }}
+        </div>
+      </form>
+    </div>
 
   </div>
 </div>
@@ -55,67 +56,60 @@
 <!-- Scripts -->
 <script>
   const editarBtn = document.getElementById('editar-btn');
-const agregarBtn = document.getElementById('agregar-btn');
-const guardarBtn = document.getElementById('guardar-btn');
-const contraLista = document.getElementById('contraindicaciones-lista');
+  const agregarBtn = document.getElementById('agregar-btn');
+  const guardarBtn = document.getElementById('guardar-btn');
+  const contraLista = document.getElementById('contraindicaciones-lista');
 
-const sugerencias = {{ sugerencias | tojson | safe }};
+  const sugerencias = {{ sugerencias | tojson | safe }};
 
-function updateBackgroundColor() {
-  const checkboxes = contraLista.querySelectorAll('input[type="checkbox"]:checked');
-  document.body.style.backgroundColor = checkboxes.length > 0 ? '#D0342C' : '';
-}
+  function updateBackgroundColor() {
+    const checkboxes = contraLista.querySelectorAll('input[type="checkbox"]:checked');
+    document.body.style.backgroundColor = checkboxes.length > 0 ? '#D0342C' : '';
+  }
 
-updateBackgroundColor();
+  updateBackgroundColor();
 
-editarBtn.addEventListener('click', () => {
-  const inputs = contraLista.querySelectorAll('input[type="text"], input[type="checkbox"]');
-  inputs.forEach(input => input.disabled = false);
+  editarBtn.addEventListener('click', () => {
+    const inputs = contraLista.querySelectorAll('input[type="text"], input[type="checkbox"]');
+    inputs.forEach(input => input.disabled = false);
 
-  agregarBtn.style.display = 'inline-block';
-  agregarBtn.disabled = false;
-  guardarBtn.style.display = 'inline-block';
-  editarBtn.style.display = 'none';
+    agregarBtn.style.display = 'inline-block';
+    agregarBtn.disabled = false;
+    guardarBtn.style.display = 'inline-block';
+    editarBtn.style.display = 'none';
 
-  const checkboxes = contraLista.querySelectorAll('input[type="checkbox"]');
-
-  // Para evitar duplicar listeners, primero eliminamos event listeners previos (opcional si no se repite mucho)
-  checkboxes.forEach(chk => {
-    chk.onchange = null;
+    const checkboxes = contraLista.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(chk => {
+      chk.onchange = null;
+      chk.addEventListener('change', updateBackgroundColor);
+    });
   });
 
-  checkboxes.forEach(chk => {
-    chk.addEventListener('change', updateBackgroundColor);
-  });
-});
+  function agregarContra() {
+    const cont = document.getElementById('contraindicaciones-lista');
+    const index = cont.children.length;
+    const div = document.createElement('div');
+    div.className = 'contraindicacion-item';
+    div.style.marginBottom = '12px';
+    div.innerHTML = `
+      <input id="contraindicaciones-${index}-descripcion" name="contraindicaciones-${index}-descripcion" size="40" placeholder="Descripción" type="text" list="sugerencias-lista">
+      <label>Grave <input id="contraindicaciones-${index}-es_grave" name="contraindicaciones-${index}-es_grave" type="checkbox"></label>
+    `;
+    cont.appendChild(div);
 
-function agregarContra() {
-  const cont = document.getElementById('contraindicaciones-lista');
-  const index = cont.children.length;
-  const div = document.createElement('div');
-  div.className = 'contraindicacion-item';
-  div.style.marginBottom = '12px';
-  div.innerHTML = `
-    <input id="contraindicaciones-${index}-descripcion" name="contraindicaciones-${index}-descripcion" size="40" placeholder="Descripción" type="text" list="sugerencias-lista">
-    <label>Grave <input id="contraindicaciones-${index}-es_grave" name="contraindicaciones-${index}-es_grave" type="checkbox"></label>
-  `;
-  cont.appendChild(div);
+    const descripcionInput = div.querySelector(`input[name="contraindicaciones-${index}-descripcion"]`);
+    const checkbox = div.querySelector(`input[name="contraindicaciones-${index}-es_grave"]`);
 
-  const descripcionInput = div.querySelector(`input[name="contraindicaciones-${index}-descripcion"]`);
-  const checkbox = div.querySelector(`input[name="contraindicaciones-${index}-es_grave"]`);
+    descripcionInput.addEventListener('input', () => {
+      if (sugerencias.includes(descripcionInput.value)) {
+        checkbox.checked = true;
+      } else {
+        checkbox.checked = false;
+      }
+    });
 
-  descripcionInput.addEventListener('input', () => {
-    if (sugerencias.includes(descripcionInput.value)) {
-      checkbox.checked = true;
-    } else {
-      checkbox.checked = false; // opcional
-    }
-  });
-
-  checkbox.addEventListener('change', updateBackgroundColor);
-}
-
+    checkbox.addEventListener('change', updateBackgroundColor);
+  }
 </script>
-
 
 {% endblock %}
