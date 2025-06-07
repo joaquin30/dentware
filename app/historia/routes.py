@@ -10,7 +10,10 @@ from app.historia.forms import HistoriaExamenForm, HistoriaContraindicacionForm,
 from datetime import date
 from flask import send_from_directory
 
-
+'''
+COD-006
+Función que muestra la información de una historia clínica específica.
+'''
 @bp.route('/<int:historia_id>')
 def index(historia_id):
     historia = db.session.query(Historia).get(historia_id)
@@ -19,7 +22,10 @@ def index(historia_id):
     tiene_grave = any(c.es_grave for c in historia.contraindicaciones)
     return render_template('historia/index.html', paciente=historia.paciente, historia=historia, tiene_grave=tiene_grave)
 
-
+'''
+COD-007
+Función que permite la subida de exámenes auxiliares.
+'''
 @bp.route('/historia/<int:historia_id>/examenes/subir', methods=['GET', 'POST'])
 def subir_examen(historia_id):
     historia = db.get_or_404(Historia, historia_id)
@@ -54,6 +60,10 @@ def subir_examen(historia_id):
     examenes = historia.examenes  # Exámenes ya subidos
     return render_template('examenes_aux/subir_examen.html', form=form, historia=historia, paciente=historia.paciente, examenes=examenes)
 
+'''
+COD-008
+Función que permite la descarga de exámenes auxiliares.
+'''
 @bp.route('/historia/<int:historia_id>/examenes/<int:examen_id>/descargar')
 def descargar_examen(historia_id, examen_id):
     examen = db.session.get(HistoriaExamen, (historia_id, examen_id))
@@ -68,7 +78,10 @@ def descargar_examen(historia_id, examen_id):
     return send_from_directory(upload_folder, examen.ruta_archivo, as_attachment=True)
 
 
-
+'''
+COD-009
+Función que permite ver los exámenes auxiliares de una resoluación más alta.
+'''
 @bp.route('/historia/<int:historia_id>/examenes/<int:examen_id>/ver')
 def ver_examen(historia_id, examen_id):
     examen = db.get_or_404(HistoriaExamen, {'historia_id': historia_id, 'examen_id': examen_id})
@@ -76,7 +89,10 @@ def ver_examen(historia_id, examen_id):
     # Para imágenes puedes usar send_from_directory sin as_attachment
     return send_from_directory(upload_folder, examen.ruta_archivo)
 
-
+'''
+COD-010
+Función que permite borrar un examen auxiliar.
+'''
 @bp.route('/historia/<int:historia_id>/examenes/<int:examen_id>/borrar', methods=['POST'])
 def borrar_examen(historia_id, examen_id):
     examen = db.get_or_404(HistoriaExamen, (historia_id, examen_id))
@@ -92,7 +108,10 @@ def borrar_examen(historia_id, examen_id):
     flash("Examen eliminado correctamente.", "success")
     return redirect(url_for('historia.index', historia_id=historia_id))
 
-
+'''
+COD-011
+Función que permite actualizar la observación de un examen auxiliar.
+'''
 @bp.route('/historia/<int:historia_id>/examenes/<int:examen_id>/actualizar-observacion', methods=['POST'])
 def actualizar_observacion(historia_id, examen_id):
     examen = db.session.query(HistoriaExamen).filter_by(historia_id=historia_id, examen_id=examen_id).first_or_404()
@@ -103,7 +122,10 @@ def actualizar_observacion(historia_id, examen_id):
     return redirect(url_for('historia.subir_examen', historia_id=historia_id))
 
 
-
+'''
+COD-012
+Función que permite agregar o editar contraindicaciones de una historia clínica y sugerencias de contraindicaciones frecuentes.
+'''
 @bp.route('/historia/<int:historia_id>/contraindicaciones', methods=['GET', 'POST'])
 def contraindicaciones(historia_id):
     historia = db.session.get(Historia, historia_id)
@@ -165,6 +187,10 @@ def contraindicaciones(historia_id):
         sugerencias=sugerencias
     )
 
+'''
+COD-013
+Función que permite agregar o editar novedades de un paciente y asignarles una prioridad.
+'''
 @bp.route('/paciente/<string:paciente_id>/novedades', methods=['GET', 'POST'])
 def paciente_novedades(paciente_id):
     paciente = db.get_or_404(Paciente, paciente_id)

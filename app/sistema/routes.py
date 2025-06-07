@@ -8,6 +8,10 @@ from sqlalchemy import select
 from app.utils import remove_csrf_token
 from flask import jsonify, request
 
+'''
+COD-001
+Función que muestra la lista de pacientes.
+'''
 @bp.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -21,12 +25,15 @@ def index():
         .join(Historia.paciente).order_by(Paciente.nombres, Paciente.apellidos)
     ).all()
     
-    cantidad_pacientes = len(pacientes)  # 👈 aquí contamos
+    cantidad_pacientes = len(pacientes)
 
     return render_template('sistema/index.html', pacientes=pacientes, cantidad_pacientes=cantidad_pacientes)
 
 
-
+'''
+COD-002
+Función del formulario de registro de datos de paciente.
+'''
 @bp.route('/registrar', methods=['GET', 'POST'])
 def registrar_paciente():
     form = PacienteForm()
@@ -45,7 +52,10 @@ def registrar_paciente():
     return render_template('sistema/registrar.html', form=form)
 
 
-
+'''
+COD-003
+Función de formulario de edición de datos del paciente.
+'''
 @bp.route('/paciente/<int:paciente_id>/editar', methods=['GET', 'POST'])
 def editar_paciente(paciente_id):
     paciente = db.get_or_404(Paciente, paciente_id)
@@ -83,6 +93,10 @@ def editar_paciente(paciente_id):
                            form_antmed=form_antmed,
                            historia=historia, paciente=historia.paciente)
 
+'''
+COD-004
+Función que muestra el formualrio de exámenes clínicos estomatológicos.
+'''
 @bp.route('/paciente/<int:paciente_id>/examenes-estomatologicos', methods=['GET', 'POST'])
 def examenes_estomatologicos(paciente_id):
     paciente = db.get_or_404(Paciente, paciente_id)
@@ -111,7 +125,10 @@ def examenes_estomatologicos(paciente_id):
 
     return render_template('historia/examenes_estomatologicos.html', form_examen=form_examen, historia=historia, paciente=historia.paciente)
 
-
+'''
+COD-005
+Función que permite mostrar el formulario de búsqueda de pacientes y mostrar las coincidencias de la búsqueda.
+'''
 @bp.route('/sistema/buscar_pacientes')
 def buscar_pacientes():
     q = request.args.get('q', '').strip()
