@@ -16,7 +16,9 @@ import datetime
 class Base(DeclarativeBase):
     pass
 
-
+'''
+CCMaterial
+'''
 class Material(Base):
     __tablename__ = 'material'
     __table_args__ = (
@@ -29,7 +31,9 @@ class Material(Base):
 
     tratamientos: Mapped[List['TratamientoMaterial']] = relationship('TratamientoMaterial', back_populates='material')
 
-
+'''
+CCOdontologo
+'''
 class Odontologo(Base):
     __tablename__ = 'odontologo'
     __table_args__ = (
@@ -44,7 +48,9 @@ class Odontologo(Base):
     tratamientos: Mapped[List['Tratamiento']] = relationship('Tratamiento', back_populates='odontologo')
     sesiones: Mapped[List['TratamientoSesion']] = relationship('TratamientoSesion', back_populates='odontologo')
 
-
+'''
+CCPaciente
+'''
 class Paciente(Base):
     __tablename__ = 'paciente'
     __table_args__ = (
@@ -74,7 +80,9 @@ class Paciente(Base):
         db.session.add(HistoriaAntecedentesMedicos(historia=historia))
         db.session.add(HistoriaExamenesEstomatologicos(historia=historia))
 
-
+'''
+CCPacienteNovedad
+'''
 class PacienteNovedad(Base):
     __tablename__ = 'paciente_novedades'
     __table_args__ = (
@@ -90,7 +98,9 @@ class PacienteNovedad(Base):
 
     paciente: Mapped['Paciente'] = relationship('Paciente', back_populates='novedades')
 
-
+'''
+CCProcedimiento
+'''
 class Procedimiento(Base):
     __tablename__ = 'procedimiento'
     __table_args__ = (
@@ -103,7 +113,9 @@ class Procedimiento(Base):
 
     tratamientos: Mapped[List['TratamientoProcedimiento']] = relationship('TratamientoProcedimiento', back_populates='procedimiento')
 
-
+'''
+CCHistoria
+'''
 class Historia(Base):
     __tablename__ = 'historia'
     __table_args__ = (
@@ -121,7 +133,9 @@ class Historia(Base):
     odontogramas: Mapped[List['Odontograma']] = relationship('Odontograma', back_populates='historia')
     tratamientos: Mapped[List['Tratamiento']] = relationship('Tratamiento', back_populates='historia')
 
-
+'''
+CCHistoriaAntecedentes
+'''
 class HistoriaAntecedentesMedicos(Base):
     __tablename__ = 'historia_antecedentes_medicos'
     __table_args__ = (
@@ -146,7 +160,9 @@ class HistoriaAntecedentesMedicos(Base):
 
     historia: Mapped['Historia'] = relationship('Historia', backref='antecedentes_medicos')
 
-
+'''
+CCHistContraindicacion
+'''
 class HistoriaContraindicacion(Base):
     __tablename__ = 'historia_contraindicacion'
     __table_args__ = (
@@ -161,7 +177,9 @@ class HistoriaContraindicacion(Base):
 
     historia: Mapped['Historia'] = relationship('Historia', back_populates='contraindicaciones')
 
-
+'''
+CCHistExamen
+'''
 class HistoriaExamen(Base):
     __tablename__ = 'historia_examen'
     __table_args__ = (
@@ -178,7 +196,9 @@ class HistoriaExamen(Base):
 
     historia: Mapped['Historia'] = relationship('Historia', back_populates='examenes')
 
-
+'''
+CCHistEstomatologicos
+'''
 class HistoriaExamenesEstomatologicos(Base):
     __tablename__ = 'historia_examenes_estomatologicos'
     __table_args__ = (
@@ -202,7 +222,9 @@ class HistoriaExamenesEstomatologicos(Base):
 
     historia: Mapped['Historia'] = relationship('Historia', backref='examenes_estomatologicos')
 
-
+'''
+CCOdontograma
+'''
 class Odontograma(Base):
     __tablename__ = 'odontograma'
     __table_args__ = (
@@ -224,7 +246,9 @@ class Odontograma(Base):
     entradas_par_dientes: Mapped[List['OdontogramaEntradaParDientes']] = relationship('OdontogramaEntradaParDientes', back_populates='odontograma')
     entradas_rango_dientes: Mapped[List['OdontogramaEntradaRangoDientes']] = relationship('OdontogramaEntradaRangoDientes', back_populates='odontograma')
 
-
+'''
+CCTratamiento
+'''
 class Tratamiento(Base):
     __tablename__ = 'tratamiento'
     __table_args__ = (
@@ -247,7 +271,9 @@ class Tratamiento(Base):
     procedimientos: Mapped[List['TratamientoProcedimiento']] = relationship('TratamientoProcedimiento', back_populates='tratamiento')
     sesiones: Mapped[List['TratamientoSesion']] = relationship('TratamientoSesion', back_populates='tratamiento')
 
-
+'''
+CCEntradaAreas
+'''
 class OdontogramaEntradaAreasDiente(Base):
     __tablename__ = 'odontograma_entrada_areas_diente'
     __table_args__ = (
@@ -264,7 +290,9 @@ class OdontogramaEntradaAreasDiente(Base):
 
     odontograma: Mapped['Odontograma'] = relationship('Odontograma', back_populates='entradas_areas_diente')
 
-
+'''
+CCEntradaBordes
+'''
 class OdontogramaEntradaBordesDiente(Base):
     __tablename__ = 'odontograma_entrada_bordes_diente'
     __table_args__ = (
@@ -281,7 +309,9 @@ class OdontogramaEntradaBordesDiente(Base):
 
     odontograma: Mapped['Odontograma'] = relationship('Odontograma', back_populates='entradas_bordes_diente')
 
-
+'''
+CCEntradaDiente
+'''
 class OdontogramaEntradaDiente(Base):
     __tablename__ = 'odontograma_entrada_diente'
     __table_args__ = (
@@ -297,7 +327,9 @@ class OdontogramaEntradaDiente(Base):
 
     odontograma: Mapped['Odontograma'] = relationship('Odontograma', back_populates='entradas_diente')
 
-
+'''
+CCEntradaParDientes
+'''
 class OdontogramaEntradaParDientes(Base):
     __tablename__ = 'odontograma_entrada_par_dientes'
     __table_args__ = (
@@ -314,7 +346,9 @@ class OdontogramaEntradaParDientes(Base):
 
     odontograma: Mapped['Odontograma'] = relationship('Odontograma', back_populates='entradas_par_dientes')
 
-
+'''
+CCEntradaRango
+'''
 class OdontogramaEntradaRangoDientes(Base):
     __tablename__ = 'odontograma_entrada_rango_dientes'
     __table_args__ = (
@@ -331,7 +365,9 @@ class OdontogramaEntradaRangoDientes(Base):
 
     odontograma: Mapped['Odontograma'] = relationship('Odontograma', back_populates='entradas_rango_dientes')
 
-
+'''
+CCTratMaterial
+'''
 class TratamientoMaterial(Base):
     __tablename__ = 'tratamiento_material'
     __table_args__ = (
@@ -348,7 +384,9 @@ class TratamientoMaterial(Base):
     material: Mapped['Material'] = relationship('Material', back_populates='tratamientos')
     tratamiento: Mapped['Tratamiento'] = relationship('Tratamiento', back_populates='materiales')
 
-
+'''
+CCTratPago
+'''
 class TratamientoPago(Base):
     __tablename__ = 'tratamiento_pago'
     __table_args__ = (
@@ -363,7 +401,9 @@ class TratamientoPago(Base):
 
     tratamiento: Mapped['Tratamiento'] = relationship('Tratamiento', back_populates='pagos')
 
-
+'''
+CCProcedimiento
+'''
 class TratamientoProcedimiento(Base):
     __tablename__ = 'tratamiento_procedimiento'
     __table_args__ = (
@@ -380,7 +420,9 @@ class TratamientoProcedimiento(Base):
     procedimiento: Mapped['Procedimiento'] = relationship('Procedimiento', back_populates='tratamientos')
     tratamiento: Mapped['Tratamiento'] = relationship('Tratamiento', back_populates='procedimientos')
 
-
+'''
+CCTratSesion
+'''
 class TratamientoSesion(Base):
     __tablename__ = 'tratamiento_sesion'
     __table_args__ = (

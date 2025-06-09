@@ -80,9 +80,9 @@ def editar_paciente(paciente_id):
         form_paciente.populate_obj(paciente)
         form_antmed.populate_obj(antecedente)
         print("Antecedentes después de populate_obj:", antecedente.enfermedad_cardiaca, antecedente.vih, antecedente.diabetes, antecedente.alergias, antecedente.otros)
-        
-        db.session.add(paciente)       # por seguridad
-        db.session.add(antecedente)    # por seguridad
+
+        db.session.add(paciente)
+        db.session.add(antecedente)
         db.session.commit()
         
         flash("Datos personales y antecedentes médicos actualizados correctamente.", "success")
@@ -135,7 +135,6 @@ def buscar_pacientes():
     if not q:
         return jsonify([])
 
-    # Necesitas hacer join para obtener historia_id
     pacientes = db.session.execute(
         select(Historia.historia_id, Paciente.documento_identidad, Paciente.nombres, Paciente.apellidos)
         .join(Historia.paciente)
