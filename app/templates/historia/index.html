@@ -74,18 +74,17 @@
   }
 
   .acciones-panel a {
-  display: inline-block; /* cambio importante */
-  width: 360px; /* ajusta según lo que necesites */
-  text-align: center;
-  background-color: #2a2f65;
-  color: white;
-  padding: 10px;
-  border-radius: 6px;
-  font-weight: bold;
-  text-decoration: none;
-  margin-left: 150px;
-}
-
+    display: inline-block;
+    width: 360px;
+    text-align: center;
+    background-color: #2a2f65;
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    text-decoration: none;
+    margin-left: 150px;
+  }
 
   .acciones-panel a:hover {
     background-color: #2a2f65;
@@ -150,6 +149,11 @@
     .datos-paciente, .acciones-panel {
       flex-basis: 100%;
     }
+
+    .acciones-panel a {
+      margin-left: 0;
+      width: 100%;
+    }
   }
 </style>
 
@@ -172,9 +176,14 @@
 
     <div class="tratamientos-box">
       <h4>Tratamientos</h4>
-      <!-- Dejar en blanco -->
+      <!-- Aquí podrías listar los tratamientos existentes -->
+
+      <a href="{{ url_for('historia.crear_tratamiento', historia_id=historia.historia_id) }}" 
+        style="display: inline-block; margin-top: 10px; background-color: #2a2f65; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+        + Crear tratamiento
+      </a>
     </div>
-  </div>
+  </div> <!-- cierre datos-paciente -->
 
   <div class="acciones-panel">
     <a href="{{ url_for('historia.contraindicaciones', historia_id=historia.historia_id) }}">
@@ -186,12 +195,13 @@
     <a href="#">Ver Odontograma</a>
     <a href="{{ url_for('historia.subir_examen', historia_id=historia.historia_id) }}">Exámenes Auxiliares</a>
     <a href="{{ url_for('sistema.examenes_estomatologicos', paciente_id=paciente.paciente_id) }}">Exámenes Estomatológicos</a>
-    <a href="#">Pagos</a>
+    <a href="{{ url_for('historia.pagos', paciente_id=paciente.paciente_id) }}">Pagos</a>
+
     <a href="{{ url_for('historia.paciente_novedades', paciente_id=paciente.paciente_id) }}" class="btn-novedades">
       <img src="{{ url_for('static', filename='img/novedad.png') }}" alt="Novedad" class="icono-novedad">
       Novedades
     </a>
-  </div>
-</div>
+  </div> <!-- cierre acciones-panel -->
+</div> <!-- cierre card-historia -->
 
 {% endblock %}

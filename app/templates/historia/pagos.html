@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Pagos{% endblock %}
+{% block content %}
+
+<style>
+  .btn-volver {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    font-size: 2rem;
+    color: #0d2f6c;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .container-pagos {
+    max-width: 900px;
+    margin: 60px auto;
+    background-color: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .header-pagos {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+
+   /* Título y botón volver */
+  .header-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 24px 0 16px;
+    font-weight: 600;
+    font-size: 1.5rem;
+    color: #2a2f65;
+  }
+  .header-main a.back-btn {
+    font-size: 1.7rem;
+    color: #2a2f65;
+    text-decoration: none;
+    font-weight: 900;
+  }
+  .header-main a.back-btn:hover {
+    color: #5a5f9e;
+  }
+  .paciente-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .paciente-info img {
+    width: 50px;
+    border-radius: 50%;
+  }
+
+  .saldo {
+    font-size: 1.2rem;
+    font-weight: 500;
+    padding: 10px 20px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+  }
+
+  .historial {
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .pago-item {
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+
+  .pago-color {
+    width: 20px;
+    height: 20px;
+    background-color: #0d2f6c;
+    border-radius: 4px;
+  }
+
+  .pago-info span {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+
+  .btn-add {
+    margin-top: 10px;
+    border: 1px solid #0d2f6c;
+    color: #0d2f6c;
+    background: white;
+    padding: 6px 16px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .btn-add:hover {
+    background-color: #0d2f6c;
+    color: white;
+  }
+</style>
+
+<!-- Botón volver fuera del container -->
+<div class="header-main">
+  <a href="{{ url_for('historia.index', historia_id=historia.historia_id) }}" class="back-btn" title="Volver" style="font-size: 1.5rem; text-decoration: none; margin-right: 10px;">&#x2190;</a>
+  <span>Pagos de {{ historia.paciente.nombres }} {{ historia.paciente.apellidos }}</span>
+</div>
+
+
+<div class="container-pagos">
+  <h3 class="fw-bold mb-3">Pagos</h3>
+
+  <div class="header-pagos">
+    <div class="paciente-info">
+      <img src="{{ url_for('static', filename='img/profile.png') }}" alt="Foto perfil">
+      <div>
+        <strong>{{ paciente.nombres }} {{ paciente.apellidos }}</strong><br>
+        <small>DNI: {{ paciente.documento_identidad }}</small>
+      </div>
+    </div>
+    <div class="saldo">Saldo pendiente: <strong style="font-size: 1.5rem;">{{ saldo }}$</strong></div>
+  </div>
+
+  <h5 class="fw-semibold">Historial de pagos</h5>
+  <div class="historial">
+    {% for pago in pagos %}
+    <div class="pago-item">
+      <div class="pago-color"></div>
+      <div class="pago-info">
+        <span><strong>Monto:</strong> {{ pago.monto }}$</span>
+        <span><strong>Fecha:</strong> {{ pago.fecha.strftime('%d/%m/%Y') }}</span>
+        <span><strong>Método de pago:</strong> {{ pago.metodo }}</span>
+      </div>
+    </div>
+    {% endfor %}
+    <button class="btn-add">➕ Agregar pago</button>
+  </div>
+</div>
+
+{% endblock %}

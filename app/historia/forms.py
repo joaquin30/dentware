@@ -3,8 +3,9 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, DateField, BooleanField, FileField, SubmitField, HiddenField
 from wtforms.validators import DataRequired, Optional
 from flask_wtf.file import FileAllowed, FileRequired
-from app.models import HistoriaContraindicacion
+from app.models import HistoriaContraindicacion, Tratamiento
 from wtforms import FieldList, FormField, TextAreaField
+from wtforms import SelectField
 
 from wtforms import TextAreaField
 from wtforms.validators import Optional
@@ -42,3 +43,12 @@ class NovedadForm(FlaskForm):
 class PacienteNovedadesForm(FlaskForm):
     novedades = FieldList(FormField(NovedadForm), min_entries=1)
     submit = SubmitField('Guardar')
+
+class FormularioTratamiento(ModelForm):
+    odontologo_id = SelectField('Odontólogo', coerce=int)
+    en_curso = BooleanField('¿En curso?')
+    fecha = DateField('Fecha', format='%Y-%m-%d', validators=[DataRequired()])
+
+    class Meta:
+        model = Tratamiento
+        include_primary_keys = True

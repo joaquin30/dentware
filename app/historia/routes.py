@@ -1,12 +1,12 @@
 from flask import render_template, abort, redirect, url_for, flash, request, current_app, jsonify
 from app.historia import bp
 from app.extensions import db
-from app.models import Paciente, Historia, HistoriaContraindicacion
+from app.models import Paciente, Historia, HistoriaContraindicacion, Tratamiento, Odontologo
 from sqlalchemy import select
 import os
 from werkzeug.utils import secure_filename
 from app.models import HistoriaExamen, PacienteNovedad
-from app.historia.forms import HistoriaExamenForm, HistoriaContraindicacionForm, ContraindicacionesForm, NovedadForm, PacienteNovedadesForm
+from app.historia.forms import HistoriaExamenForm, HistoriaContraindicacionForm, ContraindicacionesForm, NovedadForm, PacienteNovedadesForm, FormularioTratamiento
 from datetime import date
 from flask import send_from_directory
 
@@ -261,6 +261,50 @@ def paciente_novedades(paciente_id):
         form=form,
     )
 
+'''
+COD-014
+Función que permite crear un tratamiento para un paciente.
+'''
+@bp.route('/historia/<int:historia_id>/tratamiento/nuevo', methods=['GET', 'POST'])
+def crear_tratamiento(historia_id):
+    historia = db.get_or_404(Historia, historia_id)
+    paciente = historia.paciente
+    form = FormularioTratamiento()
+
+    # Llenar choices para odontólogos (si usas SelectField)
+    odontologos = db.session.query(Odontologo).all()
+    form.odontologo_id.choices = [(od.odontologo_id, od.nombre_completo) for od in odontologos]
+
+    if form.validate_on_submit():
+        nuevo_tratamiento = Tratamiento(
+            tratamiento_id=form.tratamiento_id.data,
+            fecha_creacion=form.fecha_creacion.data or date.today(),
+            descripcion=form.descripcion.data,
+            en_curso=form.en_curso.data,
+            odontologo_id=form.odontologo_id.data,
+            historia_id=historia_id
+        )
+
+        db.session.add(nuevo_tratamiento)
+        db.session.commit()
+        flash('Tratamiento creado correctamente.', 'success')
+        return redirect(url_for('historia.ver_historia', historia_id=historia_id))
+
+    return render_template(
+        "historia/crearTratamiento.html",
+        form=form,
+        historia_id=historia_id,
+        historia=historia,  # ✅ esto es lo que faltaba
+        paciente=paciente   # si necesitas mostrar datos del paciente
+    )
 
 
-
+'''
+COD-015
+Función que muestra los pagos realizados por un paciente.
+'''
+@bp.route('/paciente/<string:paciente_id>/pagos', methods=['GET'])
+def pagos(paciente_id):
+    paciente = db.get_or_404(Paciente, paciente_id)
+    historia = paciente.historias[0]
+    return render_template('historia/pagos.html', paciente=paciente, historia=historia)
