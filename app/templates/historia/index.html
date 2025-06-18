@@ -205,7 +205,7 @@
                       <span class="badge bg-{{ 'success' if t.en_curso else 'secondary' }} mb-1">
                         {{ 'En curso' if t.en_curso else 'Finalizado' }}
                       </span>
-                      <a href="#" class="crear-tratamiento-btn" style="padding: 6px 10px; font-size: 0.85rem;">Ver tratamiento</a>
+                      <a href="{{ url_for('historia.ver_tratamiento', tratamiento_id=t.tratamiento_id) }}" class="crear-tratamiento-btn" style="padding: 6px 10px; font-size: 0.85rem;">Ver tratamiento</a>
                     </div>
                   </div>
               {% endfor %}

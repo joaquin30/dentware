@@ -10,6 +10,7 @@ from app.historia.forms import HistoriaExamenForm, HistoriaContraindicacionForm,
 from datetime import date
 from flask import send_from_directory
 from sqlalchemy.orm import joinedload
+from app.models import Historia, Tratamiento, Odontologo, TratamientoSesion
 
 '''
 COD-006
@@ -307,6 +308,52 @@ def crear_tratamiento(historia_id):
         paciente=paciente
     )
 
+@bp.route('/tratamiento/<int:tratamiento_id>', methods=['GET', 'POST'])
+def ver_tratamiento(tratamiento_id):
+    tratamiento = (
+        db.session.query(Tratamiento)
+        .options(
+            joinedload(Tratamiento.odontologo),
+            joinedload(Tratamiento.historia).joinedload(Historia.paciente),
+            joinedload(Tratamiento.sesiones).joinedload(TratamientoSesion.odontologo)
+        )
+        .get(tratamiento_id)
+    )
+
+    if not tratamiento:
+        abort(404)
+
+    historia = tratamiento.historia
+    paciente = historia.paciente
+
+    form = FormularioTratamiento(obj=tratamiento)
+    odontologos = db.session.query(Odontologo).all()
+    form.odontologo_id.choices = [(od.odontologo_id, od.nombre) for od in odontologos]
+
+    if form.validate_on_submit():
+        tratamiento.descripcion = form.descripcion.data
+        tratamiento.en_curso = form.en_curso.data
+        tratamiento.odontologo_id = form.odontologo_id.data
+        tratamiento.fecha_creacion = form.fecha.data
+
+        db.session.commit()
+        flash('Tratamiento actualizado correctamente.', 'success')
+        return redirect(url_for('historia.ver_tratamiento', tratamiento_id=tratamiento_id))
+
+    return render_template(
+        'historia/verTratamiento.html',
+        tratamiento=tratamiento,
+        historia=historia,
+        paciente=paciente,
+        form=form
+    )
+
+
+@bp.route('/sesion/registrar/<int:tratamiento_id>')
+def registrar_sesion(tratamiento_id):
+    # Lógica aún no implementada
+    flash("Funcionalidad aún no implementada.", "info")
+    return redirect(url_for('historia.ver_tratamiento', tratamiento_id=tratamiento_id))
 
 
 '''

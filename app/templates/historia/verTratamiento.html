@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% block title %}Actualizar Tratamiento{% endblock %}
+{% block content %}
+
+<style>
+  body {
+    background-color: #f4f6fb;
+  }
+
+  .card-historia {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    width: 90%;
+    margin: 20px auto;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .form-box {
+    background: #ffffff;
+    border: 1px solid #dcdcdc;
+    border-radius: 10px;
+    padding: 20px;
+  }
+
+  .form-box h4 {
+    margin-bottom: 16px;
+    font-size: 1.1rem;
+    font-weight: bold;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+  }
+
+  input[type="text"], input[type="date"], textarea, select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 0.95rem;
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  .form-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .form-check input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+  }
+
+  .btn-guardar {
+    background-color: #2a2f65;
+    color: white;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    align-self: flex-end;
+  }
+
+  .btn-guardar:hover {
+    background-color: #1e244f;
+  }
+
+  .sesion-item {
+    background: #f5f7fb;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+  }
+
+  .sesion-item strong {
+    display: block;
+  }
+
+  .btn-registrar-sesion {
+    background-color: #2a2f65;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-block;
+    margin-top: 10px;
+  }
+
+  .btn-volver {
+    display: block;
+    width: 90%;
+    margin: 20px auto 0;
+    text-align: left;
+  }
+
+  .btn-volver a {
+    background-color: #6c757d;
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+  }
+
+  .btn-volver a:hover {
+    background-color: #5a6268;
+  }
+</style>
+
+<div class="btn-volver">
+  <a href="{{ url_for('historia.index', historia_id=historia.historia_id) }}">← Volver</a>
+</div>
+
+<form method="POST" action="{{ url_for('historia.ver_tratamiento', tratamiento_id=tratamiento.tratamiento_id) }}">
+  {{ form.hidden_tag() }}
+
+  <div class="card-historia">
+    <h2>Actualizar Tratamiento</h2>
+
+    <div class="form-box">
+      <h4>Procedimiento</h4>
+
+      <div class="form-check">
+        {{ form.en_curso(class="form-check-input") }}
+        {{ form.en_curso.label(class="form-check-label") }}
+      </div>
+
+      <div class="form-group">
+        {{ form.fecha.label }}
+        {{ form.fecha(class="form-control") }}
+      </div>
+
+      <div class="form-group">
+        {{ form.odontologo_id.label }}
+        {{ form.odontologo_id(class="form-control") }}
+      </div>
+
+      <div class="form-group">
+        {{ form.descripcion.label }}
+        {{ form.descripcion(rows=4, class="form-control") }}
+      </div>
+    </div>
+
+    <div class="form-box">
+      <h4>Sesiones</h4>
+      {% if tratamiento.sesiones %}
+        {% for sesion in tratamiento.sesiones|sort(attribute='fecha', reverse=True) %}
+          <div class="sesion-item">
+            <strong>{{ sesion.odontologo.nombre }}</strong>
+            <span>{{ sesion.fecha.strftime('%d/%m/%Y') }}</span>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>No hay sesiones registradas.</p>
+      {% endif %}
+      <a href="#" class="btn-registrar-sesion disabled">+ Registrar sesión</a> <!-- Deja esto inactivo por ahora -->
+    </div>
+
+    <button type="submit" class="btn-guardar">Guardar cambios</button>
+  </div>
+</form>
+
+{% endblock %}
