@@ -22,6 +22,7 @@
 
   .datos-paciente {
     flex-basis: 48%;
+    max-width: 500px; /* añadido */
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -58,10 +59,11 @@
     border-radius: 10px;
     padding: 16px;
     min-height: 180px;
+    max-width: 100%; /* añadido */
   }
 
   .tratamientos-box h4 {
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     font-size: 1rem;
     font-weight: bold;
   }
@@ -83,7 +85,8 @@
     border-radius: 6px;
     font-weight: bold;
     text-decoration: none;
-    margin-left: 150px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .acciones-panel a:hover {
@@ -141,6 +144,17 @@
     background-color: #5a6268;
   }
 
+  .crear-tratamiento-btn {
+    display: inline-block;
+    margin-top: 10px;
+    background-color: #2a2f65;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
   @media (max-width: 768px) {
     .card-historia {
       flex-direction: column;
@@ -176,32 +190,51 @@
 
     <div class="tratamientos-box">
       <h4>Tratamientos</h4>
-      <!-- Aquí podrías listar los tratamientos existentes -->
 
-      <a href="{{ url_for('historia.crear_tratamiento', historia_id=historia.historia_id) }}" 
-        style="display: inline-block; margin-top: 10px; background-color: #2a2f65; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+      {% if historia.tratamientos %}
+          <div style="display: flex; flex-direction: column; gap: 5px;">
+              {% for t in historia.tratamientos|sort(attribute='fecha_creacion', reverse=True) %}
+                  <div class="d-flex align-items-start mb-3">
+
+                    <div class="flex-grow-1">
+                      <div><strong>{{ t.odontologo.nombre }}</strong></div>
+                      <div class="text-muted">{{ t.fecha_creacion.strftime('%d/%m/%Y') }}</div>
+                    </div>
+
+                    <div class="text-end" style="min-width: 80px; display: flex; flex-direction: column; align-items: flex-end;">
+                      <span class="badge bg-{{ 'success' if t.en_curso else 'secondary' }} mb-1">
+                        {{ 'En curso' if t.en_curso else 'Finalizado' }}
+                      </span>
+                      <a href="#" class="crear-tratamiento-btn" style="padding: 6px 10px; font-size: 0.85rem;">Ver tratamiento</a>
+                    </div>
+                  </div>
+              {% endfor %}
+          </div>
+      {% else %}
+          <p>No hay tratamientos registrados.</p>
+      {% endif %}
+
+      <a href="{{ url_for('historia.crear_tratamiento', historia_id=historia.historia_id) }}" class="crear-tratamiento-btn">
         + Crear tratamiento
       </a>
     </div>
-  </div> <!-- cierre datos-paciente -->
+  </div>
 
   <div class="acciones-panel">
     <a href="{{ url_for('historia.contraindicaciones', historia_id=historia.historia_id) }}">
       Contraindicaciones Médicas
     </a>
-
     <a href="#">Crear Odontograma</a>
     <a href="#">Actualizar Odontograma</a>
     <a href="#">Ver Odontograma</a>
     <a href="{{ url_for('historia.subir_examen', historia_id=historia.historia_id) }}">Exámenes Auxiliares</a>
     <a href="{{ url_for('sistema.examenes_estomatologicos', paciente_id=paciente.paciente_id) }}">Exámenes Estomatológicos</a>
     <a href="{{ url_for('historia.pagos', paciente_id=paciente.paciente_id) }}">Pagos</a>
-
     <a href="{{ url_for('historia.paciente_novedades', paciente_id=paciente.paciente_id) }}" class="btn-novedades">
       <img src="{{ url_for('static', filename='img/novedad.png') }}" alt="Novedad" class="icono-novedad">
       Novedades
     </a>
-  </div> <!-- cierre acciones-panel -->
-</div> <!-- cierre card-historia -->
+  </div>
+</div>
 
 {% endblock %}

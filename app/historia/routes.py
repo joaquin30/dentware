@@ -9,6 +9,7 @@ from app.models import HistoriaExamen, PacienteNovedad
 from app.historia.forms import HistoriaExamenForm, HistoriaContraindicacionForm, ContraindicacionesForm, NovedadForm, PacienteNovedadesForm, FormularioTratamiento
 from datetime import date
 from flask import send_from_directory
+from sqlalchemy.orm import joinedload
 
 '''
 COD-006
@@ -16,11 +17,22 @@ Función que muestra la información de una historia clínica específica.
 '''
 @bp.route('/<int:historia_id>')
 def index(historia_id):
-    historia = db.session.query(Historia).get(historia_id)
+    historia = (
+        db.session.query(Historia)
+        .options(joinedload(Historia.tratamientos).joinedload(Tratamiento.odontologo))  # carga tratamientos y odontólogo
+        .get(historia_id)
+    )
     if not historia:
         return abort(404)
+
     tiene_grave = any(c.es_grave for c in historia.contraindicaciones)
-    return render_template('historia/index.html', paciente=historia.paciente, historia=historia, tiene_grave=tiene_grave)
+
+    return render_template(
+        'historia/index.html',
+        paciente=historia.paciente,
+        historia=historia,
+        tiene_grave=tiene_grave
+    )
 
 '''
 COD-007
@@ -271,32 +283,30 @@ def crear_tratamiento(historia_id):
     paciente = historia.paciente
     form = FormularioTratamiento()
 
-    # Llenar choices para odontólogos (si usas SelectField)
     odontologos = db.session.query(Odontologo).all()
     form.odontologo_id.choices = [(od.odontologo_id, od.nombre) for od in odontologos]
 
     if form.validate_on_submit():
         nuevo_tratamiento = Tratamiento(
-            tratamiento_id=form.tratamiento_id.data,
-            fecha_creacion=form.fecha_creacion.data or date.today(),
+            fecha_creacion=form.fecha.data,
             descripcion=form.descripcion.data,
             en_curso=form.en_curso.data,
             odontologo_id=form.odontologo_id.data,
             historia_id=historia_id
         )
-
         db.session.add(nuevo_tratamiento)
         db.session.commit()
         flash('Tratamiento creado correctamente.', 'success')
-        return redirect(url_for('historia.ver_historia', historia_id=historia_id))
+        return redirect(url_for('historia.index', historia_id=historia_id))  # <- corrige aquí también
 
     return render_template(
         "historia/crearTratamiento.html",
         form=form,
         historia_id=historia_id,
-        historia=historia,  # ✅ esto es lo que faltaba
-        paciente=paciente   # si necesitas mostrar datos del paciente
+        historia=historia,
+        paciente=paciente
     )
+
 
 
 '''
