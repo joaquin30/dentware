@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Odontólogos{% endblock %}
+
+{% block content %}
+<style>
+  .section-box {
+    border: 1px solid #d3d3d3;
+    border-radius: 8px;
+    padding: 24px;
+    background-color: #fff;
+    margin: 20px auto 0 auto;
+    max-width: 600px;  /* ancho limitado y centrado */
+  }
+  .section-title {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: #2a2f65;
+    margin-bottom: 20px;
+  }
+  ul.odontologos-list {
+    list-style-type: none;
+    padding-left: 0;
+  }
+  ul.odontologos-list li {
+    padding: 12px 0;
+    font-size: 1rem;
+    border-bottom: 1px solid #ddd;
+  }
+  .btn-add {
+    display: block;
+    max-width: 180px; /* botón más pequeño */
+    margin: 10px 0 0 755px; /* margen superior y alineado a la derecha */
+    background-color: #2a2f65;
+    border-color: #2a2f65;
+  }
+  .btn-add:hover {
+    background-color: #454c9b;
+    border-color: #454c9b;
+  }
+  .btn-volver {
+    display: block;
+    max-width: 600px;
+    margin: 20px auto 0 auto;
+    text-align: left;
+  }
+
+  .btn-volver a {
+    background-color: #6c757d;
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+  }
+
+  .btn-volver a:hover {
+    background-color: #5a6268;
+  }
+</style>
+
+<div class="container">
+  <div class="btn-volver">
+    <a href="{{ url_for('sistema.index') }}">← Volver</a>
+  </div>
+
+  <div class="section-box">
+    <div class="section-title">Odontólogos Internos</div>
+    <ul class="odontologos-list">
+      {% for od in internos %}
+        <li>
+         {{ od.nombre }} - DNI: {{ od.odontologo_dni }}
+         <a href="{{ url_for('sistema.editar_odontologo', odontologo_id=od.odontologo_id) }}" class="btn btn-sm btn-outline-primary ms-2">Editar</a>
+         <form action="{{ url_for('sistema.eliminar_odontologo', odontologo_id=od.odontologo_id) }}" method="post" style="display:inline;" onsubmit="return confirm('¿Está seguro de eliminar este odontólogo?');">
+         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+         <button type="submit" class="btn btn-sm btn-outline-danger ms-1">Eliminar</button>
+         </form>
+        </li>
+        {% else %}
+        <li>No hay odontólogos internos.</li>
+        {% endfor %}
+    </ul>
+  </div>
+
+  <div class="section-box">
+    <div class="section-title">Odontólogos Externos</div>
+    <ul class="odontologos-list">
+      {% for od in externos %}
+      <li>
+        {{ od.nombre }} - DNI: {{ od.odontologo_dni }}
+        <a href="{{ url_for('sistema.editar_odontologo', odontologo_id=od.odontologo_id) }}" class="btn btn-sm btn-outline-primary ms-2">Editar</a>
+        <form action="{{ url_for('sistema.eliminar_odontologo', odontologo_id=od.odontologo_id) }}" method="post" style="display:inline;" onsubmit="return confirm('¿Está seguro de eliminar este odontólogo?');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-sm btn-outline-danger ms-1">Eliminar</button>
+        </form>
+      </li>
+      {% else %}
+      <li>No hay odontólogos externos.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="section-box">
+    <div class="section-title">Odontólogos Temporales</div>
+    <ul class="odontologos-list">
+      {% for od in temporales %}
+      <li>
+        {{ od.nombre }} - DNI: {{ od.odontologo_dni }}
+        <a href="{{ url_for('sistema.editar_odontologo', odontologo_id=od.odontologo_id) }}" class="btn btn-sm btn-outline-primary ms-2">Editar</a>
+        <form action="{{ url_for('sistema.eliminar_odontologo', odontologo_id=od.odontologo_id) }}" method="post" style="display:inline;" onsubmit="return confirm('¿Está seguro de eliminar este odontólogo?');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-sm btn-outline-danger ms-1">Eliminar</button>
+        </form>
+      </li>
+      {% else %}
+      <li>No hay odontólogos temporales.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <a href="{{ url_for('sistema.agregar_odontologo') }}" class="btn btn-primary btn-add">Agregar Odontólogo</a>
+</div>
+{% endblock %}

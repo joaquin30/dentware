@@ -1,9 +1,9 @@
 from flask import flash, url_for
 from flask import render_template, redirect, request, abort
 from app.sistema import bp
-from app.sistema.forms import PacienteForm, AntMedForm, ExamenesEstomatologicosForm
+from app.sistema.forms import PacienteForm, AntMedForm, ExamenesEstomatologicosForm, OdontologoForm
 from app.extensions import db
-from app.models import Paciente, Historia, HistoriaAntecedentesMedicos, HistoriaExamenesEstomatologicos
+from app.models import Paciente, Historia, HistoriaAntecedentesMedicos, HistoriaExamenesEstomatologicos, Odontologo
 from sqlalchemy import select
 from app.utils import remove_csrf_token
 from flask import jsonify, request
@@ -154,3 +154,51 @@ def buscar_pacientes():
     } for p in pacientes]
 
     return jsonify(resultados)
+
+@bp.route('/odontologos')
+def odontologos():
+    odontologos_internos = db.session.query(Odontologo).filter_by(tipo_odontologo='Interno').all()
+    odontologos_externos = db.session.query(Odontologo).filter_by(tipo_odontologo='Externo').all()
+    odontologos_temporales = db.session.query(Odontologo).filter_by(tipo_odontologo='Temporal').all()
+
+    return render_template('sistema/odontologo_listado.html',
+                           internos=odontologos_internos,
+                           externos=odontologos_externos,
+                           temporales=odontologos_temporales)
+
+@bp.route('/odontologo/<int:odontologo_id>/editar', methods=['GET', 'POST'])
+def editar_odontologo(odontologo_id):
+    odontologo = db.get_or_404(Odontologo, odontologo_id)
+    form = OdontologoForm(obj=odontologo)
+
+    if form.validate_on_submit():
+        form.populate_obj(odontologo)
+        db.session.commit()
+        flash('Odontólogo actualizado correctamente.', 'success')
+        return redirect(url_for('sistema.odontologos'))
+
+    return render_template('sistema/editar_odontologo.html', form=form, odontologo=odontologo)
+
+
+@bp.route('/odontologo/<int:odontologo_id>/eliminar', methods=['POST'])
+def eliminar_odontologo(odontologo_id):
+    odontologo = db.get_or_404(Odontologo, odontologo_id)
+    db.session.delete(odontologo)
+    db.session.commit()
+    flash('Odontólogo eliminado correctamente.', 'success')
+    return redirect(url_for('sistema.odontologos'))
+
+@bp.route('/odontologos/agregar', methods=['GET', 'POST'])
+def agregar_odontologo():
+    form = OdontologoForm()
+    if form.validate_on_submit():
+        nuevo_odontologo = Odontologo(
+            odontologo_dni=form.odontologo_dni.data,
+            nombre=form.nombre.data,
+            tipo_odontologo=form.tipo_odontologo.data
+        )
+        db.session.add(nuevo_odontologo)
+        db.session.commit()
+        flash('Odontólogo agregado correctamente', 'success')
+        return redirect(url_for('sistema.odontologos'))
+    return render_template('sistema/agregar_odontologo.html', form=form)

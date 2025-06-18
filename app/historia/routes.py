@@ -273,7 +273,7 @@ def crear_tratamiento(historia_id):
 
     # Llenar choices para odontólogos (si usas SelectField)
     odontologos = db.session.query(Odontologo).all()
-    form.odontologo_id.choices = [(od.odontologo_id, od.nombre_completo) for od in odontologos]
+    form.odontologo_id.choices = [(od.odontologo_id, od.nombre) for od in odontologos]
 
     if form.validate_on_submit():
         nuevo_tratamiento = Tratamiento(

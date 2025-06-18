@@ -41,9 +41,9 @@ class Odontologo(Base):
     )
 
     odontologo_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    odontologo_dni: Mapped[str] = mapped_column(String)
-    nombre: Mapped[str] = mapped_column(String)
-    tipo_odontologo: Mapped[str] = mapped_column(Enum('Interno', 'Externo', 'Temporal', name='tipo_odontologo_t'))
+    odontologo_dni: Mapped[str] = mapped_column(String, info={'label': 'Dni'})
+    nombre: Mapped[str] = mapped_column(String, info={'label': 'Nombres y Apellidos'})
+    tipo_odontologo: Mapped[str] = mapped_column(Enum('Interno', 'Externo', 'Temporal', name='tipo_odontologo_t'), info={'label': 'Tipo de Odontólogo'})
 
     tratamientos: Mapped[List['Tratamiento']] = relationship('Tratamiento', back_populates='odontologo')
     sesiones: Mapped[List['TratamientoSesion']] = relationship('TratamientoSesion', back_populates='odontologo')

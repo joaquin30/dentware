@@ -1,0 +1,62 @@
+{% from 'bootstrap5/form.html' import render_field %}
+{% extends "base.html" %}
+{% block title %}Agregar Odontólogo{% endblock %}
+
+{% block content %}
+<style>
+  .form-box {
+    border: 1px solid #d3d3d3;
+    border-radius: 8px;
+    padding: 24px;
+    background-color: #fff;
+    margin-top: 20px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .form-title {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: #2a2f65;
+    margin-bottom: 20px;
+  }
+  .btn-primary {
+    background-color: #2a2f65;
+    border-color: #2a2f65;
+  }
+  .btn-primary:hover {
+    background-color: #454c9b;
+    border-color: #454c9b;
+  }
+  .submit-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    gap: 10px;
+  }
+</style>
+
+<div class="container">
+  <div class="form-box">
+    <div class="form-title">Agregar nuevo odontólogo</div>
+    <form method="post">
+      {{ form.csrf_token }}
+      <div class="row g-3">
+        <div class="col-md-6">
+          {{ render_field(form.nombre, class="form-control") }}
+        </div>
+        <div class="col-md-6">
+          {{ render_field(form.odontologo_dni, class="form-control") }}
+        </div>
+        <div class="col-md-6">
+          {{ render_field(form.tipo_odontologo, class="form-select") }}
+        </div>
+      </div>
+      <div class="submit-row">
+        <input type="submit" class="btn btn-primary" value="Agregar Odontólogo" />
+        <a class="btn btn-secondary" href="{{ url_for('sistema.odontologos') }}">Volver</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
