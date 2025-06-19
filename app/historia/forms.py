@@ -54,7 +54,7 @@ class FormularioTratamiento(FlaskForm):
 class FormularioTratamientoSesion(ModelForm):
     tratamiento_id = HiddenField(validators=[DataRequired()])
     sesion_id = HiddenField()  # Se asigna incremental en la ruta, no se valida en el formulario
-    odontologo_id = SelectField('Odontólogo', coerce=int, validators=[DataRequired()])
+    odontologo_id = SelectField('Odontólogo', coerce=str, validators=[DataRequired()])
     fecha = DateField('Fecha', format='%Y-%m-%d', validators=[DataRequired()])
     descripcion = TextAreaField('Descripción', validators=[DataRequired()])
     observaciones = TextAreaField('Observaciones', validators=[Optional()])

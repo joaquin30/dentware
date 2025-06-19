@@ -436,7 +436,7 @@ class TratamientoSesion(Base):
     fecha: Mapped[datetime.date] = mapped_column(Date, default=datetime.date.today)
     descripcion: Mapped[str] = mapped_column(String)
     observaciones: Mapped[str] = mapped_column(Text)
-    odontologo_id: Mapped[str] = mapped_column(Text)
+    odontologo_id: Mapped[str] = mapped_column(String)
 
     odontologo: Mapped['Odontologo'] = relationship('Odontologo', back_populates='sesiones')
     tratamiento: Mapped['Tratamiento'] = relationship('Tratamiento', back_populates='sesiones')
