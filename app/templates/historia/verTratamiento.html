@@ -168,10 +168,11 @@
               <div class="sesion-item" style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
                   <strong>{{ sesion.odontologo.nombre }}</strong><br>
+                  <div style="margin: 4px 0;">{{ sesion.descripcion }}</div>
                   <span>{{ sesion.fecha.strftime('%d/%m/%Y') }}</span>
                 </div>
-                <a href="{{ url_for('historia.ver_sesion_tratamiento', tratamiento_id=tratamiento.tratamiento_id, sesion_id=sesion.sesion_id) }}"
-                  class="btn btn-sm btn-outline-primary ms-2">
+                <a href="{{ url_for('historia.editar_sesion_tratamiento', tratamiento_id=tratamiento.tratamiento_id, sesion_id=sesion.sesion_id) }}"
+                  class="btn btn-sm btn-outline-secondary ms-1">
                   Ver sesión
                 </a>
               </div>

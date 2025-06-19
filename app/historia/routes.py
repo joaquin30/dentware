@@ -395,30 +395,38 @@ def crear_sesion_tratamiento(tratamiento_id):
         historia=historia
     )
 
-@bp.route('/historia/tratamiento/<int:tratamiento_id>/sesion/<int:sesion_id>')
-def ver_sesion_tratamiento(tratamiento_id, sesion_id):
-    sesion = (
-        db.session.query(TratamientoSesion)
-        .filter_by(tratamiento_id=tratamiento_id, sesion_id=sesion_id)
-        .join(Odontologo)
-        .options(joinedload(TratamientoSesion.odontologo), joinedload(TratamientoSesion.tratamiento))
-        .first()
-    )
 
-    if not sesion:
-        abort(404)
+@bp.route('/historia/tratamiento/<int:tratamiento_id>/sesion/<int:sesion_id>/editar', methods=['GET', 'POST'])
+def editar_sesion_tratamiento(tratamiento_id, sesion_id):
+    sesion = db.session.query(TratamientoSesion).filter_by(
+        tratamiento_id=tratamiento_id, sesion_id=sesion_id).first_or_404()
 
     tratamiento = sesion.tratamiento
-    paciente = tratamiento.historia.paciente
     historia = tratamiento.historia
+    paciente = historia.paciente
 
-    return render_template(
-        'historia/verSesion.html',
-        sesion=sesion,
-        tratamiento=tratamiento,
-        historia=historia,
-        paciente=paciente
-    )
+    form = FormularioTratamientoSesion(obj=sesion)
+    form.tratamiento_id.data = str(tratamiento_id)
+    form.sesion_id.data = str(sesion_id)
+
+    odontologos = db.session.query(Odontologo).all()
+    form.odontologo_id.choices = [(str(od.odontologo_id), od.nombre) for od in odontologos]
+
+    if form.validate_on_submit():
+        sesion.fecha = form.fecha.data
+        sesion.descripcion = form.descripcion.data
+        sesion.observaciones = form.observaciones.data
+        sesion.odontologo_id = form.odontologo_id.data
+
+        db.session.commit()
+        flash('Sesión actualizada correctamente.', 'success')
+        return redirect(url_for('historia.ver_tratamiento', tratamiento_id=tratamiento_id))
+
+    return render_template('historia/verSesion.html',
+                           form=form,
+                           tratamiento=tratamiento,
+                           paciente=paciente,
+                           historia=historia)
 
 
 '''

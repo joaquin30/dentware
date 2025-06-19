@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Ver Sesión{% endblock %}
+{% block title %}Editar Sesión{% endblock %}
 {% block content %}
 
 <style>
@@ -16,6 +16,13 @@
     border-radius: 14px;
     padding: 24px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  }
+
+  h2 {
+    font-weight: bold;
+    font-size: 1.6rem;
+    color: #2a2f65;
+    margin-bottom: 20px;
   }
 
   .paciente-info {
@@ -35,44 +42,117 @@
     margin-right: 16px;
   }
 
-  .form-field {
+  .paciente-info div {
+    font-size: 1rem;
+    color: #333;
+  }
+
+  .form-box {
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
     margin-bottom: 16px;
   }
 
-  .form-field label {
-    font-weight: bold;
+  .form-group {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  label {
+    font-weight: 600;
     display: block;
     margin-bottom: 6px;
     color: #333;
   }
 
-  .form-value {
-    padding: 10px;
-    background-color: #eee;
+  input[type="text"],
+  input[type="date"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #aaa;
     border-radius: 6px;
-    color: #333;
+    font-size: 0.95rem;
+  }
+
+  textarea {
+    resize: vertical;
+    height: 100px;
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 24px;
   }
 
   .btn {
     background-color: #2a2f65;
     color: white;
-    padding: 10px 16px;
     border: none;
+    padding: 10px 22px;
+    font-size: 1rem;
     border-radius: 6px;
-    text-decoration: none;
     font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
   }
 
   .btn:hover {
     background-color: #1e234f;
   }
+
+  .btn-secondary {
+    background-color: #888;
+  }
+
+  .btn-secondary:hover {
+    background-color: #666;
+  }
+
+  .alert {
+    padding: 12px;
+    margin: 15px 0;
+    border-radius: 6px;
+    font-weight: bold;
+  }
+
+  .alert-success {
+    background-color: #d4edda;
+    color: #155724;
+  }
+
+  .alert-error, .alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
 </style>
 
-<a href="{{ url_for('historia.ver_tratamiento', tratamiento_id=tratamiento.tratamiento_id) }}" class="btn">← Volver al tratamiento</a>
+<!-- Mensajes flash -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div id="flash-messages">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<a href="{{ url_for('historia.ver_tratamiento', tratamiento_id=tratamiento.tratamiento_id) }}" class="btn btn-secondary">← Volver</a>
 
 <div class="container">
   <div class="card">
-    <h2>Detalles de la Sesión</h2>
+    <h2>Sesión</h2>
 
     <div class="paciente-info">
       <img src="{{ url_for('static', filename='img/profile.png') }}" alt="Foto perfil">
@@ -82,27 +162,45 @@
       </div>
     </div>
 
-    <div class="form-field">
-      <label>Profesional tratante:</label>
-      <div class="form-value">{{ sesion.odontologo.nombre }}</div>
-    </div>
+    <form method="POST">
+      {{ form.hidden_tag() }}
+      {{ form.tratamiento_id }}
+      {{ form.sesion_id }}
 
-    <div class="form-field">
-      <label>Fecha:</label>
-      <div class="form-value">{{ sesion.fecha.strftime('%d/%m/%Y') }}</div>
-    </div>
+      <div class="form-box">
 
-    <div class="form-field">
-      <label>Descripción del procedimiento realizado:</label>
-      <div class="form-value">{{ sesion.descripcion }}</div>
-    </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="odontologo_id">Profesional tratante:</label>
+            {{ form.odontologo_id }}
+          </div>
 
-    <div class="form-field">
-      <label>Observaciones:</label>
-      <div class="form-value">{{ sesion.observaciones }}</div>
-    </div>
+          <div class="form-group">
+            <label for="fecha">Fecha:</label>
+            {{ form.fecha(type="date") }}
+          </div>
+        </div>
 
+        <div class="form-row">
+          <div class="form-group" style="flex: 1 1 100%;">
+            <label for="descripcion">Descripción del procedimiento realizado:</label>
+            {{ form.descripcion }}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group" style="flex: 1 1 100%;">
+            <label for="observaciones">Observaciones:</label>
+            {{ form.observaciones }}
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn">Guardar cambios</button>
+        </div>
+
+      </div>
+    </form>
   </div>
 </div>
-
 {% endblock %}
