@@ -125,6 +125,12 @@
   .btn-volver a:hover {
     background-color: #5a6268;
   }
+
+  .scroll-sesiones {
+    max-height: 300px;   /* ajusta según preferencia */
+    overflow-y: auto;
+    padding-right: 6px;  /* espacio para scroll */
+  }
 </style>
 
 <div class="btn-volver">
@@ -164,19 +170,21 @@
     <div class="form-box">
       <h4>Sesiones</h4>
       {% if tratamiento.sesiones %}
-          {% for sesion in tratamiento.sesiones|sort(attribute='fecha', reverse=True) %}
-              <div class="sesion-item" style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                  <strong>{{ sesion.odontologo.nombre }}</strong><br>
-                  <div style="margin: 4px 0;">{{ sesion.descripcion }}</div>
-                  <span>{{ sesion.fecha.strftime('%d/%m/%Y') }}</span>
+          <div class="scroll-sesiones">
+            {% for sesion in tratamiento.sesiones|sort(attribute='fecha', reverse=True) %}
+                <div class="sesion-item" style="display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <strong>{{ sesion.odontologo.nombre }}</strong><br>
+                    <div style="margin: 4px 0;">{{ sesion.descripcion }}</div>
+                    <span>{{ sesion.fecha.strftime('%d/%m/%Y') }}</span>
+                  </div>
+                  <a href="{{ url_for('historia.editar_sesion_tratamiento', tratamiento_id=tratamiento.tratamiento_id, sesion_id=sesion.sesion_id) }}"
+                    class="btn btn-sm btn-outline-secondary ms-1">
+                    Ver sesión
+                  </a>
                 </div>
-                <a href="{{ url_for('historia.editar_sesion_tratamiento', tratamiento_id=tratamiento.tratamiento_id, sesion_id=sesion.sesion_id) }}"
-                  class="btn btn-sm btn-outline-secondary ms-1">
-                  Ver sesión
-                </a>
-              </div>
-          {% endfor %}
+            {% endfor %}
+          </div>
       {% else %}
           <p>No hay sesiones registradas.</p>
       {% endif %}

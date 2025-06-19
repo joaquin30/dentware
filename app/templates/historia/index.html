@@ -169,6 +169,11 @@
       width: 100%;
     }
   }
+  .scroll-tratamientos {
+      max-height: 300px; /* ajusta si quieres más alto o más bajo */
+      overflow-y: auto;
+      padding-right: 6px;
+  }
 </style>
 
 <div class="btn-volver">
@@ -192,24 +197,23 @@
       <h4>Tratamientos</h4>
 
       {% if historia.tratamientos %}
-          <div style="display: flex; flex-direction: column; gap: 5px;">
-              {% for t in historia.tratamientos|sort(attribute='fecha_creacion', reverse=True) %}
-                  <div class="d-flex align-items-start mb-3">
-
-                    <div class="flex-grow-1">
-                      <div><strong>{{ t.odontologo.nombre }}</strong></div>
-                      <div class="text-muted">{{ t.fecha_creacion.strftime('%d/%m/%Y') }}</div>
-                    </div>
-
-                    <div class="text-end" style="min-width: 80px; display: flex; flex-direction: column; align-items: flex-end;">
-                      <span class="badge bg-{{ 'success' if t.en_curso else 'secondary' }} mb-1">
-                        {{ 'En curso' if t.en_curso else 'Finalizado' }}
-                      </span>
-                      <a href="{{ url_for('historia.ver_tratamiento', tratamiento_id=t.tratamiento_id) }}" class="crear-tratamiento-btn" style="padding: 6px 10px; font-size: 0.85rem;">Ver tratamiento</a>
-                    </div>
+          <div class="scroll-tratamientos">
+            {% for t in historia.tratamientos|sort(attribute='fecha_creacion', reverse=True) %}
+                <div class="d-flex align-items-start mb-3">
+                  <div class="flex-grow-1">
+                    <div><strong>{{ t.odontologo.nombre }}</strong></div>
+                    <div class="text-muted">{{ t.fecha_creacion.strftime('%d/%m/%Y') }}</div>
                   </div>
-              {% endfor %}
+                  <div class="text-end" style="min-width: 80px; display: flex; flex-direction: column; align-items: flex-end;">
+                    <span class="badge bg-{{ 'success' if t.en_curso else 'secondary' }} mb-1">
+                      {{ 'En curso' if t.en_curso else 'Finalizado' }}
+                    </span>
+                    <a href="{{ url_for('historia.ver_tratamiento', tratamiento_id=t.tratamiento_id) }}" class="crear-tratamiento-btn" style="padding: 6px 10px; font-size: 0.85rem;">Ver tratamiento</a>
+                  </div>
+                </div>
+            {% endfor %}
           </div>
+
       {% else %}
           <p>No hay tratamientos registrados.</p>
       {% endif %}

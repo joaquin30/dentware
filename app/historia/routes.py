@@ -288,7 +288,7 @@ def crear_tratamiento(historia_id):
 
     if form.validate_on_submit():
         nuevo_tratamiento = Tratamiento(
-            fecha_creacion=form.fecha.data,
+            fecha_creacion=form.fecha_creacion.data,
             descripcion=form.descripcion.data,
             en_curso=form.en_curso.data,
             odontologo_id=form.odontologo_id.data,
