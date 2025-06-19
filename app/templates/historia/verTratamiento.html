@@ -135,10 +135,14 @@
   {{ form.hidden_tag() }}
 
   <div class="card-historia">
-    <h2>Actualizar Tratamiento</h2>
+    <h2>Ver Tratamiento</h2>
 
     <div class="form-box">
-      <h4>Procedimiento</h4>
+
+      <div class="form-group">
+        {{ form.descripcion.label }}
+        {{ form.descripcion(rows=4, class="form-control") }}
+      </div>
 
       <div class="form-check">
         {{ form.en_curso(class="form-check-input") }}
@@ -155,25 +159,23 @@
         {{ form.odontologo_id(class="form-control") }}
       </div>
 
-      <div class="form-group">
-        {{ form.descripcion.label }}
-        {{ form.descripcion(rows=4, class="form-control") }}
-      </div>
     </div>
 
     <div class="form-box">
       <h4>Sesiones</h4>
       {% if tratamiento.sesiones %}
-        {% for sesion in tratamiento.sesiones|sort(attribute='fecha', reverse=True) %}
-          <div class="sesion-item">
-            <strong>{{ sesion.odontologo.nombre }}</strong>
-            <span>{{ sesion.fecha.strftime('%d/%m/%Y') }}</span>
-          </div>
-        {% endfor %}
+          {% for sesion in tratamiento.sesiones|sort(attribute='fecha', reverse=True) %}
+              <div class="sesion-item">
+                  <strong>{{ sesion.odontologo.nombre }}</strong>
+                  <span>{{ sesion.fecha.strftime('%d/%m/%Y') }}</span>
+              </div>
+          {% endfor %}
       {% else %}
-        <p>No hay sesiones registradas.</p>
+          <p>No hay sesiones registradas.</p>
       {% endif %}
-      <a href="#" class="btn-registrar-sesion disabled">+ Registrar sesión</a> <!-- Deja esto inactivo por ahora -->
+      <a href="{{ url_for('historia.crear_sesion_tratamiento', tratamiento_id=tratamiento.tratamiento_id) }}" class="btn-registrar-sesion">
+        + Registrar sesión
+      </a>
     </div>
 
     <button type="submit" class="btn-guardar">Guardar cambios</button>

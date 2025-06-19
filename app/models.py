@@ -259,7 +259,7 @@ class Tratamiento(Base):
 
     tratamiento_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     fecha_creacion: Mapped[datetime.date] = mapped_column(Date, default=datetime.date.today)
-    descripcion: Mapped[str] = mapped_column(String)
+    descripcion: Mapped[str] = mapped_column(String, info={'label': 'Descripción de tratamientos'})
     en_curso: Mapped[bool] = mapped_column(Boolean)
     odontologo_id: Mapped[str] = mapped_column(String)
     historia_id: Mapped[int] = mapped_column(Integer)

@@ -3,7 +3,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, DateField, BooleanField, FileField, SubmitField, HiddenField
 from wtforms.validators import DataRequired, Optional
 from flask_wtf.file import FileAllowed, FileRequired
-from app.models import HistoriaContraindicacion, Tratamiento
+from app.models import HistoriaContraindicacion, Tratamiento, TratamientoSesion
 from wtforms import FieldList, FormField, TextAreaField
 from wtforms import SelectField
 from flask_wtf import FlaskForm
@@ -49,4 +49,18 @@ class FormularioTratamiento(FlaskForm):
     odontologo_id = SelectField('Odontólogo', coerce=int, validators=[DataRequired()])
     en_curso = BooleanField('¿En curso?')
     fecha = DateField('Fecha', format='%Y-%m-%d', validators=[DataRequired()])
-    descripcion = TextAreaField('Observaciones', validators=[DataRequired()])
+    descripcion = TextAreaField('Tratamiento', validators=[DataRequired()])
+
+class FormularioTratamientoSesion(ModelForm):
+    tratamiento_id = HiddenField(validators=[DataRequired()])
+    sesion_id = HiddenField()  # Se asigna incremental en la ruta, no se valida en el formulario
+    odontologo_id = SelectField('Odontólogo', coerce=int, validators=[DataRequired()])
+    fecha = DateField('Fecha', format='%Y-%m-%d', validators=[DataRequired()])
+    descripcion = TextAreaField('Descripción', validators=[DataRequired()])
+    observaciones = TextAreaField('Observaciones', validators=[Optional()])
+    submit = SubmitField('Guardar sesión')
+
+    class Meta:
+        model = TratamientoSesion
+        include_primary_keys = True
+

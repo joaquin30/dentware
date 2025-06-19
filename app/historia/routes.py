@@ -1,12 +1,12 @@
 from flask import render_template, abort, redirect, url_for, flash, request, current_app, jsonify
 from app.historia import bp
 from app.extensions import db
-from app.models import Paciente, Historia, HistoriaContraindicacion, Tratamiento, Odontologo
+from app.models import Paciente, Historia, HistoriaContraindicacion, Tratamiento, Odontologo, TratamientoSesion
 from sqlalchemy import select
 import os
 from werkzeug.utils import secure_filename
 from app.models import HistoriaExamen, PacienteNovedad
-from app.historia.forms import HistoriaExamenForm, HistoriaContraindicacionForm, ContraindicacionesForm, NovedadForm, PacienteNovedadesForm, FormularioTratamiento
+from app.historia.forms import HistoriaExamenForm, HistoriaContraindicacionForm, ContraindicacionesForm, NovedadForm, PacienteNovedadesForm, FormularioTratamiento, FormularioTratamientoSesion
 from datetime import date
 from flask import send_from_directory
 from sqlalchemy.orm import joinedload
@@ -311,13 +311,14 @@ def crear_tratamiento(historia_id):
 @bp.route('/tratamiento/<int:tratamiento_id>', methods=['GET', 'POST'])
 def ver_tratamiento(tratamiento_id):
     tratamiento = (
-        db.session.query(Tratamiento)
-        .options(
-            joinedload(Tratamiento.odontologo),
-            joinedload(Tratamiento.historia).joinedload(Historia.paciente),
-            joinedload(Tratamiento.sesiones).joinedload(TratamientoSesion.odontologo)
-        )
-        .get(tratamiento_id)
+    db.session.query(Tratamiento)
+    .options(
+        joinedload(Tratamiento.odontologo),
+        joinedload(Tratamiento.historia).joinedload(Historia.paciente),
+        joinedload(Tratamiento.sesiones).joinedload(TratamientoSesion.odontologo)
+    )
+    .filter(Tratamiento.tratamiento_id == tratamiento_id)
+    .first()
     )
 
     if not tratamiento:
@@ -349,12 +350,47 @@ def ver_tratamiento(tratamiento_id):
     )
 
 
-@bp.route('/sesion/registrar/<int:tratamiento_id>')
-def registrar_sesion(tratamiento_id):
-    # Lógica aún no implementada
-    flash("Funcionalidad aún no implementada.", "info")
-    return redirect(url_for('historia.ver_tratamiento', tratamiento_id=tratamiento_id))
+@bp.route('/historia/tratamiento/<int:tratamiento_id>/sesion/nuevo', methods=['GET', 'POST'])
+def crear_sesion_tratamiento(tratamiento_id):
+    tratamiento = db.get_or_404(Tratamiento, tratamiento_id)
+    form = FormularioTratamientoSesion()
 
+    # Cargar odontólogos para el SelectField
+    odontologos = db.session.query(Odontologo).all()
+    form.odontologo_id.choices = [(od.odontologo_id, od.nombre) for od in odontologos]
+
+    if form.validate_on_submit():
+        # Calcular nuevo sesion_id incremental para este tratamiento
+        last_sesion = (
+            db.session.query(TratamientoSesion)
+            .filter_by(tratamiento_id=tratamiento_id)
+            .order_by(TratamientoSesion.sesion_id.desc())
+            .first()
+        )
+        new_sesion_id = 1 if last_sesion is None else last_sesion.sesion_id + 1
+
+        nueva_sesion = TratamientoSesion(
+            tratamiento_id=tratamiento_id,
+            sesion_id=new_sesion_id,
+            fecha=form.fecha.data,
+            descripcion=form.descripcion.data,
+            observaciones=form.observaciones.data,
+            odontologo_id=form.odontologo_id.data,
+        )
+        db.session.add(nueva_sesion)
+        db.session.commit()
+        flash('Sesión creada correctamente.', 'success')
+        return redirect(url_for('historia.ver_tratamiento', tratamiento_id=tratamiento_id))
+
+    historia = tratamiento.historia
+
+    return render_template(
+        'historia/crearSesion.html',
+        form=form,
+        tratamiento=tratamiento,
+        paciente=tratamiento.historia.paciente,
+        historia=historia
+    )
 
 '''
 COD-015
