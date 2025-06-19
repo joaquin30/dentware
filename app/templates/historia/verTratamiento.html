@@ -165,9 +165,15 @@
       <h4>Sesiones</h4>
       {% if tratamiento.sesiones %}
           {% for sesion in tratamiento.sesiones|sort(attribute='fecha', reverse=True) %}
-              <div class="sesion-item">
-                  <strong>{{ sesion.odontologo.nombre }}</strong>
+              <div class="sesion-item" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <strong>{{ sesion.odontologo.nombre }}</strong><br>
                   <span>{{ sesion.fecha.strftime('%d/%m/%Y') }}</span>
+                </div>
+                <a href="{{ url_for('historia.ver_sesion_tratamiento', tratamiento_id=tratamiento.tratamiento_id, sesion_id=sesion.sesion_id) }}"
+                  class="btn btn-sm btn-outline-primary ms-2">
+                  Ver sesión
+                </a>
               </div>
           {% endfor %}
       {% else %}

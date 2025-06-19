@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Ver Sesión{% endblock %}
+{% block content %}
+
+<style>
+  .container {
+    width: 90%;
+    max-width: 900px;
+    margin: 20px auto;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .card {
+    background-color: #fff;
+    border: 2px solid #ccc;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  }
+
+  .paciente-info {
+    display: flex;
+    align-items: center;
+    background: #f5f5f5;
+    border-radius: 10px;
+    padding: 12px 15px;
+    margin-bottom: 18px;
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .paciente-info img {
+    width: 60px;
+    height: 60px;
+    margin-right: 16px;
+  }
+
+  .form-field {
+    margin-bottom: 16px;
+  }
+
+  .form-field label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 6px;
+    color: #333;
+  }
+
+  .form-value {
+    padding: 10px;
+    background-color: #eee;
+    border-radius: 6px;
+    color: #333;
+  }
+
+  .btn {
+    background-color: #2a2f65;
+    color: white;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .btn:hover {
+    background-color: #1e234f;
+  }
+</style>
+
+<a href="{{ url_for('historia.ver_tratamiento', tratamiento_id=tratamiento.tratamiento_id) }}" class="btn">← Volver al tratamiento</a>
+
+<div class="container">
+  <div class="card">
+    <h2>Detalles de la Sesión</h2>
+
+    <div class="paciente-info">
+      <img src="{{ url_for('static', filename='img/profile.png') }}" alt="Foto perfil">
+      <div>
+        <strong>{{ paciente.nombres }} {{ paciente.apellidos }}</strong><br>
+        DNI: {{ paciente.documento_identidad }}
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Profesional tratante:</label>
+      <div class="form-value">{{ sesion.odontologo.nombre }}</div>
+    </div>
+
+    <div class="form-field">
+      <label>Fecha:</label>
+      <div class="form-value">{{ sesion.fecha.strftime('%d/%m/%Y') }}</div>
+    </div>
+
+    <div class="form-field">
+      <label>Descripción del procedimiento realizado:</label>
+      <div class="form-value">{{ sesion.descripcion }}</div>
+    </div>
+
+    <div class="form-field">
+      <label>Observaciones:</label>
+      <div class="form-value">{{ sesion.observaciones }}</div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

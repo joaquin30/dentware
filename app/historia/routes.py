@@ -395,6 +395,32 @@ def crear_sesion_tratamiento(tratamiento_id):
         historia=historia
     )
 
+@bp.route('/historia/tratamiento/<int:tratamiento_id>/sesion/<int:sesion_id>')
+def ver_sesion_tratamiento(tratamiento_id, sesion_id):
+    sesion = (
+        db.session.query(TratamientoSesion)
+        .filter_by(tratamiento_id=tratamiento_id, sesion_id=sesion_id)
+        .join(Odontologo)
+        .options(joinedload(TratamientoSesion.odontologo), joinedload(TratamientoSesion.tratamiento))
+        .first()
+    )
+
+    if not sesion:
+        abort(404)
+
+    tratamiento = sesion.tratamiento
+    paciente = tratamiento.historia.paciente
+    historia = tratamiento.historia
+
+    return render_template(
+        'historia/verSesion.html',
+        sesion=sesion,
+        tratamiento=tratamiento,
+        historia=historia,
+        paciente=paciente
+    )
+
+
 '''
 COD-015
 Función que muestra los pagos realizados por un paciente.
