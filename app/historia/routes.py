@@ -439,3 +439,22 @@ def pagos(paciente_id):
     paciente = db.get_or_404(Paciente, paciente_id)
     historia = paciente.historias[0]
     return render_template('historia/pagos.html', paciente=paciente, historia=historia)
+
+
+
+'''
+COD-016
+Función que muestra el presupuesto
+'''
+
+@bp.route('/paciente/<int:paciente_id>/tratamiento/<int:tratamiento_id>/presupuesto')
+def presupuesto(paciente_id, tratamiento_id):
+    paciente = db.get_or_404(Paciente, paciente_id)
+    historia = paciente.historias[0]
+    tratamiento = db.get_or_404(Tratamiento, tratamiento_id)
+    return render_template(
+        'historia/editarpresupuesto.html',
+        paciente=paciente,
+        historia=historia,
+        tratamiento=tratamiento
+    )
