@@ -48,7 +48,7 @@ class PacienteNovedadesForm(FlaskForm):
 class FormularioTratamiento(FlaskForm):
     odontologo_id = SelectField('Odontólogo', coerce=int, validators=[DataRequired()])
     en_curso = BooleanField('¿En curso?')
-    fecha = DateField('Fecha', format='%Y-%m-%d', validators=[DataRequired()])
+    fecha_creacion = DateField('Fecha', format='%Y-%m-%d', validators=[DataRequired()])
     descripcion = TextAreaField('Tratamiento', validators=[DataRequired()])
 
 class FormularioTratamientoSesion(ModelForm):

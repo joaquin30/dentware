@@ -334,11 +334,12 @@ def ver_tratamiento(tratamiento_id):
         tratamiento.descripcion = form.descripcion.data
         tratamiento.en_curso = form.en_curso.data
         tratamiento.odontologo_id = form.odontologo_id.data
-        tratamiento.fecha_creacion = form.fecha.data
+        tratamiento.fecha_creacion = form.fecha_creacion.data
 
         db.session.commit()
         flash('Tratamiento actualizado correctamente.', 'success')
-        return redirect(url_for('historia.ver_tratamiento', tratamiento_id=tratamiento_id))
+        return redirect(url_for('historia.index', historia_id=historia.historia_id))
+
 
     return render_template(
         'historia/verTratamiento.html',
