@@ -67,14 +67,14 @@ class FormularioTratamientoSesion(ModelForm):
         include_primary_keys = True
 
 class LineaPresupuestoForm(FlaskForm):
-    procedimiento_id = SelectField('Procedimiento', coerce=int, validators=[DataRequired()])
-    material_id = SelectField('Material (opcional)', coerce=lambda x: int(x) if x else None)
+    procedimiento = StringField('Procedimiento', validators=[DataRequired()])
+    material = StringField('Material', validators=[Optional()])
     costo = DecimalField('Costo', validators=[DataRequired(), NumberRange(min=0)])
 
 class PresupuestoForm(FlaskForm):
-    lineas = FieldList(FormField(LineaPresupuestoForm), min_entries=1)
     tratamiento_id = HiddenField(validators=[DataRequired()])
-
+    lineas = FieldList(FormField(LineaPresupuestoForm), min_entries=1)
+        
 class FormularioPago(FlaskForm):
     tratamiento_id = HiddenField(validators=[DataRequired()])
     metodo = SelectField(

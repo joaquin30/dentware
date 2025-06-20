@@ -446,7 +446,6 @@ def pagos(paciente_id):
 COD-016
 Función que muestra el presupuesto
 '''
-
 @bp.route('/paciente/<int:paciente_id>/tratamiento/<int:tratamiento_id>/presupuesto', methods=['GET', 'POST'])
 def presupuesto(paciente_id, tratamiento_id):
     paciente = db.get_or_404(Paciente, paciente_id)
@@ -456,45 +455,46 @@ def presupuesto(paciente_id, tratamiento_id):
     form = PresupuestoForm()
     form.tratamiento_id.data = tratamiento_id
 
-    # Obtener procedimientos y materiales desde la BD
     procedimientos = db.session.query(Procedimiento).all()
     materiales = db.session.query(Material).all()
-    choices_proc = [(p.procedimiento_id, p.nombre) for p in procedimientos]
-    choices_mat = [('', '---')] + [(m.material_id, m.nombre) for m in materiales]
-
-    # Asignar opciones (con entrada vacía para materiales opcionales)
-    for linea_form in form.lineas:
-        linea_form.procedimiento_id.choices = choices_proc
-        linea_form.material_id.choices = choices_mat  # ✅ ya incluye ('', '---')
 
     if form.validate_on_submit():
-        for linea in form.lineas.entries:
-            proc_id = linea.form.procedimiento_id.data
-            mat_id_raw = linea.form.material_id.data
-            mat_id = int(mat_id_raw) if mat_id_raw else None
-            costo = linea.form.costo.data
+        for linea in form.lineas.data:
+            nombre_proc = linea['procedimiento'].strip()
+            nombre_mat = linea['material'].strip()
+            costo = linea['costo'].strip()
 
-            # ✅ Guardar procedimiento con cantidad fija
+            # Buscar procedimiento por nombre ingresado manualmente
+            procedimiento = db.session.query(Procedimiento).filter_by(nombre=nombre_proc).first()
+            if not procedimiento:
+                flash(f"Procedimiento '{nombre_proc}' no encontrado.", "danger")
+                continue
+
             tratamiento_proc = TratamientoProcedimiento(
                 tratamiento_id=tratamiento_id,
-                procedimiento_id=proc_id,
+                procedimiento_id=procedimiento.procedimiento_id,
                 cantidad=1,
-                costo=costo
+                costo=int(costo)
             )
             db.session.add(tratamiento_proc)
 
-            # ✅ Guardar material si se seleccionó, también con cantidad fija
-            if mat_id is not None:
+            # Si se proporcionó un nombre de material
+            if nombre_mat:
+                material = db.session.query(Material).filter_by(nombre=nombre_mat).first()
+                if not material:
+                    flash(f"Material '{nombre_mat}' no encontrado.", "danger")
+                    continue
+
                 tratamiento_mat = TratamientoMaterial(
                     tratamiento_id=tratamiento_id,
-                    material_id=mat_id,
+                    material_id=material.material_id,
                     cantidad=1,
-                    costo=costo
+                    costo=int(costo)
                 )
                 db.session.add(tratamiento_mat)
 
         db.session.commit()
-        flash("Presupuesto actualizado exitosamente", "success")
+        flash("Presupuesto registrado correctamente", "success")
         return redirect(url_for('historia.ver_tratamiento', tratamiento_id=tratamiento_id))
 
     return render_template(
@@ -504,4 +504,3 @@ def presupuesto(paciente_id, tratamiento_id):
         tratamiento=tratamiento,
         form=form
     )
-
