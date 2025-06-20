@@ -194,11 +194,15 @@
     </div>
 
 
-<a href="{{ url_for('historia.presupuesto', paciente_id=paciente.paciente_id, tratamiento_id=tratamiento.tratamiento_id)
- }}">Presupuesto</a>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+  <a href="{{ url_for('historia.presupuesto', paciente_id=paciente.paciente_id, tratamiento_id=tratamiento.tratamiento_id) }}" class="btn-registrar-sesion">
+    Ver presupuesto
+  </a>
+
+  <button type="submit" class="btn-guardar">Guardar cambios</button>
+</div>
 
 
-    <button type="submit" class="btn-guardar">Guardar cambios</button>
   </div>
 </form>
 

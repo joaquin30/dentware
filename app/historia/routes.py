@@ -1,12 +1,12 @@
 from flask import render_template, abort, redirect, url_for, flash, request, current_app, jsonify
 from app.historia import bp
 from app.extensions import db
-from app.models import Paciente, Historia, HistoriaContraindicacion, Tratamiento, Odontologo, TratamientoSesion
+from app.models import Paciente, Historia, HistoriaContraindicacion, Tratamiento, Odontologo, TratamientoSesion, Procedimiento, Material, TratamientoProcedimiento, TratamientoMaterial
 from sqlalchemy import select
 import os
 from werkzeug.utils import secure_filename
 from app.models import HistoriaExamen, PacienteNovedad
-from app.historia.forms import HistoriaExamenForm, HistoriaContraindicacionForm, ContraindicacionesForm, NovedadForm, PacienteNovedadesForm, FormularioTratamiento, FormularioTratamientoSesion
+from app.historia.forms import HistoriaExamenForm, HistoriaContraindicacionForm, ContraindicacionesForm, NovedadForm, PacienteNovedadesForm, FormularioTratamiento, FormularioTratamientoSesion, PresupuestoForm, LineaPresupuestoForm
 from datetime import date
 from flask import send_from_directory
 from sqlalchemy.orm import joinedload
@@ -447,14 +447,61 @@ COD-016
 Función que muestra el presupuesto
 '''
 
-@bp.route('/paciente/<int:paciente_id>/tratamiento/<int:tratamiento_id>/presupuesto')
+@bp.route('/paciente/<int:paciente_id>/tratamiento/<int:tratamiento_id>/presupuesto', methods=['GET', 'POST'])
 def presupuesto(paciente_id, tratamiento_id):
     paciente = db.get_or_404(Paciente, paciente_id)
     historia = paciente.historias[0]
     tratamiento = db.get_or_404(Tratamiento, tratamiento_id)
+
+    form = PresupuestoForm()
+    form.tratamiento_id.data = tratamiento_id
+
+    # Obtener procedimientos y materiales desde la BD
+    procedimientos = db.session.query(Procedimiento).all()
+    materiales = db.session.query(Material).all()
+    choices_proc = [(p.procedimiento_id, p.nombre) for p in procedimientos]
+    choices_mat = [('', '---')] + [(m.material_id, m.nombre) for m in materiales]
+
+    # Asignar opciones (con entrada vacía para materiales opcionales)
+    for linea_form in form.lineas:
+        linea_form.procedimiento_id.choices = choices_proc
+        linea_form.material_id.choices = choices_mat  # ✅ ya incluye ('', '---')
+
+    if form.validate_on_submit():
+        for linea in form.lineas.entries:
+            proc_id = linea.form.procedimiento_id.data
+            mat_id_raw = linea.form.material_id.data
+            mat_id = int(mat_id_raw) if mat_id_raw else None
+            costo = linea.form.costo.data
+
+            # ✅ Guardar procedimiento con cantidad fija
+            tratamiento_proc = TratamientoProcedimiento(
+                tratamiento_id=tratamiento_id,
+                procedimiento_id=proc_id,
+                cantidad=1,
+                costo=costo
+            )
+            db.session.add(tratamiento_proc)
+
+            # ✅ Guardar material si se seleccionó, también con cantidad fija
+            if mat_id is not None:
+                tratamiento_mat = TratamientoMaterial(
+                    tratamiento_id=tratamiento_id,
+                    material_id=mat_id,
+                    cantidad=1,
+                    costo=costo
+                )
+                db.session.add(tratamiento_mat)
+
+        db.session.commit()
+        flash("Presupuesto actualizado exitosamente", "success")
+        return redirect(url_for('historia.ver_tratamiento', tratamiento_id=tratamiento_id))
+
     return render_template(
         'historia/editarpresupuesto.html',
         paciente=paciente,
         historia=historia,
-        tratamiento=tratamiento
+        tratamiento=tratamiento,
+        form=form
     )
+

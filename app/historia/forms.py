@@ -3,10 +3,12 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, DateField, BooleanField, FileField, SubmitField, HiddenField
 from wtforms.validators import DataRequired, Optional
 from flask_wtf.file import FileAllowed, FileRequired
-from app.models import HistoriaContraindicacion, Tratamiento, TratamientoSesion
+from app.models import HistoriaContraindicacion, Tratamiento, TratamientoSesion, Material, Procedimiento
 from wtforms import FieldList, FormField, TextAreaField
-from wtforms import SelectField
+from wtforms import SelectField, IntegerField
 from flask_wtf import FlaskForm
+from wtforms import DecimalField
+from wtforms.validators import NumberRange
 
 from wtforms import TextAreaField
 from wtforms.validators import Optional
@@ -64,3 +66,30 @@ class FormularioTratamientoSesion(ModelForm):
         model = TratamientoSesion
         include_primary_keys = True
 
+class LineaPresupuestoForm(FlaskForm):
+    procedimiento_id = SelectField('Procedimiento', coerce=int, validators=[DataRequired()])
+    material_id = SelectField('Material (opcional)', coerce=lambda x: int(x) if x else None)
+    costo = DecimalField('Costo', validators=[DataRequired(), NumberRange(min=0)])
+
+class PresupuestoForm(FlaskForm):
+    lineas = FieldList(FormField(LineaPresupuestoForm), min_entries=1)
+    tratamiento_id = HiddenField(validators=[DataRequired()])
+
+class FormularioPago(FlaskForm):
+    tratamiento_id = HiddenField(validators=[DataRequired()])
+    metodo = SelectField(
+        'Método de pago',
+        choices=[
+            ('efectivo', 'Efectivo'),
+            ('tarjeta', 'Tarjeta'),
+            ('transferencia', 'Transferencia'),
+            ('yape', 'Yape'),
+            ('plin', 'Plin'),
+        ],
+        validators=[DataRequired()]
+    )
+    monto = DecimalField('Monto a pagar', validators=[
+        DataRequired(),
+        NumberRange(min=0.01, message="Debe ingresar un monto positivo")
+    ])
+    submit = SubmitField('Registrar pago')

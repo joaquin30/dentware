@@ -1,18 +1,17 @@
 {% extends "base.html" %}
-{% block title %}Pagos{% endblock %}
+{% block title %}Presupuesto{% endblock %}
 {% block content %}
 
 <style>
   .btn-volver {
-    position: absolute;
-    top: 30px;
-    left: 30px;
-    font-size: 2rem;
-    color: #0d2f6c;
-    background: none;
-    border: none;
-    cursor: pointer;
+    font-size: 1.3rem;
+    color: #2a2f65;
     text-decoration: none;
+    font-weight: bold;
+  }
+
+  .btn-volver:hover {
+    color: #5a5f9e;
   }
 
   .container-presupuesto {
@@ -21,29 +20,8 @@
     background-color: white;
     border-radius: 16px;
     padding: 30px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     font-family: 'Segoe UI', sans-serif;
-  }
-
-  .header-main {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 24px 0 16px;
-    font-weight: 600;
-    font-size: 1.5rem;
-    color: #2a2f65;
-  }
-
-  .header-main a.back-btn {
-    font-size: 1.7rem;
-    color: #2a2f65;
-    text-decoration: none;
-    font-weight: 900;
-  }
-
-  .header-main a.back-btn:hover {
-    color: #5a5f9e;
   }
 
   .paciente-info {
@@ -65,7 +43,7 @@
   .paciente-info .info {
     display: flex;
     flex-direction: column;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
   }
 
   .form-section {
@@ -80,7 +58,6 @@
     border: 1px solid #ccc;
     border-radius: 12px;
     padding: 20px;
-    min-height: 150px;
     background-color: #f9f9f9;
   }
 
@@ -123,43 +100,79 @@
   }
 </style>
 
-<div class="header-main">
-  <a href="#" class="back-btn">&larr;</a>
-
-  <a href="{{ url_for('historia.ver_tratamiento', tratamiento_id=tratamiento.tratamiento_id) }}" class="btn-volver">
-  &larr; Volver al tratamiento
-</a>
-
-  <span>Presupuesto de {{ historia.paciente.nombres }} {{ historia.paciente.apellidos }}</span>
+<div style="margin-left: 30px; margin-top: 20px;">
+  <a href="{{ url_for('historia.ver_tratamiento', tratamiento_id=tratamiento.tratamiento_id) }}" class="btn-volver">&larr; Volver</a>
 </div>
 
-<div class="container-presupuesto">
-
-  <div class="paciente-info">
-    <img src="{{ url_for('static', filename='img/profile.png') }}" alt="Foto paciente">
-    <div class="info">
-      <strong>{{ paciente.nombres }} {{ paciente.apellidos }}</strong>
-      <span>DNI: {{ paciente.dni }}</span>
+<!-- Box 1: Tarjeta con información del paciente -->
+    <div class="paciente-info" style="display: flex; gap: 16px; align-items: center; margin-bottom: 24px; background: #ffffff; padding: 16px; border-radius: 10px; box-shadow: 0 1px 6px rgba(0,0,0,0.05);">
+      <img src="{{ url_for('static', filename='img/profile.png') }}" alt="Foto de perfil" style="width: 80px; height: 80px; object-fit: cover; border-radius: 50%;">
+      <div>
+        <p><strong>Nombre:</strong> {{ paciente.nombres }} {{ paciente.apellidos }}</p>
+        <p><strong>DNI:</strong> {{ paciente.documento_identidad }}</p>
+        <p><strong>Teléfono:</strong> {{ paciente.telefono }}</p>
+        <p><strong>Fecha de nacimiento:</strong> {{ paciente.fecha_nacimiento }}</p>
+      </div>
     </div>
-  </div>
 
-  <div class="form-section">
-    <div class="form-box">
-      <h4>Procedimiento</h4>
-      <p>Endodoncia</p>
+  <form method="POST">
+    {{ form.hidden_tag() }}
+
+    <h4 style="margin-bottom: 12px; color: #2a2f65;">Presupuesto</h4>
+
+    <div id="line-items">
+      <div class="line-item" style="display: flex; gap: 10px; margin-bottom: 12px;">
+        <input type="text" name="procedimiento[]" placeholder="Procedimiento" class="form-control" style="flex: 2; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+        <input type="text" name="material[]" placeholder="Materiales" class="form-control" style="flex: 2; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+        <input type="number" name="costo[]" placeholder="Costo" class="form-control costo-input" style="flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+      </div>
     </div>
-    <div class="form-box">
-      <h4>Materiales</h4>
-      <p>Pz. Uniradicular</p>
+
+    <button type="button" id="agregar-linea" style="margin-bottom: 20px; background-color: #2a2f65; color: white; border: none; padding: 6px 14px; border-radius: 6px; font-weight: bold; cursor: pointer;">
+      + Agregar línea
+    </button>
+
+    <div class="costo-total">
+      <label for="total" style="font-weight: bold;">Costo total:</label>
+      <input type="number" id="total" name="total" readonly>
     </div>
-  </div>
 
-  <div class="costo-total">
-    <label for="costo">Costo total:</label>
-    <input type="number" id="costo" name="costo" value="250">
-  </div>
-
-  <button type="submit" class="btn-crear">Crear</button>
+    <button type="submit" class="btn btn-primary">Actualizar</button>
+  </form>
 </div>
+
+<script>
+  function calcularTotal() {
+    let total = 0;
+    document.querySelectorAll('.costo-input').forEach(input => {
+      const valor = parseFloat(input.value);
+      if (!isNaN(valor)) total += valor;
+    });
+    document.getElementById('total').value = total;
+  }
+
+  document.getElementById('agregar-linea').addEventListener('click', () => {
+    const nuevaLinea = document.createElement('div');
+    nuevaLinea.classList.add('line-item');
+    nuevaLinea.style.display = 'flex';
+    nuevaLinea.style.gap = '10px';
+    nuevaLinea.style.marginBottom = '12px';
+    nuevaLinea.innerHTML = `
+      <input type="text" name="procedimiento[]" placeholder="Procedimiento" class="form-control" style="flex: 2; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+      <input type="text" name="material[]" placeholder="Materiales" class="form-control" style="flex: 2; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+      <input type="number" name="costo[]" placeholder="Costo" class="form-control costo-input" style="flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+    `;
+    document.getElementById('line-items').appendChild(nuevaLinea);
+    nuevaLinea.querySelector('.costo-input').addEventListener('input', calcularTotal);
+  });
+
+  // Calcular total en tiempo real
+  document.addEventListener('input', (e) => {
+    if (e.target.classList.contains('costo-input')) {
+      calcularTotal();
+    }
+  });
+</script>
+
 
 {% endblock %}
