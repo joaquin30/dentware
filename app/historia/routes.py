@@ -481,13 +481,12 @@ def presupuesto(paciente_id, tratamiento_id):
                     costo=float(costo)
                 ))
 
-                if nombre_mat:
+                if nombre_mat and nombre_mat != "-":
                     material = db.session.query(Material).filter_by(nombre=nombre_mat).first()
                     if not material:
                         material = Material(nombre=nombre_mat, costo_referencial=0.0)
                         db.session.add(material)
                         db.session.flush()
-
 
                     db.session.add(TratamientoMaterial(
                         tratamiento_id=tratamiento_id,
@@ -495,6 +494,9 @@ def presupuesto(paciente_id, tratamiento_id):
                         cantidad=1,
                         costo=material.costo_referencial or 0
                     ))
+                else:
+                    material = None
+
 
 
             db.session.commit()
@@ -504,14 +506,19 @@ def presupuesto(paciente_id, tratamiento_id):
     form = PresupuestoForm()
 
         # Suponiendo que esta es la función del POST y GET para presupuesto
-    procedimientos_presupuesto = db.session.query(TratamientoProcedimiento).filter_by(tratamiento_id=tratamiento.tratamiento_id).all()
+    
+    procedimientos = db.session.query(TratamientoProcedimiento).filter_by(tratamiento_id=tratamiento.tratamiento_id).order_by(TratamientoProcedimiento.procedimiento_id).all()
+    materiales = db.session.query(TratamientoMaterial).filter_by(tratamiento_id=tratamiento.tratamiento_id).order_by(TratamientoMaterial.material_id).all()
 
-    # Al final del return render_template(...)
+    # Emparejar por índice (posición)
+    min_len = min(len(procedimientos), len(materiales))
+    presupuestos = [(procedimientos[i], materiales[i]) for i in range(min_len)]
+
     return render_template(
         'historia/editarpresupuesto.html',
         paciente=paciente,
         tratamiento=tratamiento,
         form=form,
-        procedimientos_presupuesto=procedimientos_presupuesto
+        presupuestos=presupuestos
     )
 

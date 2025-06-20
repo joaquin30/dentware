@@ -66,7 +66,7 @@
     newItem.innerHTML = `
       <input type="text" name="lineas-${index}-procedimiento" class="form-control" style="flex:2; padding:8px; border-radius:6px; border:1px solid #ccc;" placeholder="Procedimiento">
       <input type="text" name="lineas-${index}-material" class="form-control" style="flex:2; padding:8px; border-radius:6px; border:1px solid #ccc;" placeholder="Material">
-      <input type="number" name="lineas-${index}-costo" class="form-control costo-input" style="flex:1; padding:8px; border-radius:6px; border:1px solid #ccc;" placeholder="Costo">
+      <input type="text" name="lineas-${index}-material" class="form-control" style="flex:2; padding:8px; border-radius:6px; border:1px solid #ccc;" placeholder="Material" onblur="if(this.value.trim() === '') this.value = '-'">
     `;
     container.appendChild(newItem);
     index++;
@@ -101,25 +101,23 @@
     </tr>
   </thead>
   <tbody>
-    {% for item in procedimientos_presupuesto %}
-      <tr>
-        <td style="padding: 8px;">{{ item.procedimiento.nombre }}</td>
-        <td style="padding: 8px;">
-          {% if item.material %}
-            {{ item.material.nombre }}
-          {% else %}
-            -
-          {% endif %}
-        </td>
-        <td style="padding: 8px;">S/. {{ item.costo }}</td>
-      </tr>
-    {% else %}
-      <tr>
-        <td colspan="3" style="padding: 8px;">No hay procedimientos registrados aún.</td>
-      </tr>
-    {% endfor %}
+    {% for proc, mat in presupuestos %}
+  <tr>
+    <td style="padding: 8px;">{{ proc.procedimiento.nombre }}</td>
+    <td style="padding: 8px;">
+      {% if mat and mat.material %}
+        {{ mat.material.nombre }}
+      {% else %}
+        -
+      {% endif %}
+    </td>
+    <td style="padding: 8px;">S/. {{ proc.costo }}</td>
+  </tr>
+{% endfor %}
+
   </tbody>
 </table>
+
 
 
 {% endblock %}
