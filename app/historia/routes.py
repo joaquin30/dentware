@@ -1,7 +1,7 @@
 from flask import render_template, abort, redirect, url_for, flash, request, current_app, jsonify
 from app.historia import bp
 from app.extensions import db
-from app.models import Paciente, Historia, HistoriaContraindicacion, Tratamiento, Odontologo, TratamientoSesion, Procedimiento, Material, TratamientoProcedimiento, TratamientoMaterial
+from app.models import Paciente, Historia, HistoriaContraindicacion, Tratamiento, Odontologo, TratamientoSesion, Procedimiento
 from sqlalchemy import select
 import os
 from werkzeug.utils import secure_filename

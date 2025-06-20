@@ -5,7 +5,7 @@ from typing import List
 from sqlalchemy import (
     BigInteger, Boolean, Date, Enum,
     ForeignKeyConstraint, Integer, PrimaryKeyConstraint,
-    Text, String
+    Text, String, Table, Column, ForeignKey
 )
 from sqlalchemy_utils import (
     EmailType, ScalarListType, PhoneNumberType
@@ -15,21 +15,6 @@ import datetime
 
 class Base(DeclarativeBase):
     pass
-
-'''
-CCMaterial
-'''
-class Material(Base):
-    __tablename__ = 'material'
-    __table_args__ = (
-        PrimaryKeyConstraint('material_id', name='material_pkey'),
-    )
-
-    material_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    nombre: Mapped[str] = mapped_column(String)
-    costo_referencial: Mapped[int] = mapped_column(BigInteger)
-
-    tratamientos: Mapped[List['TratamientoMaterial']] = relationship('TratamientoMaterial', back_populates='material')
 
 '''
 CCOdontologo
@@ -97,21 +82,6 @@ class PacienteNovedad(Base):
     es_importante: Mapped[bool] = mapped_column(Boolean, default=False)
 
     paciente: Mapped['Paciente'] = relationship('Paciente', back_populates='novedades')
-
-'''
-CCProcedimiento
-'''
-class Procedimiento(Base):
-    __tablename__ = 'procedimiento'
-    __table_args__ = (
-        PrimaryKeyConstraint('procedimiento_id', name='procedimiento_pkey'),
-    )
-
-    procedimiento_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    nombre: Mapped[str] = mapped_column(String)
-    costo_referencial: Mapped[int] = mapped_column(BigInteger)
-
-    tratamientos: Mapped[List['TratamientoProcedimiento']] = relationship('TratamientoProcedimiento', back_populates='procedimiento')
 
 '''
 CCHistoria
@@ -247,31 +217,6 @@ class Odontograma(Base):
     entradas_rango_dientes: Mapped[List['OdontogramaEntradaRangoDientes']] = relationship('OdontogramaEntradaRangoDientes', back_populates='odontograma')
 
 '''
-CCTratamiento
-'''
-class Tratamiento(Base):
-    __tablename__ = 'tratamiento'
-    __table_args__ = (
-        ForeignKeyConstraint(['historia_id'], ['historia.historia_id'], name='tratamiento_historia_id_fkey'),
-        ForeignKeyConstraint(['odontologo_id'], ['odontologo.odontologo_id'], name='tratamiento_odontologo_id_fkey'),
-        PrimaryKeyConstraint('tratamiento_id', name='tratamiento_pkey')
-    )
-
-    tratamiento_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    fecha_creacion: Mapped[datetime.date] = mapped_column(Date, default=datetime.date.today)
-    descripcion: Mapped[str] = mapped_column(String, info={'label': 'Descripción de tratamientos'})
-    en_curso: Mapped[bool] = mapped_column(Boolean)
-    odontologo_id: Mapped[str] = mapped_column(String)
-    historia_id: Mapped[int] = mapped_column(Integer)
-
-    historia: Mapped['Historia'] = relationship('Historia', back_populates='tratamientos')
-    odontologo: Mapped['Odontologo'] = relationship('Odontologo', back_populates='tratamientos')
-    materiales: Mapped[List['TratamientoMaterial']] = relationship('TratamientoMaterial', back_populates='tratamiento')
-    pagos: Mapped[List['TratamientoPago']] = relationship('TratamientoPago', back_populates='tratamiento')
-    procedimientos: Mapped[List['TratamientoProcedimiento']] = relationship('TratamientoProcedimiento', back_populates='tratamiento')
-    sesiones: Mapped[List['TratamientoSesion']] = relationship('TratamientoSesion', back_populates='tratamiento')
-
-'''
 CCEntradaAreas
 '''
 class OdontogramaEntradaAreasDiente(Base):
@@ -365,24 +310,50 @@ class OdontogramaEntradaRangoDientes(Base):
 
     odontograma: Mapped['Odontograma'] = relationship('Odontograma', back_populates='entradas_rango_dientes')
 
+tratamiento_procedimiento = Table(
+    'tratamiento_procedimiento',
+    Base.metadata,
+    Column('tratamiento_id', ForeignKey('tratamiento.tratamiento_id')),
+    Column('procedimiento_id', ForeignKey('procedimiento.procedimiento_id'))
+)
+
 '''
-CCTratMaterial
+CCTratamiento
 '''
-class TratamientoMaterial(Base):
-    __tablename__ = 'tratamiento_material'
+class Tratamiento(Base):
+    __tablename__ = 'tratamiento'
     __table_args__ = (
-        ForeignKeyConstraint(['material_id'], ['material.material_id'], name='tratamiento_material_material_id_fkey'),
-        ForeignKeyConstraint(['tratamiento_id'], ['tratamiento.tratamiento_id'], name='tratamiento_material_tratamiento_id_fkey'),
-        PrimaryKeyConstraint('tratamiento_id', 'material_id', name='tratamiento_material_pkey')
+        ForeignKeyConstraint(['historia_id'], ['historia.historia_id'], name='tratamiento_historia_id_fkey'),
+        ForeignKeyConstraint(['odontologo_id'], ['odontologo.odontologo_id'], name='tratamiento_odontologo_id_fkey'),
+        PrimaryKeyConstraint('tratamiento_id', name='tratamiento_pkey')
     )
 
     tratamiento_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    material_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    cantidad: Mapped[int] = mapped_column(Integer)
+    fecha_creacion: Mapped[datetime.date] = mapped_column(Date, default=datetime.date.today)
+    descripcion: Mapped[str] = mapped_column(String, info={'label': 'Descripción de tratamientos'})
+    en_curso: Mapped[bool] = mapped_column(Boolean)
     costo: Mapped[int] = mapped_column(BigInteger)
+    odontologo_id: Mapped[str] = mapped_column(String)
+    historia_id: Mapped[int] = mapped_column(Integer)
 
-    material: Mapped['Material'] = relationship('Material', back_populates='tratamientos')
-    tratamiento: Mapped['Tratamiento'] = relationship('Tratamiento', back_populates='materiales')
+    historia: Mapped['Historia'] = relationship('Historia', back_populates='tratamientos')
+    odontologo: Mapped['Odontologo'] = relationship('Odontologo', back_populates='tratamientos')
+    pagos: Mapped[List['TratamientoPago']] = relationship('TratamientoPago', back_populates='tratamiento')
+    sesiones: Mapped[List['TratamientoSesion']] = relationship('TratamientoSesion', back_populates='tratamiento')
+    procedimientos: Mapped[List['Procedimiento']] = relationship(secondary=tratamiento_procedimiento)
+
+'''
+CCProcedimiento
+'''
+class Procedimiento(Base):
+    __tablename__ = 'procedimiento'
+    __table_args__ = (
+        PrimaryKeyConstraint('procedimiento_id', name='procedimiento_pkey'),
+    )
+
+    procedimiento_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    nombre: Mapped[str] = mapped_column(String)
+    costo_referencial: Mapped[int] = mapped_column(BigInteger)
 
 '''
 CCTratPago
@@ -400,25 +371,6 @@ class TratamientoPago(Base):
     monto: Mapped[int] = mapped_column(BigInteger)
 
     tratamiento: Mapped['Tratamiento'] = relationship('Tratamiento', back_populates='pagos')
-
-'''
-CCProcedimiento
-'''
-class TratamientoProcedimiento(Base):
-    __tablename__ = 'tratamiento_procedimiento'
-    __table_args__ = (
-        ForeignKeyConstraint(['procedimiento_id'], ['procedimiento.procedimiento_id'], name='tratamiento_procedimiento_procedimiento_id_fkey'),
-        ForeignKeyConstraint(['tratamiento_id'], ['tratamiento.tratamiento_id'], name='tratamiento_procedimiento_tratamiento_id_fkey'),
-        PrimaryKeyConstraint('tratamiento_id', 'procedimiento_id', name='tratamiento_procedimiento_pkey')
-    )
-
-    tratamiento_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    procedimiento_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    cantidad: Mapped[int] = mapped_column(Integer)
-    costo: Mapped[int] = mapped_column(BigInteger)
-
-    procedimiento: Mapped['Procedimiento'] = relationship('Procedimiento', back_populates='tratamientos')
-    tratamiento: Mapped['Tratamiento'] = relationship('Tratamiento', back_populates='procedimientos')
 
 '''
 CCTratSesion

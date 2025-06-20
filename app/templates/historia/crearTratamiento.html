@@ -183,16 +183,16 @@
       <div class="form-box">
         <div class="form-row">
           <div class="form-group" style="flex: 1 1 100%;">
-            <label for="descripcion">Tratamiento:</label>
+            <label for="descripcion">Descripción</label>
             {{ form.descripcion }}
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label for="en_curso">Estado</label>
-            <div class="checkbox-label">
-              {{ form.en_curso }}
-              <span>En curso</span>
+            <div class="form-check">
+              <input id="en_curso" name="en_curso" type="checkbox" class="form-check-input" checked />
+              <label for="en_curso" class="form-check-label fw-normal">En curso</label>
             </div>
           </div>
 
