@@ -209,6 +209,13 @@
           </div>
         </div>
 
+        <div class="form-row">
+          <div class="form-group">
+            <label for="costo">Costo (S/)</label>
+            {{ form.costo(class="form-control", step="0.01", min="0", type="number") }}
+          </div>
+        </div>
+
         <div class="form-actions">
           <button type="submit" class="btn">Guardar</button>
         </div>

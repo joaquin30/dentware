@@ -9,6 +9,8 @@ from wtforms import SelectField, IntegerField
 from flask_wtf import FlaskForm
 from wtforms import DecimalField
 from wtforms.validators import NumberRange
+from wtforms import StringField, SelectField, BooleanField, DateField, DecimalField
+from wtforms.validators import DataRequired, NumberRange
 
 from wtforms import TextAreaField
 from wtforms.validators import Optional
@@ -52,6 +54,11 @@ class FormularioTratamiento(FlaskForm):
     odontologo_id = SelectField('Odontólogo', coerce=int, validators=[DataRequired()])
     en_curso = BooleanField('¿En curso?')
     fecha_creacion = DateField('Fecha', format='%Y-%m-%d', validators=[DataRequired()])
+    costo = DecimalField('Costo', places=2, rounding=None, validators=[
+        DataRequired(message="Debe ingresar un costo."),
+        NumberRange(min=0, message="El costo no puede ser negativo.")
+    ])
+
 
 class FormularioTratamientoSesion(ModelForm):
     tratamiento_id = HiddenField(validators=[DataRequired()])

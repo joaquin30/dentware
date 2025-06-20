@@ -288,16 +288,18 @@ def crear_tratamiento(historia_id):
 
     if form.validate_on_submit():
         nuevo_tratamiento = Tratamiento(
-            fecha_creacion=form.fecha_creacion.data,
-            descripcion=form.descripcion.data,
-            en_curso=form.en_curso.data,
-            odontologo_id=form.odontologo_id.data,
-            historia_id=historia_id
-        )
+        fecha_creacion=form.fecha_creacion.data,
+        descripcion=form.descripcion.data,
+        en_curso=form.en_curso.data,
+        costo=float(form.costo.data),  # 👈 conversión aquí
+        odontologo_id=form.odontologo_id.data,
+        historia_id=historia_id
+    )
+
         db.session.add(nuevo_tratamiento)
         db.session.commit()
         flash('Tratamiento creado correctamente.', 'success')
-        return redirect(url_for('historia.index', historia_id=historia_id))  # <- corrige aquí también
+        return redirect(url_for('historia.index', historia_id=historia_id))
 
     return render_template(
         "historia/crearTratamiento.html",
@@ -306,6 +308,7 @@ def crear_tratamiento(historia_id):
         historia=historia,
         paciente=paciente
     )
+
 
 @bp.route('/tratamiento/<int:tratamiento_id>', methods=['GET', 'POST'])
 def ver_tratamiento(tratamiento_id):
