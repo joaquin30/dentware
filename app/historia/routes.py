@@ -484,20 +484,34 @@ def presupuesto(paciente_id, tratamiento_id):
                 if nombre_mat:
                     material = db.session.query(Material).filter_by(nombre=nombre_mat).first()
                     if not material:
-                        material = Material(nombre=nombre_mat)
+                        material = Material(nombre=nombre_mat, costo_referencial=0.0)
                         db.session.add(material)
                         db.session.flush()
-                        flash(f"Material '{nombre_mat}' creado automáticamente.", "info")
 
-                    db.session.add(Material(
+
+                    db.session.add(TratamientoMaterial(
                         tratamiento_id=tratamiento_id,
                         material_id=material.material_id,
-                        cantidad=1
+                        cantidad=1,
+                        costo=material.costo_referencial or 0
                     ))
+
 
             db.session.commit()
             flash('Presupuesto guardado exitosamente.', 'success')
             return redirect(url_for('historia.index', historia_id=historia.historia_id))
 
     form = PresupuestoForm()
-    return render_template('historia/editarpresupuesto.html', paciente=paciente, tratamiento=tratamiento, form=form)
+
+        # Suponiendo que esta es la función del POST y GET para presupuesto
+    procedimientos_presupuesto = db.session.query(TratamientoProcedimiento).filter_by(tratamiento_id=tratamiento.tratamiento_id).all()
+
+    # Al final del return render_template(...)
+    return render_template(
+        'historia/editarpresupuesto.html',
+        paciente=paciente,
+        tratamiento=tratamiento,
+        form=form,
+        procedimientos_presupuesto=procedimientos_presupuesto
+    )
+

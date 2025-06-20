@@ -90,4 +90,36 @@
   });
 </script>
 
+
+<h3>Presupuestos registrados</h3>
+<table style="width: 100%; margin-top: 20px; border-collapse: collapse;">
+  <thead>
+    <tr>
+      <th style="border-bottom: 1px solid #ccc; text-align: left; padding: 8px;">Procedimiento</th>
+      <th style="border-bottom: 1px solid #ccc; text-align: left; padding: 8px;">Material</th>
+      <th style="border-bottom: 1px solid #ccc; text-align: left; padding: 8px;">Costo</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in procedimientos_presupuesto %}
+      <tr>
+        <td style="padding: 8px;">{{ item.procedimiento.nombre }}</td>
+        <td style="padding: 8px;">
+          {% if item.material %}
+            {{ item.material.nombre }}
+          {% else %}
+            -
+          {% endif %}
+        </td>
+        <td style="padding: 8px;">S/. {{ item.costo }}</td>
+      </tr>
+    {% else %}
+      <tr>
+        <td colspan="3" style="padding: 8px;">No hay procedimientos registrados aún.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
 {% endblock %}
