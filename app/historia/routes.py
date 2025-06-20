@@ -452,55 +452,52 @@ def presupuesto(paciente_id, tratamiento_id):
     historia = paciente.historias[0]
     tratamiento = db.get_or_404(Tratamiento, tratamiento_id)
 
-    form = PresupuestoForm()
-    form.tratamiento_id.data = tratamiento_id
+    if request.method == 'POST':
+        lineas = []
+        for key in request.form:
+            if key.startswith("lineas-") and key.endswith("-procedimiento"):
+                index = key.split("-")[1]
+                procedimiento = request.form.get(f"lineas-{index}-procedimiento", "").strip()
+                material = request.form.get(f"lineas-{index}-material", "").strip()
+                costo = request.form.get(f"lineas-{index}-costo", "").strip()
+                if procedimiento and costo:
+                    lineas.append((procedimiento, material, costo))
 
-    procedimientos = db.session.query(Procedimiento).all()
-    materiales = db.session.query(Material).all()
+        if not lineas:
+            flash("Debes agregar al menos un procedimiento con costo.", "danger")
+        else:
+            for nombre_proc, nombre_mat, costo in lineas:
+                procedimiento = db.session.query(Procedimiento).filter_by(nombre=nombre_proc).first()
+                if not procedimiento:
+                    procedimiento = Procedimiento(nombre=nombre_proc, costo_referencial=float(costo))
+                    db.session.add(procedimiento)
+                    db.session.flush()
+                    flash(f"Procedimiento '{nombre_proc}' creado automáticamente.", "info")
 
-    if form.validate_on_submit():
-        for linea in form.lineas.data:
-            nombre_proc = linea['procedimiento'].strip()
-            nombre_mat = linea['material'].strip()
-            costo = linea['costo'].strip()
-
-            # Buscar procedimiento por nombre ingresado manualmente
-            procedimiento = db.session.query(Procedimiento).filter_by(nombre=nombre_proc).first()
-            if not procedimiento:
-                flash(f"Procedimiento '{nombre_proc}' no encontrado.", "danger")
-                continue
-
-            tratamiento_proc = TratamientoProcedimiento(
-                tratamiento_id=tratamiento_id,
-                procedimiento_id=procedimiento.procedimiento_id,
-                cantidad=1,
-                costo=int(costo)
-            )
-            db.session.add(tratamiento_proc)
-
-            # Si se proporcionó un nombre de material
-            if nombre_mat:
-                material = db.session.query(Material).filter_by(nombre=nombre_mat).first()
-                if not material:
-                    flash(f"Material '{nombre_mat}' no encontrado.", "danger")
-                    continue
-
-                tratamiento_mat = TratamientoMaterial(
+                db.session.add(TratamientoProcedimiento(
                     tratamiento_id=tratamiento_id,
-                    material_id=material.material_id,
+                    procedimiento_id=procedimiento.procedimiento_id,
                     cantidad=1,
-                    costo=int(costo)
-                )
-                db.session.add(tratamiento_mat)
+                    costo=float(costo)
+                ))
 
-        db.session.commit()
-        flash("Presupuesto registrado correctamente", "success")
-        return redirect(url_for('historia.ver_tratamiento', tratamiento_id=tratamiento_id))
+                if nombre_mat:
+                    material = db.session.query(Material).filter_by(nombre=nombre_mat).first()
+                    if not material:
+                        material = Material(nombre=nombre_mat)
+                        db.session.add(material)
+                        db.session.flush()
+                        flash(f"Material '{nombre_mat}' creado automáticamente.", "info")
 
-    return render_template(
-        'historia/editarpresupuesto.html',
-        paciente=paciente,
-        historia=historia,
-        tratamiento=tratamiento,
-        form=form
-    )
+                    db.session.add(Material(
+                        tratamiento_id=tratamiento_id,
+                        material_id=material.material_id,
+                        cantidad=1
+                    ))
+
+            db.session.commit()
+            flash('Presupuesto guardado exitosamente.', 'success')
+            return redirect(url_for('historia.index', historia_id=historia.historia_id))
+
+    form = PresupuestoForm()
+    return render_template('historia/editarpresupuesto.html', paciente=paciente, tratamiento=tratamiento, form=form)

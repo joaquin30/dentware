@@ -3,141 +3,57 @@
 {% block content %}
 
 <style>
-  .btn-volver {
-    font-size: 1.3rem;
-    color: #2a2f65;
-    text-decoration: none;
-    font-weight: bold;
-  }
-
-  .btn-volver:hover {
-    color: #5a5f9e;
-  }
-
-  .container-presupuesto {
-    max-width: 900px;
-    margin: 60px auto;
-    background-color: white;
-    border-radius: 16px;
-    padding: 30px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    font-family: 'Segoe UI', sans-serif;
-  }
-
-  .paciente-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background-color: #f4f6fb;
-    border-radius: 10px;
-    padding: 12px 16px;
-    margin-bottom: 24px;
-  }
-
-  .paciente-info img {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-  }
-
-  .paciente-info .info {
-    display: flex;
-    flex-direction: column;
-    font-size: 0.95rem;
-  }
-
-  .form-section {
-    display: flex;
-    justify-content: space-between;
-    gap: 24px;
-    margin-bottom: 24px;
-  }
-
-  .form-box {
-    flex: 1;
-    border: 1px solid #ccc;
-    border-radius: 12px;
-    padding: 20px;
-    background-color: #f9f9f9;
-  }
-
-  .form-box h4 {
-    margin-bottom: 10px;
-    font-size: 1rem;
-    color: #2a2f65;
-    font-weight: 600;
-  }
-
-  .costo-total {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: bold;
-    font-size: 1.1rem;
-    margin-bottom: 30px;
-  }
-
-  .costo-total input {
-    border: 1px solid #ccc;
-    padding: 6px 12px;
-    border-radius: 8px;
-    width: 100px;
-  }
-
-  .btn-crear {
-    background-color: #2a2f65;
-    color: white;
-    padding: 12px 30px;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    float: right;
-  }
-
-  .btn-crear:hover {
-    background-color: #444b88;
-  }
+  /* ... tus estilos existentes ... */
 </style>
 
 <div style="margin-left: 30px; margin-top: 20px;">
   <a href="{{ url_for('historia.ver_tratamiento', tratamiento_id=tratamiento.tratamiento_id) }}" class="btn-volver">&larr; Volver</a>
 </div>
 
-<!-- Box 1: Tarjeta con información del paciente -->
-    <div class="paciente-info" style="display: flex; gap: 16px; align-items: center; margin-bottom: 24px; background: #ffffff; padding: 16px; border-radius: 10px; box-shadow: 0 1px 6px rgba(0,0,0,0.05);">
-      <img src="{{ url_for('static', filename='img/profile.png') }}" alt="Foto de perfil" style="width: 80px; height: 80px; object-fit: cover; border-radius: 50%;">
-      <div>
-        <p><strong>Nombre:</strong> {{ paciente.nombres }} {{ paciente.apellidos }}</p>
-        <p><strong>DNI:</strong> {{ paciente.documento_identidad }}</p>
-        <p><strong>Teléfono:</strong> {{ paciente.telefono }}</p>
-        <p><strong>Fecha de nacimiento:</strong> {{ paciente.fecha_nacimiento }}</p>
-      </div>
-    </div>
+<!-- Info del paciente -->
+<div class="paciente-info">
+  <img src="{{ url_for('static', filename='img/profile.png') }}" alt="Foto de perfil">
+  <div>
+    <p><strong>Nombre:</strong> {{ paciente.nombres }} {{ paciente.apellidos }}</p>
+    <p><strong>DNI:</strong> {{ paciente.documento_identidad }}</p>
+    <p><strong>Teléfono:</strong> {{ paciente.telefono }}</p>
+    <p><strong>Fecha de nacimiento:</strong> {{ paciente.fecha_nacimiento }}</p>
+  </div>
+</div>
 
-  <form method="POST">
+<!-- Flash messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul class="flashes">
+      {% for category, message in messages %}
+        <li class="alert alert-{{ category }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+<form method="POST">
   {{ form.hidden_tag() }}
 
-    <div id="line-items">
-      {% for linea in form.lineas %}
-        <div class="line-item" style="display:flex; gap:10px; margin-bottom:12px;">
-          {{ linea.procedimiento(class="form-control", style="flex:2; padding:8px; border-radius:6px; border:1px solid #ccc;") }}
-          {{ linea.material(class="form-control", style="flex:2; padding:8px; border-radius:6px; border:1px solid #ccc;") }}
-          {{ linea.costo(class="form-control costo-input", style="flex:1; padding:8px; border-radius:6px; border:1px solid #ccc;") }}
-        </div>
-      {% endfor %}
-    </div>
+  <div id="line-items">
+    {% for linea in form.lineas %}
+      <div class="line-item" style="display:flex; gap:10px; margin-bottom:12px;">
+        {{ linea.procedimiento(class="form-control", style="flex:2; padding:8px; border-radius:6px; border:1px solid #ccc;", placeholder="Procedimiento") }}
+        {{ linea.material(class="form-control", style="flex:2; padding:8px; border-radius:6px; border:1px solid #ccc;", placeholder="Material") }}
+        {{ linea.costo(class="form-control costo-input", style="flex:1; padding:8px; border-radius:6px; border:1px solid #ccc;", placeholder="Costo") }}
+      </div>
+    {% endfor %}
+  </div>
 
-    <button type="button" id="agregar-linea">+ Agregar línea</button>
+  <button type="button" id="agregar-linea">+ Agregar línea</button>
 
-    <div class="costo-total">
-      <label for="total">Costo total:</label>
-      <input type="number" id="total" name="total" readonly>
-    </div>
+  <div class="costo-total">
+    <label for="total">Costo total:</label>
+    <input type="number" id="total" name="total" readonly>
+  </div>
 
-    <button type="submit" class="btn btn-primary">Guardar</button>
-  </form>
-</div>
+  <button type="submit" class="btn-crear">Guardar</button>
+</form>
 
 <script>
   let index = {{ form.lineas|length }};
@@ -151,8 +67,7 @@
       <input type="text" name="lineas-${index}-procedimiento" class="form-control" style="flex:2; padding:8px; border-radius:6px; border:1px solid #ccc;" placeholder="Procedimiento">
       <input type="text" name="lineas-${index}-material" class="form-control" style="flex:2; padding:8px; border-radius:6px; border:1px solid #ccc;" placeholder="Material">
       <input type="number" name="lineas-${index}-costo" class="form-control costo-input" style="flex:1; padding:8px; border-radius:6px; border:1px solid #ccc;" placeholder="Costo">
-  `   ;
-
+    `;
     container.appendChild(newItem);
     index++;
 
@@ -165,7 +80,7 @@
       const value = parseFloat(input.value);
       if (!isNaN(value)) total += value;
     });
-    document.getElementById('total').value = total;
+    document.getElementById('total').value = total.toFixed(2);
   }
 
   document.addEventListener('input', (e) => {
@@ -174,6 +89,5 @@
     }
   });
 </script>
-
 
 {% endblock %}
