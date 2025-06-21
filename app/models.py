@@ -58,6 +58,7 @@ class Paciente(Base):
 
     novedades: Mapped[List['PacienteNovedad']] = relationship('PacienteNovedad', back_populates='paciente')
     historias: Mapped[List['Historia']] = relationship('Historia', back_populates='paciente')
+    pagos: Mapped[List['Pago']] = relationship('Pago', back_populates='paciente')
 
     def crear_nueva_historia(self, db):
         historia = Historia(paciente=self)
@@ -338,7 +339,6 @@ class Tratamiento(Base):
 
     historia: Mapped['Historia'] = relationship('Historia', back_populates='tratamientos')
     odontologo: Mapped['Odontologo'] = relationship('Odontologo', back_populates='tratamientos')
-    pagos: Mapped[List['TratamientoPago']] = relationship('TratamientoPago', back_populates='tratamiento')
     sesiones: Mapped[List['TratamientoSesion']] = relationship('TratamientoSesion', back_populates='tratamiento')
     procedimientos: Mapped[List['Procedimiento']] = relationship(secondary=tratamiento_procedimiento)
 
@@ -356,21 +356,22 @@ class Procedimiento(Base):
     costo_referencial: Mapped[int] = mapped_column(BigInteger)
 
 '''
-CCTratPago
+CCPago
 '''
-class TratamientoPago(Base):
-    __tablename__ = 'tratamiento_pago'
+class Pago(Base):
+    __tablename__ = 'pago'
     __table_args__ = (
-        ForeignKeyConstraint(['tratamiento_id'], ['tratamiento.tratamiento_id'], name='tratamiento_pago_tratamiento_id_fkey'),
-        PrimaryKeyConstraint('tratamiento_id', 'pago_id', name='tratamiento_pago_pkey')
+        ForeignKeyConstraint(['paciente_id'], ['paciente.paciente_id'], name='pago_paciente_id_fkey'),
+        PrimaryKeyConstraint('pago_id', name='pago_pkey')
     )
 
-    tratamiento_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     pago_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    metodo: Mapped[str] = mapped_column(String)
+    metodo: Mapped[str] = mapped_column(Enum('Efectivo', 'Tarjeta', 'Transferencia', 'Yape', 'Otros', name='metodo_pago_t'))
     monto: Mapped[int] = mapped_column(BigInteger)
+    fecha: Mapped[datetime.date] = mapped_column(Date, default=datetime.date.today)
+    paciente_id: Mapped[int] = mapped_column(Integer)
 
-    tratamiento: Mapped['Tratamiento'] = relationship('Tratamiento', back_populates='pagos')
+    paciente: Mapped['Paciente'] = relationship('Paciente', back_populates='pagos')
 
 '''
 CCTratSesion

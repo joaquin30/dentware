@@ -1,7 +1,7 @@
 from flask import render_template, abort, redirect, url_for, flash, request, current_app, jsonify
 from app.historia import bp
 from app.extensions import db
-from app.models import Paciente, Historia, HistoriaContraindicacion, Tratamiento, Odontologo, TratamientoSesion, Procedimiento, TratamientoPago
+from app.models import Paciente, Historia, HistoriaContraindicacion, Tratamiento, Odontologo, TratamientoSesion, Procedimiento, Pago
 from sqlalchemy import select
 import os
 from werkzeug.utils import secure_filename
@@ -312,7 +312,10 @@ def crear_tratamiento(historia_id):
         paciente=paciente
     )
 
-
+'''
+COD-015
+Función que permite ver un tratamiento específico y editarlo.
+'''
 @bp.route('/tratamiento/<int:tratamiento_id>', methods=['GET', 'POST'])
 def ver_tratamiento(tratamiento_id):
     tratamiento = (
@@ -355,7 +358,10 @@ def ver_tratamiento(tratamiento_id):
         form=form
     )
 
-
+'''
+COD-016
+Función que permite crear una sesión de tratamiento.
+'''
 @bp.route('/historia/tratamiento/<int:tratamiento_id>/sesion/nuevo', methods=['GET', 'POST'])
 def crear_sesion_tratamiento(tratamiento_id):
     tratamiento = db.get_or_404(Tratamiento, tratamiento_id)
@@ -402,7 +408,10 @@ def crear_sesion_tratamiento(tratamiento_id):
         historia=historia
     )
 
-
+'''
+COD-017
+Función que permite ver una sesión de tratamiento y editarla.
+'''
 @bp.route('/historia/tratamiento/<int:tratamiento_id>/sesion/<int:sesion_id>/editar', methods=['GET', 'POST'])
 def editar_sesion_tratamiento(tratamiento_id, sesion_id):
     sesion = db.session.query(TratamientoSesion).filter_by(
@@ -437,8 +446,8 @@ def editar_sesion_tratamiento(tratamiento_id, sesion_id):
 
 
 '''
-COD-015
-Función que muestra los pagos realizados por un paciente.
+COD-018
+Función que permite ver los pagos de un paciente y el total de dauda pendiente.
 '''
 @bp.route('/paciente/<string:paciente_id>/pagos', methods=['GET'])
 def pagos(paciente_id):
@@ -448,24 +457,32 @@ def pagos(paciente_id):
     # Obtener todos los tratamientos asociados a la historia clínica
     tratamientos = db.session.query(Tratamiento).filter_by(historia_id=historia.historia_id).all()
 
-    # Calcular el presupuesto total sumando los presupuestos de los tratamientos
-    total_presupuestos = 0
+    # Calcular el presupuesto total sumando los costos de los tratamientos
+    total_presupuestos = 0.0
     for tratamiento in tratamientos:
-        # Aquí puedes hacer cualquier cálculo necesario para obtener el presupuesto de cada tratamiento
-        # Por ejemplo, si tienes un campo como 'costo' o 'precio' en el tratamiento, usa eso para el cálculo
-        # Si el presupuesto de cada tratamiento es una columna en el modelo, como 'costo' o 'precio', úsalo:
-        total_presupuestos += tratamiento.costo  # Asumiendo que 'presupuesto' es el campo del tratamiento
+        if tratamiento.costo:
+            total_presupuestos += float(tratamiento.costo)
+    
+    return render_template(
+        'historia/pagos.html',
+        paciente=paciente,
+        historia=historia,
+        total_presupuestos=round(total_presupuestos, 2),
+        pagos=paciente.pagos  # Obtener los pagos del paciente
+    )
 
-    # Pasar la suma de presupuestos a la plantilla
-    return render_template('historia/pagos.html', paciente=paciente, historia=historia, total_presupuestos=total_presupuestos)
-
-@bp.route('/paciente/<string:paciente_id>/pagos/nuevo', methods=['GET', 'POST'])
+'''
+COD-019
+Función que permite agregar un pago a un tratamiento específico.
+'''
+@bp.route('/paciente/<int:paciente_id>/pago', methods=['GET', 'POST'])
 def agregar_pago(paciente_id):
     print(f"Agregando pago para el paciente con ID {paciente_id}")  # Debug print
     paciente = db.get_or_404(Paciente, paciente_id)
-    historia = paciente.historias[0]  # Suponiendo que el paciente tiene una historia
+
     form = FormularioPago()
 
+<<<<<<< Updated upstream
     print(f"Paciente encontrado: {paciente.nombres} {paciente.apellidos}")  # Debug print
 
     # Obtener los tratamientos asociados a la historia clínica del paciente
@@ -503,11 +520,33 @@ def agregar_pago(paciente_id):
     # Si el formulario no es válido, pasar a la plantilla de agregar pago
     print("Formulario no válido. Renderizando el formulario de agregar pago.")  # Debug print
     return render_template('historia/agregar_pago.html', form=form, paciente=paciente, historia=historia)
+=======
+    if form.validate_on_submit():
+        monto = float(form.monto.data)
+        metodo = form.metodo.data
+
+        nuevo_pago = Pago(
+            monto=monto,
+            metodo=metodo,
+            paciente=paciente
+        )
+        db.session.add(nuevo_pago)
+        db.session.commit()
+
+        flash("Pago registrado con éxito.", "success")
+        return redirect(url_for('historia.pagos', paciente_id=paciente_id))
+
+    return render_template(
+        'historia/agregar_pago.html',
+        form=form,
+        paciente=paciente
+    )
+>>>>>>> Stashed changes
 
 
 '''
-COD-016
-Función que muestra el presupuesto
+COD-020
+Función que permite crear un presupuesto para un tratamiento específico.
 '''
 @bp.route('/paciente/<int:paciente_id>/tratamiento/<int:tratamiento_id>/presupuesto', methods=['GET', 'POST'])
 def presupuesto(paciente_id, tratamiento_id):
@@ -542,8 +581,8 @@ def presupuesto(paciente_id, tratamiento_id):
 
 
 '''
-COD-017
-Función que gestiona los procedimientos
+COD-021
+Función que permite agregar un procedimiento a un procedimiento específico.
 '''
 
 @bp.route('/tratamiento/<int:tratamiento_id>/procedimientos', methods=['GET', 'POST'])

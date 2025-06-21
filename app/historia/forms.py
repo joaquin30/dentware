@@ -79,18 +79,21 @@ class PresupuestoForm(FlaskForm):
     lineas = FieldList(FormField(LineaPresupuestoForm), min_entries=1)
         
 class FormularioPago(FlaskForm):
+<<<<<<< Updated upstream
     # Tratamiento id: Cambiar a SelectField si es necesario
     tratamiento_id = SelectField('Seleccione el tratamiento', coerce=int, validators=[DataRequired()])
     
     # Método de pago
+=======
+>>>>>>> Stashed changes
     metodo = SelectField(
         'Método de pago',
         choices=[
-            ('efectivo', 'Efectivo'),
-            ('tarjeta', 'Tarjeta'),
-            ('transferencia', 'Transferencia'),
-            ('yape', 'Yape'),
-            ('plin', 'Plin'),
+            ('Efectivo', 'Efectivo'),
+            ('Tarjeta', 'Tarjeta'),
+            ('Transferencia', 'Transferencia'),
+            ('Yape', 'Yape'),
+            ('Plin', 'Plin'),
         ],
         validators=[DataRequired()],
         render_kw={"aria-label": "Método de pago"}  # Mejora accesibilidad
