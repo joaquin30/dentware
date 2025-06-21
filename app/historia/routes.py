@@ -289,13 +289,13 @@ def crear_tratamiento(historia_id):
 
     if form.validate_on_submit():
         nuevo_tratamiento = Tratamiento(
-        fecha_creacion=form.fecha_creacion.data,
-        descripcion=form.descripcion.data,
-        en_curso=form.en_curso.data,
-        costo=float(form.costo.data),  # 👈 conversión aquí
-        odontologo_id=form.odontologo_id.data,
-        historia_id=historia_id
-    )
+            fecha_creacion=form.fecha_creacion.data,
+            descripcion=form.descripcion.data,
+            en_curso=form.en_curso.data,
+            costo=0,  # 👈 valor fijo por defecto
+            odontologo_id=form.odontologo_id.data,
+            historia_id=historia_id
+        )
 
         db.session.add(nuevo_tratamiento)
         db.session.commit()
