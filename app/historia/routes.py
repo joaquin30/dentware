@@ -477,50 +477,10 @@ Función que permite agregar un pago a un tratamiento específico.
 '''
 @bp.route('/paciente/<int:paciente_id>/pago', methods=['GET', 'POST'])
 def agregar_pago(paciente_id):
-    print(f"Agregando pago para el paciente con ID {paciente_id}")  # Debug print
     paciente = db.get_or_404(Paciente, paciente_id)
 
     form = FormularioPago()
 
-<<<<<<< Updated upstream
-    print(f"Paciente encontrado: {paciente.nombres} {paciente.apellidos}")  # Debug print
-
-    # Obtener los tratamientos asociados a la historia clínica del paciente
-    tratamientos = db.session.query(Tratamiento).filter_by(historia_id=historia.historia_id).all()
-
-    # Llenar las opciones de tratamientos en el formulario (SelectField)
-    form.tratamiento_id.choices = [(tratamiento.tratamiento_id, tratamiento.descripcion) for tratamiento in tratamientos]
-
-    # Si el formulario es enviado y válido
-    if form.validate_on_submit():
-        # Obtener el tratamiento seleccionado
-        tratamiento_id = form.tratamiento_id.data
-        metodo_pago = form.metodo.data
-        monto = float(form.monto.data)  # Convertir el monto de Decimal a Float
-
-        # Crear el nuevo registro en la tabla TratamientoPago
-        tratamiento_pago = TratamientoPago(
-            tratamiento_id=tratamiento_id,
-            metodo=metodo_pago,
-            monto=monto  # Guardar el monto como Float
-        )
-
-        # Guardar la relación en la base de datos
-        db.session.add(tratamiento_pago)
-        db.session.commit()  # Guardar el pago en la tabla TratamientoPago
-
-        print(f"Nuevo pago guardado con tratamiento_id: {tratamiento_id}")  # Debug print
-
-        # Mensaje de éxito
-        flash('Pago registrado exitosamente', 'success')
-
-        # Redirigir a la página de pagos del paciente
-        return redirect(url_for('historia.pagos', paciente_id=paciente_id))
-
-    # Si el formulario no es válido, pasar a la plantilla de agregar pago
-    print("Formulario no válido. Renderizando el formulario de agregar pago.")  # Debug print
-    return render_template('historia/agregar_pago.html', form=form, paciente=paciente, historia=historia)
-=======
     if form.validate_on_submit():
         monto = float(form.monto.data)
         metodo = form.metodo.data
@@ -541,8 +501,6 @@ def agregar_pago(paciente_id):
         form=form,
         paciente=paciente
     )
->>>>>>> Stashed changes
-
 
 '''
 COD-020

@@ -116,21 +116,7 @@
         <small class="text-danger">{{ error }}</small>
       {% endfor %}
     </div>
-
-<<<<<<< Updated upstream
-    <!-- Campo para seleccionar el tratamiento -->
-    <div class="form-group">
-      {{ form.tratamiento_id.label }}
-      {{ form.tratamiento_id(class="form-control") }}
-      {% for error in form.tratamiento_id.errors %}
-        <small class="text-danger">{{ error }}</small>
-      {% endfor %}
-    </div>
-
-    {{ form.submit(class="btn-submit") }}
-=======
     <button type="submit" class="btn-submit">Agregar</button>
->>>>>>> Stashed changes
     <a href="{{ url_for('historia.pagos', paciente_id=paciente.paciente_id) }}" class="btn-cancelar">Cancelar</a>
   </form>
 </div>

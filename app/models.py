@@ -366,7 +366,7 @@ class Pago(Base):
     )
 
     pago_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    metodo: Mapped[str] = mapped_column(Enum('Efectivo', 'Tarjeta', 'Transferencia', 'Yape', 'Otros', name='metodo_pago_t'))
+    metodo: Mapped[str] = mapped_column(Enum('Efectivo', 'Tarjeta', 'Transferencia', 'Yape', 'Plin', 'Otros', name='metodo_pago_t'))
     monto: Mapped[int] = mapped_column(BigInteger)
     fecha: Mapped[datetime.date] = mapped_column(Date, default=datetime.date.today)
     paciente_id: Mapped[int] = mapped_column(Integer)
