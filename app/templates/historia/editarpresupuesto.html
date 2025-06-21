@@ -3,14 +3,14 @@
 {% block content %}
 
 <style>
-  /* ... tus estilos existentes ... */
+
 </style>
 
 <div style="margin-left: 30px; margin-top: 20px;">
   <a href="{{ url_for('historia.ver_tratamiento', tratamiento_id=tratamiento.tratamiento_id) }}" class="btn-volver">&larr; Volver</a>
 </div>
 
-<!-- Info del paciente -->
+
 <div class="paciente-info">
   <img src="{{ url_for('static', filename='img/profile.png') }}" alt="Foto de perfil">
   <div>

@@ -6,7 +6,7 @@ from sqlalchemy import select
 import os
 from werkzeug.utils import secure_filename
 from app.models import HistoriaExamen, PacienteNovedad
-from app.historia.forms import HistoriaExamenForm, HistoriaContraindicacionForm, ContraindicacionesForm, NovedadForm, PacienteNovedadesForm, FormularioTratamiento, FormularioTratamientoSesion, PresupuestoForm, LineaPresupuestoForm, FormularioAgregarProcedimiento
+from app.historia.forms import HistoriaExamenForm, HistoriaContraindicacionForm, ContraindicacionesForm, NovedadForm, PacienteNovedadesForm, FormularioTratamiento, FormularioTratamientoSesion, PresupuestoForm, LineaPresupuestoForm, FormularioAgregarProcedimiento, FormularioPresupuesto
 from datetime import date
 from flask import send_from_directory
 from sqlalchemy.orm import joinedload
@@ -450,21 +450,42 @@ def pagos(paciente_id):
 COD-016
 Función que muestra el presupuesto
 '''
-@bp.route('/paciente/<int:paciente_id>/tratamiento/<int:tratamiento_id>/presupuesto')
+@bp.route('/paciente/<int:paciente_id>/tratamiento/<int:tratamiento_id>/presupuesto', methods=['GET', 'POST'])
 def presupuesto(paciente_id, tratamiento_id):
-    paciente = db.get_or_404(Paciente, paciente_id)
     tratamiento = db.get_or_404(Tratamiento, tratamiento_id)
+    paciente = db.get_or_404(Paciente, paciente_id)
+    form = FormularioPresupuesto()
 
-    # ✅ Aquí accedemos a los procedimientos asociados
-    procedimientos = tratamiento.procedimientos
+    if form.validate_on_submit():
+        for procedimiento in tratamiento.procedimientos:
+            nuevo_costo = request.form.get(f'costo_{procedimiento.procedimiento_id}')
+            if nuevo_costo:
+                try:
+                    procedimiento.costo_referencial = int(nuevo_costo)
+                except ValueError:
+                    pass
 
-    return render_template(
-        'historia/presupuesto.html',
-        paciente=paciente,
-        tratamiento=tratamiento,
-        procedimientos=procedimientos
-    )
+        total_costo = sum(p.costo_referencial or 0 for p in tratamiento.procedimientos)
 
+
+        tratamiento.costo = total_costo
+
+        db.session.commit()
+        return redirect(request.url)
+
+    total_costo = sum(p.costo_referencial or 0 for p in tratamiento.procedimientos)
+
+    return render_template('historia/presupuesto.html',
+                           tratamiento=tratamiento,
+                           paciente=paciente,
+                           form=form,
+                           total_costo=total_costo)
+
+
+'''
+COD-017
+Función que gestiona los procedimientos
+'''
 
 @bp.route('/tratamiento/<int:tratamiento_id>/procedimientos', methods=['GET', 'POST'])
 def gestionar_procedimientos(tratamiento_id):
@@ -475,7 +496,7 @@ def gestionar_procedimientos(tratamiento_id):
         try:
             nuevo_proc = Procedimiento(
                 nombre=form.nombre.data.strip(),
-                costo_referencial=0  # <--- se asigna por defecto aquí
+                costo_referencial=0  
             )
             db.session.add(nuevo_proc)
 

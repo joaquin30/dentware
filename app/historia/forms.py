@@ -102,3 +102,7 @@ class FormularioPago(FlaskForm):
 class FormularioAgregarProcedimiento(FlaskForm):
     nombre = StringField('Nombre del procedimiento', validators=[DataRequired()])
     submit = SubmitField('Registrar')
+
+
+class FormularioPresupuesto(FlaskForm):
+    pass  # no necesita campos visibles, solo para CSRF

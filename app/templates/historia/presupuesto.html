@@ -7,29 +7,40 @@
 <p><strong>Paciente:</strong> {{ paciente.nombres }} {{ paciente.apellidos }}</p>
 <p><strong>Tratamiento:</strong> {{ tratamiento.descripcion }}</p>
 
-<table border="1" cellpadding="8" cellspacing="0">
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>Procedimiento</th>
-      <th>Costo Referencial (S/)</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for proc in procedimientos %}
-    <tr>
-      <td>{{ loop.index }}</td>
-      <td>{{ proc.nombre }}</td>
-      <td>{{ "{:,.2f}".format(proc.costo_referencial) }}</td>
-    </tr>
-    {% else %}
-    <tr>
-      <td colspan="3">No hay procedimientos registrados.</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<form method="POST">
+  {{ form.hidden_tag() }}
 
-<a href="{{ url_for('historia.ver_tratamiento', tratamiento_id=tratamiento.tratamiento_id) }}" class="btn btn-secondary mt-3">← Volver</a>
+  <table>
+    <thead>
+      <tr>
+        <th>Procedimiento</th>
+        <th>Costo referencial (S/)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for procedimiento in tratamiento.procedimientos %}
+      <tr>
+        <td>{{ procedimiento.nombre }}</td>
+        <td>
+          <input
+            type="number"
+            name="costo_{{ procedimiento.procedimiento_id }}"
+            value="{{ procedimiento.costo_referencial }}"
+            step="0.01"
+            min="0"
+          >
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h3 style="margin-top: 20px;">Total: S/ {{ total_costo }}</h3>
+
+  <div style="margin-top: 20px;">
+    <button type="submit" class="btn">Guardar cambios</button>
+  </div>
+</form>
+
 
 {% endblock %}
