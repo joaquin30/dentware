@@ -8,7 +8,7 @@
   {% if tratamiento.procedimientos %}
     <ul>
       {% for proc in tratamiento.procedimientos %}
-        <li>{{ proc.nombre }} — S/. {{ proc.costo_referencial }}</li>
+        <li>{{ proc.nombre }}</li>
       {% endfor %}
     </ul>
   {% else %}
@@ -24,11 +24,6 @@
     <div class="form-group">
       {{ form.nombre.label }}
       {{ form.nombre(class="form-control") }}
-    </div>
-
-    <div class="form-group">
-      {{ form.costo_referencial.label }}
-      {{ form.costo_referencial(class="form-control") }}
     </div>
 
     <button type="submit" class="btn btn-primary">Agregar</button>
