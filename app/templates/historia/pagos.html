@@ -105,6 +105,27 @@
     background-color: #0d2f6c;
     color: white;
   }
+
+  .tratamientos-box {
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+  }
+
+  .tratamientos-box h5 {
+    margin-bottom: 16px;
+    color: #2a2f65;
+  }
+
+  .tratamiento-item {
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  .tratamiento-item:last-child {
+    border-bottom: none;
+  }
 </style>
 
 <div class="header-main">
@@ -126,19 +147,40 @@
     <div class="saldo">Total de presupuestos: <strong style="font-size: 1.5rem;">{{ total_presupuestos }}$</strong></div>
   </div>
 
+  <!-- Box de Tratamientos -->
+  <div class="tratamientos-box">
+    <h5 class="fw-semibold">Tratamientos del paciente</h5>
+    {% if historia.tratamientos %}
+      <ul style="list-style: none; padding-left: 0; margin: 0;">
+        {% for tratamiento in historia.tratamientos %}
+          <li class="tratamiento-item">
+            <strong>{{ tratamiento.descripcion }}</strong><br>
+            Costo total: <strong>S/. {{ tratamiento.costo or '0.00' }}</strong>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No hay tratamientos registrados.</p>
+    {% endif %}
+  </div>
+
   <h5 class="fw-semibold">Historial de pagos</h5>
   <div class="historial">
     {% for pago in pagos %}
     <div class="pago-item">
       <div class="pago-color"></div>
       <div class="pago-info">
-        <span><strong>Monto:</strong> {{ pago.monto }}$</span>
+        <span><strong>Monto:</strong> S/. {{ pago.monto }}</span>
         <span><strong>Fecha:</strong> {{ pago.fecha.strftime('%d/%m/%Y') }}</span>
         <span><strong>Método de pago:</strong> {{ pago.metodo }}</span>
       </div>
     </div>
     {% endfor %}
-    <button class="btn-add"><a href="{{ url_for('historia.agregar_pago', paciente_id=paciente.paciente_id) }}" style="text-decoration: none; color: inherit;">➕ Agregar pago</a></button>
+    <button class="btn-add">
+      <a href="{{ url_for('historia.agregar_pago', paciente_id=paciente.paciente_id) }}" style="text-decoration: none; color: inherit;">
+        ➕ Agregar pago
+      </a>
+    </button>
   </div>
 </div>
 

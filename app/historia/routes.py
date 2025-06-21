@@ -512,7 +512,7 @@ def presupuesto(paciente_id, tratamiento_id):
         total_costo = sum(p.costo_referencial or 0 for p in tratamiento.procedimientos)
 
 
-        tratamiento.costo = total_costo
+        tratamiento.costo = int(total_costo)
 
         db.session.commit()
         return redirect(request.url)
