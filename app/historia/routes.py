@@ -6,10 +6,12 @@ from sqlalchemy import select
 import os
 from werkzeug.utils import secure_filename
 from app.models import HistoriaExamen, PacienteNovedad
-from app.historia.forms import HistoriaExamenForm, HistoriaContraindicacionForm, ContraindicacionesForm, NovedadForm, PacienteNovedadesForm, FormularioTratamiento, FormularioTratamientoSesion, PresupuestoForm, LineaPresupuestoForm, FormularioAgregarProcedimiento, FormularioPresupuesto
+from app.historia.forms import HistoriaExamenForm, HistoriaContraindicacionForm, ContraindicacionesForm, NovedadForm, PacienteNovedadesForm, FormularioTratamiento, FormularioTratamientoSesion, PresupuestoForm, LineaPresupuestoForm, FormularioAgregarProcedimiento, FormularioPresupuesto, FormularioPago
 from datetime import date
 from flask import send_from_directory
 from sqlalchemy.orm import joinedload
+from datetime import datetime
+
 
 
 '''
@@ -441,10 +443,52 @@ Función que muestra los pagos realizados por un paciente.
 @bp.route('/paciente/<string:paciente_id>/pagos', methods=['GET'])
 def pagos(paciente_id):
     paciente = db.get_or_404(Paciente, paciente_id)
-    historia = paciente.historias[0]
-    return render_template('historia/pagos.html', paciente=paciente, historia=historia)
+    historia = paciente.historias[0]  # Obtener la primera historia del paciente
+    
+    # Obtener todos los tratamientos asociados a la historia clínica
+    tratamientos = db.session.query(Tratamiento).filter_by(historia_id=historia.historia_id).all()
 
+    # Calcular el presupuesto total sumando los presupuestos de los tratamientos
+    total_presupuestos = 0
+    for tratamiento in tratamientos:
+        # Aquí puedes hacer cualquier cálculo necesario para obtener el presupuesto de cada tratamiento
+        # Por ejemplo, si tienes un campo como 'costo' o 'precio' en el tratamiento, usa eso para el cálculo
+        # Si el presupuesto de cada tratamiento es una columna en el modelo, como 'costo' o 'precio', úsalo:
+        total_presupuestos += tratamiento.costo  # Asumiendo que 'presupuesto' es el campo del tratamiento
 
+    # Pasar la suma de presupuestos a la plantilla
+    return render_template('historia/pagos.html', paciente=paciente, historia=historia, total_presupuestos=total_presupuestos)
+
+@bp.route('/paciente/<string:paciente_id>/pagos/nuevo', methods=['GET', 'POST'])
+def agregar_pago(paciente_id):
+    paciente = db.get_or_404(Paciente, paciente_id)
+    historia = paciente.historias[0]  # Suponiendo que el paciente tiene una historia
+    form = FormularioPago()
+
+    # Obtener el tratamiento correspondiente (esto lo asumo basado en el formulario)
+    tratamiento = db.session.query(Tratamiento).filter_by(historia_id=historia.historia_id).first()
+
+    # Validación y procesamiento del formulario
+    if form.validate_on_submit():
+        # Crear el nuevo pago en la tabla TratamientoPago
+        nuevo_pago = TratamientoPago(
+            tratamiento_id=form.tratamiento_id.data,  # Asumo que el formulario tiene este campo
+            metodo=form.metodo.data,
+            monto=form.monto.data,
+        )
+        
+        # Guardar el pago en la base de datos
+        db.session.add(nuevo_pago)
+        db.session.commit()
+
+        # Mensaje de éxito
+        flash('Pago registrado exitosamente', 'success')
+
+        # Redirigir a la vista de pagos del paciente
+        return redirect(url_for('historia.pagos', paciente_id=paciente_id))
+
+    # Si el formulario no es válido, pasar a la plantilla de agregar pago
+    return render_template('historia/agregar_pago.html', form=form, paciente=paciente, historia=historia)
 
 '''
 COD-016
