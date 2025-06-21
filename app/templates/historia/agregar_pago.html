@@ -63,10 +63,27 @@
     margin-top: 10px;
     display: inline-block;
   }
+  
+  /* Estilos para los errores generales del formulario */
+  .form-errors {
+    margin-bottom: 20px;
+    color: red;
+  }
 </style>
 
 <div class="form-container">
   <div class="form-header">Agregar nuevo pago</div>
+
+  <!-- Mostrar los errores generales del formulario -->
+  {% if form.errors %}
+    <div class="form-errors">
+      <ul>
+        {% for field, errors in form.errors.items() %}
+          <li><strong>{{ form[field].label.text }}:</strong> {% for error in errors %}{{ error }} {% endfor %}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
 
   <form method="POST">
     {{ form.hidden_tag() }}
@@ -83,6 +100,15 @@
       {{ form.monto.label }}
       {{ form.monto(class="form-control", step="0.01") }}
       {% for error in form.monto.errors %}
+        <small class="text-danger">{{ error }}</small>
+      {% endfor %}
+    </div>
+
+    <!-- Campo para seleccionar el tratamiento -->
+    <div class="form-group">
+      {{ form.tratamiento_id.label }}
+      {{ form.tratamiento_id(class="form-control") }}
+      {% for error in form.tratamiento_id.errors %}
         <small class="text-danger">{{ error }}</small>
       {% endfor %}
     </div>

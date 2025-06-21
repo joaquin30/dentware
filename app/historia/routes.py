@@ -461,34 +461,49 @@ def pagos(paciente_id):
 
 @bp.route('/paciente/<string:paciente_id>/pagos/nuevo', methods=['GET', 'POST'])
 def agregar_pago(paciente_id):
+    print(f"Agregando pago para el paciente con ID {paciente_id}")  # Debug print
     paciente = db.get_or_404(Paciente, paciente_id)
     historia = paciente.historias[0]  # Suponiendo que el paciente tiene una historia
     form = FormularioPago()
 
-    # Obtener el tratamiento correspondiente (esto lo asumo basado en el formulario)
-    tratamiento = db.session.query(Tratamiento).filter_by(historia_id=historia.historia_id).first()
+    print(f"Paciente encontrado: {paciente.nombres} {paciente.apellidos}")  # Debug print
 
-    # Validación y procesamiento del formulario
+    # Obtener los tratamientos asociados a la historia clínica del paciente
+    tratamientos = db.session.query(Tratamiento).filter_by(historia_id=historia.historia_id).all()
+
+    # Llenar las opciones de tratamientos en el formulario (SelectField)
+    form.tratamiento_id.choices = [(tratamiento.tratamiento_id, tratamiento.descripcion) for tratamiento in tratamientos]
+
+    # Si el formulario es enviado y válido
     if form.validate_on_submit():
-        # Crear el nuevo pago en la tabla TratamientoPago
-        nuevo_pago = TratamientoPago(
-            tratamiento_id=form.tratamiento_id.data,  # Asumo que el formulario tiene este campo
-            metodo=form.metodo.data,
-            monto=form.monto.data,
+        # Obtener el tratamiento seleccionado
+        tratamiento_id = form.tratamiento_id.data
+        metodo_pago = form.metodo.data
+        monto = float(form.monto.data)  # Convertir el monto de Decimal a Float
+
+        # Crear el nuevo registro en la tabla TratamientoPago
+        tratamiento_pago = TratamientoPago(
+            tratamiento_id=tratamiento_id,
+            metodo=metodo_pago,
+            monto=monto  # Guardar el monto como Float
         )
-        
-        # Guardar el pago en la base de datos
-        db.session.add(nuevo_pago)
-        db.session.commit()
+
+        # Guardar la relación en la base de datos
+        db.session.add(tratamiento_pago)
+        db.session.commit()  # Guardar el pago en la tabla TratamientoPago
+
+        print(f"Nuevo pago guardado con tratamiento_id: {tratamiento_id}")  # Debug print
 
         # Mensaje de éxito
         flash('Pago registrado exitosamente', 'success')
 
-        # Redirigir a la vista de pagos del paciente
+        # Redirigir a la página de pagos del paciente
         return redirect(url_for('historia.pagos', paciente_id=paciente_id))
 
     # Si el formulario no es válido, pasar a la plantilla de agregar pago
+    print("Formulario no válido. Renderizando el formulario de agregar pago.")  # Debug print
     return render_template('historia/agregar_pago.html', form=form, paciente=paciente, historia=historia)
+
 
 '''
 COD-016
