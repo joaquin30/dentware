@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+{% block title %}Odontograma{% endblock %}
+{% block content %}
+<div class="row mt-2">
+    <div class="col-3">
+        <form>
+            <label class="form-label w-100">
+                Hallazgo clínico
+                <input type="text" class="form-control" list="hallazgos-clinicos"/>
+            </label>
+            <label>Vista previa</label><br>
+            <canvas id="canvas-secondary" width="300" height="150"></canvas>
+            <div class="form-check mb-2">
+                <label class="form-check-label">
+                    <input class="form-check-input" type="checkbox" id="is-serious" />
+                    ¿Es grave?
+                </label>
+            </div>
+            <button type="button" class="btn btn-primary" id="button-save">Guardar</button>
+            <button type="reset" class="btn btn-danger">Deshacer</button>
+        </form>
+        <hr />
+        <label class="form-label w-100">
+            Especificaciones
+            <textarea class="form-control" rows="4"></textarea>
+        </label>
+         <label class="form-label w-100">
+            Observaciones
+            <textarea class="form-control" rows="4"></textarea>
+        </label>
+    </div>
+    <div class="col-9">
+        <canvas id="canvas-primary" width="1000" height="600"></canvas>
+    </div>
+</div>
+<datalist id="hallazgos-clinicos">
+    <option value="Carie"></option>
+    <option value="Corona"></option>
+    <option value="Diastema"></option>
+    <option value="Espigón"></option>
+</datalist>
+<style>
+canvas {
+    background-color: #eee;
+}
+</style>
+<script>
+'use strict';
+const SCALE = 10;
+const RECT_GAP = 0.25;
+
+const shapeDienteSimple = {
+    'width': 4,
+    'height': 8,
+    'lines': [
+        [2, 0, 0, 4],
+        [2, 0, 4, 4],
+        [0, 4, 4, 4],
+        [0, 4, 0, 8],
+        [0, 8, 4, 8],
+        [4, 8, 4, 4],
+        [0, 4, 1, 6],
+        [1, 6, 0, 8],
+        [4, 4, 3, 6],
+        [3, 6, 4, 8],
+        [1, 6, 3, 6]
+    ],
+    'polygons': [
+        [[2, 0], [0, 4], [4, 4]],
+        [[0, 4], [1, 6], [0, 8]],
+        [[4, 4], [3, 6], [4, 8]],
+        [[0, 4], [4, 4], [3, 6], [1, 6]],
+        [[0, 8], [1, 6], [3, 6], [4, 8]]
+    ]
+};
+
+function createDiente(shape, x, y) {
+    return { 
+        shape: shape,
+        x: x,
+        y: y,
+        selected: false,
+        lines: shape.lines.map((line) =>
+            [line[0] * SCALE + x, line[1] * SCALE + y, line[2] * SCALE + x, line[3] * SCALE + y]
+        ),
+        polygons: shape.polygons.map((points) =>
+            points.map((p) => [p[0] * SCALE + x, p[1] * SCALE + y])
+        ),
+        lineColored: new Array(shape.lines.length).fill(false),
+        polygonColored: new Array(shape.polygons.length).fill(false),
+        isSerious: false,
+        index: null,
+    }
+}
+
+function getRect(diente) {
+    return {
+        x: diente.x - RECT_GAP * SCALE,
+        y: diente.y - RECT_GAP * SCALE,
+        w: diente.shape.width * SCALE + 2 * RECT_GAP * SCALE,
+        h: diente.shape.height * SCALE + 2 * RECT_GAP * SCALE,
+    }
+}
+
+function drawDiente(ctx, diente) {
+    const x = diente.x;
+    const y = diente.y;
+    const shape = diente.shape;
+    let color = diente.isSerious ? 'red': 'blue';
+
+    // Dibujar polígonos
+    for (let i = 0; i < shape.polygons.length; i++) {
+        const polygon = shape.polygons[i];
+        ctx.beginPath();
+        ctx.moveTo(x + polygon[0][0] * SCALE, y + polygon[0][1] * SCALE);
+        for (let i = 1; i < polygon.length; i++) {
+            ctx.lineTo(x + polygon[i][0] * SCALE, y + polygon[i][1] * SCALE);
+        }
+        ctx.closePath();
+        ctx.fillStyle = diente.polygonColored[i] ? color : 'white';
+        ctx.fill();
+    }
+    
+    // Dibujar líneas
+    for (let i = 0; i < shape.lines.length; i++) {
+        ctx.beginPath();
+        const [x1, y1, x2, y2] = shape.lines[i]
+        ctx.moveTo(x + x1 * SCALE, y + y1 * SCALE);
+        ctx.lineTo(x + x2 * SCALE, y + y2 * SCALE);
+        ctx.strokeStyle = diente.lineColored[i] ? color : 'black';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    }
+
+    if (diente.selected) {
+        drawRect(ctx, getRect(diente));
+    }
+}
+
+function drawRect(ctx, rect) {
+    ctx.beginPath();
+    ctx.setLineDash([5, 3]); // Patrón de línea discontinua: 5 píxeles dibujados, 3 píxeles vacíos
+    ctx.rect(rect.x, rect.y, rect.w, rect.h);
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.setLineDash([]); // Restaurar a línea continua para futuros dibujos
+}
+
+// UTILS
+
+function rectsCollide(rectA, rectB) {
+    return !(
+        rectA.x + rectA.w <= rectB.x || // A está completamente a la izquierda de B
+        rectA.x >= rectB.x + rectB.w || // A está completamente a la derecha de B
+        rectA.y + rectA.h <= rectB.y || // A está completamente arriba de B
+        rectA.y >= rectB.y + rectB.h    // A está completamente debajo de B
+    );
+}
+
+function pointInPolygon(polygon, px, py) {
+    let inside = false;
+
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        const [xi, yi] = polygon[i];
+        const [xj, yj] = polygon[j];
+
+        const intersect = ((yi > py) !== (yj > py)) &&
+                          (px < (xj - xi) * (py - yi) / (yj - yi + Number.EPSILON) + xi);
+        if (intersect) inside = !inside;
+    }
+
+    return inside;
+}
+
+function pointInRect(rect, px, py) {
+    return (
+        px >= rect.x &&
+        px <= rect.x + rect.w &&
+        py >= rect.y &&
+        py <= rect.y + rect.h
+    );
+}
+
+const canvasPrimary = document.getElementById('canvas-primary'); 
+const ctxPrimary = canvasPrimary.getContext('2d');
+const canvasSecondary = document.getElementById('canvas-secondary');
+const ctxSecondary = canvasSecondary.getContext('2d');
+const checkbox = document.getElementById('is-serious');
+const buttonSave = document.getElementById('button-save');
+
+const dientes = [];
+let selectedDientes = [];
+let selectionOrigin = null;
+
+function drawSelection(ctx, e) {
+    ctx.beginPath();
+    ctx.rect(selectionOrigin.x, selectionOrigin.y, e.offsetX - selectionOrigin.x, e.offsetY - selectionOrigin.y); 
+    ctx.strokeStyle = 'blue';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(0, 0, 255, 0.2)';
+    ctx.fill();
+}
+
+function renderCtxPrimary(e) {
+    ctxPrimary.clearRect(0, 0, canvasPrimary.width, canvasPrimary.height)
+
+    for (let diente of dientes) {
+        drawDiente(ctxPrimary, diente);
+    }
+
+    if (selectionOrigin) {
+        drawSelection(ctxPrimary, e);
+    }
+}
+
+function selectDientes(e) {
+    const selectionRect = {
+        x: Math.min(selectionOrigin.x, e.offsetX),
+        y: Math.min(selectionOrigin.y, e.offsetY),
+        w: Math.abs(e.offsetX - selectionOrigin.x),
+        h: Math.abs(e.offsetY - selectionOrigin.y),
+    }
+
+    for (let diente of dientes) {
+        diente.selected = rectsCollide(selectionRect, getRect(diente));
+    }
+}
+
+function renderCtxSecondary() {
+    ctxSecondary.clearRect(0, 0, canvasSecondary.width, canvasSecondary.height)
+    if (selectedDientes.length === 0) {
+        return;
+    }
+
+    for (let diente of selectedDientes) {
+        drawDiente(ctxSecondary, diente);
+    }
+}
+
+function updateSelectedDientes() {
+    selectedDientes = [];
+    for (let diente of dientes) {
+        if (diente.selected) {
+            selectedDientes.push(diente);
+        }
+    }
+    if (selectedDientes.length > 0) {
+        const offsetX = 20 - selectedDientes[0].x;
+        const offsetY = 20 - selectedDientes[0].y;
+        selectedDientes = selectedDientes.map((diente) => {
+            const newDiente = createDiente(diente.shape, diente.x + offsetX, diente.y + offsetY);
+            newDiente.selected = false;
+            newDiente.lineColored = [...diente.lineColored];
+            newDiente.polygonColored = [...diente.polygonColored];
+            newDiente.isSerious = diente.isSerious;
+            newDiente.index = diente.index;
+            return newDiente;
+        })
+    }
+    renderCtxSecondary();
+}
+
+canvasPrimary.onmousedown = (e) => {
+    selectionOrigin = {x: e.offsetX, y: e.offsetY};
+};
+
+canvasPrimary.onmouseup = (e) => {
+    selectDientes(e);
+    selectionOrigin = null;
+    renderCtxPrimary(e);
+    updateSelectedDientes();
+};
+
+canvasPrimary.onmousemove = (e) => {
+    if (selectionOrigin) {
+        selectDientes(e);
+        renderCtxPrimary(e);
+    }
+};
+
+canvasSecondary.onmouseup = (e) => {
+    for (let diente of selectedDientes) {
+        if (!pointInRect(getRect(diente), e.offsetX, e.offsetY)) {
+            continue;
+        }
+        for (let i = 0; i < diente.polygons.length; ++i) {
+            if (!pointInPolygon(diente.polygons[i], e.offsetX, e.offsetY)) {
+                continue;
+            }
+            diente.polygonColored[i] = !diente.polygonColored[i];
+        }
+    }
+
+    renderCtxSecondary();
+};
+
+checkbox.addEventListener('change', () => {
+    for (let diente of selectedDientes) {
+        diente.isSerious = !!checkbox.checked;
+    }
+
+    renderCtxSecondary();
+});
+
+buttonSave.addEventListener('click', () => {
+    for (let diente of selectedDientes) {
+        dientes[diente.index].lineColored = diente.lineColored;
+        dientes[diente.index].polygonColored = diente.polygonColored;
+        dientes[diente.index].isSerious = diente.isSerious;
+    }
+
+    selectedDientes = [];
+
+    for (let diente of dientes) {
+        diente.selected = false;
+    }
+
+    checkbox.checked = false;
+    renderCtxPrimary();
+    renderCtxSecondary();
+})
+
+
+for (let x = 20, i = 0; x < 500; x += 50, i++) {
+    const diente = createDiente(shapeDienteSimple, x, 20)
+    diente.index = i;
+    dientes.push(diente);
+}
+
+renderCtxPrimary(null);
+
+</script>
+{% endblock %}
