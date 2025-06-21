@@ -2,22 +2,98 @@
 {% block title %}Procedimientos del Tratamiento{% endblock %}
 
 {% block content %}
+<style>
+  .btn-volver {
+    background-color: #6c757d;
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin: 20px auto 0 5%;
+    display: inline-block;
+  }
+
+  .btn-volver:hover {
+    background-color: #5a6268;
+  }
+
+  .card-historia {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    width: 90%;
+    margin: 10px auto;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .titulo-seccion {
+    margin-top: 0;
+    margin-bottom: 16px;
+  }
+
+  .lista-procedimientos {
+    margin-top: 12px;
+    margin-bottom: 24px;
+    font-size: 1rem;
+  }
+
+  .lista-procedimientos li {
+    margin-bottom: 6px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.95rem;
+  }
+
+  .btn-agregar {
+    background-color: #2a2f65;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 6px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .btn-agregar:hover {
+    background-color: #1e234d;
+  }
+</style>
+
+<a href="{{ url_for('historia.ver_tratamiento', tratamiento_id=tratamiento.tratamiento_id) }}" class="btn-volver">← Volver</a>
+
 <div class="card-historia">
-  <h2>Procedimientos Asociados</h2>
+  <h2 class="titulo-seccion">Procedimientos Asociados</h2>
 
   {% if tratamiento.procedimientos %}
-    <ul>
+    <ul class="lista-procedimientos">
       {% for proc in tratamiento.procedimientos %}
         <li>{{ proc.nombre }}</li>
       {% endfor %}
     </ul>
   {% else %}
-    <p>No hay procedimientos asociados aún.</p>
+    <p class="lista-procedimientos">No hay procedimientos asociados aún.</p>
   {% endif %}
 
   <hr>
 
-  <h3>Agregar nuevo procedimiento</h3>
+  <h3 class="titulo-seccion">Agregar nuevo procedimiento</h3>
   <form method="POST">
     {{ form.hidden_tag() }}
     
@@ -26,11 +102,7 @@
       {{ form.nombre(class="form-control") }}
     </div>
 
-    <button type="submit" class="btn btn-primary">Agregar</button>
+    <button type="submit" class="btn-agregar">Agregar</button>
   </form>
-
-  <div style="margin-top: 20px;">
-    <a href="{{ url_for('historia.ver_tratamiento', tratamiento_id=tratamiento.tratamiento_id) }}" class="btn btn-secondary">← Volver al tratamiento</a>
-  </div>
 </div>
 {% endblock %}
