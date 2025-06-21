@@ -1,20 +1,9 @@
 {% extends "base.html" %}
+
 {% block title %}Pagos{% endblock %}
+
 {% block content %}
-
 <style>
-  .btn-volver {
-    position: absolute;
-    top: 30px;
-    left: 30px;
-    font-size: 2rem;
-    color: #0d2f6c;
-    background: none;
-    border: none;
-    cursor: pointer;
-    text-decoration: none;
-  }
-
   .container-pagos {
     max-width: 900px;
     margin: 60px auto;
@@ -32,7 +21,6 @@
     margin-bottom: 30px;
   }
 
-   /* Título y botón volver */
   .header-main {
     display: flex;
     align-items: center;
@@ -42,15 +30,18 @@
     font-size: 1.5rem;
     color: #2a2f65;
   }
+
   .header-main a.back-btn {
     font-size: 1.7rem;
     color: #2a2f65;
     text-decoration: none;
     font-weight: 900;
   }
+
   .header-main a.back-btn:hover {
     color: #5a5f9e;
   }
+
   .paciente-info {
     display: flex;
     align-items: center;
@@ -116,12 +107,10 @@
   }
 </style>
 
-<!-- Botón volver fuera del container -->
 <div class="header-main">
-  <a href="{{ url_for('historia.index', historia_id=historia.historia_id) }}" class="back-btn" title="Volver" style="font-size: 1.5rem; text-decoration: none; margin-right: 10px;">&#x2190;</a>
+  <a href="{{ url_for('historia.index', historia_id=historia.historia_id) }}" class="back-btn" title="Volver">&#x2190;</a>
   <span>Pagos de {{ historia.paciente.nombres }} {{ historia.paciente.apellidos }}</span>
 </div>
-
 
 <div class="container-pagos">
   <h3 class="fw-bold mb-3">Pagos</h3>
@@ -134,7 +123,7 @@
         <small>DNI: {{ paciente.documento_identidad }}</small>
       </div>
     </div>
-    <div class="saldo">Saldo pendiente: <strong style="font-size: 1.5rem;">{{ saldo }}$</strong></div>
+    <div class="saldo">Total de presupuestos: <strong style="font-size: 1.5rem;">{{ total_presupuestos }}$</strong></div>
   </div>
 
   <h5 class="fw-semibold">Historial de pagos</h5>
@@ -149,7 +138,7 @@
       </div>
     </div>
     {% endfor %}
-    <button class="btn-add">➕ Agregar pago</button>
+    <button class="btn-add"><a href="{{ url_for('historia.agregar_pago', paciente_id=paciente.paciente_id) }}" style="text-decoration: none; color: inherit;">➕ Agregar pago</a></button>
   </div>
 </div>
 
