@@ -30,4 +30,7 @@ def create_app(config_class=Config):
     from app.historia import bp as historia_bp
     app.register_blueprint(historia_bp, url_prefix='/historia')
 
+    from app.odontograma import bp as odontograma_bp
+    app.register_blueprint(odontograma_bp, url_prefix='/odontograma')
+
     return app
