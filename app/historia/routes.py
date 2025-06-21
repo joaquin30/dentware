@@ -450,80 +450,19 @@ def pagos(paciente_id):
 COD-016
 Función que muestra el presupuesto
 '''
-@bp.route('/paciente/<int:paciente_id>/tratamiento/<int:tratamiento_id>/presupuesto', methods=['GET', 'POST'])
+@bp.route('/paciente/<int:paciente_id>/tratamiento/<int:tratamiento_id>/presupuesto')
 def presupuesto(paciente_id, tratamiento_id):
     paciente = db.get_or_404(Paciente, paciente_id)
-    historia = paciente.historias[0]
     tratamiento = db.get_or_404(Tratamiento, tratamiento_id)
 
-    if request.method == 'POST':
-        lineas = []
-        for key in request.form:
-            if key.startswith("lineas-") and key.endswith("-procedimiento"):
-                index = key.split("-")[1]
-                procedimiento = request.form.get(f"lineas-{index}-procedimiento", "").strip()
-                material = request.form.get(f"lineas-{index}-material", "").strip()
-                costo = request.form.get(f"lineas-{index}-costo", "").strip()
-                if procedimiento and costo:
-                    lineas.append((procedimiento, material, costo))
-
-        if not lineas:
-            flash("Debes agregar al menos un procedimiento con costo.", "danger")
-        else:
-            for nombre_proc, nombre_mat, costo in lineas:
-                procedimiento = db.session.query(Procedimiento).filter_by(nombre=nombre_proc).first()
-                if not procedimiento:
-                    procedimiento = Procedimiento(nombre=nombre_proc, costo_referencial=float(costo))
-                    db.session.add(procedimiento)
-                    db.session.flush()
-                    flash(f"Procedimiento '{nombre_proc}' creado automáticamente.", "info")
-
-                db.session.add(TratamientoProcedimiento(
-                    tratamiento_id=tratamiento_id,
-                    procedimiento_id=procedimiento.procedimiento_id,
-                    cantidad=1,
-                    costo=float(costo)
-                ))
-
-                if nombre_mat and nombre_mat != "-":
-                    material = db.session.query(Material).filter_by(nombre=nombre_mat).first()
-                    if not material:
-                        material = Material(nombre=nombre_mat, costo_referencial=0.0)
-                        db.session.add(material)
-                        db.session.flush()
-
-                    db.session.add(TratamientoMaterial(
-                        tratamiento_id=tratamiento_id,
-                        material_id=material.material_id,
-                        cantidad=1,
-                        costo=material.costo_referencial or 0
-                    ))
-                else:
-                    material = None
-
-
-
-            db.session.commit()
-            flash('Presupuesto guardado exitosamente.', 'success')
-            return redirect(url_for('historia.index', historia_id=historia.historia_id))
-
-    form = PresupuestoForm()
-
-        # Suponiendo que esta es la función del POST y GET para presupuesto
-    
-    procedimientos = db.session.query(TratamientoProcedimiento).filter_by(tratamiento_id=tratamiento.tratamiento_id).order_by(TratamientoProcedimiento.procedimiento_id).all()
-    materiales = db.session.query(TratamientoMaterial).filter_by(tratamiento_id=tratamiento.tratamiento_id).order_by(TratamientoMaterial.material_id).all()
-
-    # Emparejar por índice (posición)
-    min_len = min(len(procedimientos), len(materiales))
-    presupuestos = [(procedimientos[i], materiales[i]) for i in range(min_len)]
+    # ✅ Aquí accedemos a los procedimientos asociados
+    procedimientos = tratamiento.procedimientos
 
     return render_template(
-        'historia/editarpresupuesto.html',
+        'historia/presupuesto.html',
         paciente=paciente,
         tratamiento=tratamiento,
-        form=form,
-        presupuestos=presupuestos
+        procedimientos=procedimientos
     )
 
 

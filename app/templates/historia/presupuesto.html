@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Presupuesto{% endblock %}
+{% block content %}
+
+<h2>Presupuesto del tratamiento</h2>
+
+<p><strong>Paciente:</strong> {{ paciente.nombres }} {{ paciente.apellidos }}</p>
+<p><strong>Tratamiento:</strong> {{ tratamiento.descripcion }}</p>
+
+<table border="1" cellpadding="8" cellspacing="0">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Procedimiento</th>
+      <th>Costo Referencial (S/)</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for proc in procedimientos %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ proc.nombre }}</td>
+      <td>{{ "{:,.2f}".format(proc.costo_referencial) }}</td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="3">No hay procedimientos registrados.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<a href="{{ url_for('historia.ver_tratamiento', tratamiento_id=tratamiento.tratamiento_id) }}" class="btn btn-secondary mt-3">← Volver</a>
+
+{% endblock %}
