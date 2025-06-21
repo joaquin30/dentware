@@ -100,3 +100,10 @@ class FormularioPago(FlaskForm):
         NumberRange(min=0.01, message="Debe ingresar un monto positivo")
     ])
     submit = SubmitField('Registrar pago')
+
+
+class FormularioNuevoProcedimiento(FlaskForm):
+    nombre = StringField('Nombre del procedimiento', validators=[DataRequired()])
+    costo_referencial = DecimalField('Costo referencial (S/.)', validators=[DataRequired(), NumberRange(min=0)])
+    submit = SubmitField('Agregar procedimiento')
+

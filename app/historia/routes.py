@@ -6,10 +6,11 @@ from sqlalchemy import select
 import os
 from werkzeug.utils import secure_filename
 from app.models import HistoriaExamen, PacienteNovedad
-from app.historia.forms import HistoriaExamenForm, HistoriaContraindicacionForm, ContraindicacionesForm, NovedadForm, PacienteNovedadesForm, FormularioTratamiento, FormularioTratamientoSesion, PresupuestoForm, LineaPresupuestoForm
+from app.historia.forms import HistoriaExamenForm, HistoriaContraindicacionForm, ContraindicacionesForm, NovedadForm, PacienteNovedadesForm, FormularioTratamiento, FormularioTratamientoSesion, PresupuestoForm, LineaPresupuestoForm, FormularioNuevoProcedimiento
 from datetime import date
 from flask import send_from_directory
 from sqlalchemy.orm import joinedload
+
 
 '''
 COD-006
@@ -524,4 +525,32 @@ def presupuesto(paciente_id, tratamiento_id):
         form=form,
         presupuestos=presupuestos
     )
+
+
+@bp.route('/tratamiento/<int:tratamiento_id>/procedimientos', methods=['GET', 'POST'])
+def gestionar_procedimientos(tratamiento_id):
+    tratamiento = db.get_or_404(Tratamiento, tratamiento_id)
+    form = FormularioNuevoProcedimiento()
+
+    if form.validate_on_submit():
+        # Crear el nuevo procedimiento
+
+
+        nuevo_proc = Procedimiento(
+            nombre=form.nombre.data.strip(),
+            costo_referencial=int(form.costo_referencial.data)  # <- conversión aquí
+        )
+
+        db.session.add(nuevo_proc)
+        db.session.commit()
+
+        # Asociar al tratamiento
+        tratamiento.procedimientos.append(nuevo_proc)
+        db.session.commit()
+
+        flash('Procedimiento registrado y asociado correctamente.', 'success')
+        return redirect(url_for('historia.gestionar_procedimientos', tratamiento_id=tratamiento_id))
+
+    return render_template('historia/gestionar_procedimientos.html', tratamiento=tratamiento, form=form)
+
 

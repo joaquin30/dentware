@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Procedimientos del Tratamiento{% endblock %}
+
+{% block content %}
+<div class="card-historia">
+  <h2>Procedimientos Asociados</h2>
+
+  {% if tratamiento.procedimientos %}
+    <ul>
+      {% for proc in tratamiento.procedimientos %}
+        <li>{{ proc.nombre }} — S/. {{ proc.costo_referencial }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No hay procedimientos asociados aún.</p>
+  {% endif %}
+
+  <hr>
+
+  <h3>Agregar nuevo procedimiento</h3>
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    
+    <div class="form-group">
+      {{ form.nombre.label }}
+      {{ form.nombre(class="form-control") }}
+    </div>
+
+    <div class="form-group">
+      {{ form.costo_referencial.label }}
+      {{ form.costo_referencial(class="form-control") }}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Agregar</button>
+  </form>
+
+  <div style="margin-top: 20px;">
+    <a href="{{ url_for('historia.ver_tratamiento', tratamiento_id=tratamiento.tratamiento_id) }}" class="btn btn-secondary">← Volver al tratamiento</a>
+  </div>
+</div>
+{% endblock %}
