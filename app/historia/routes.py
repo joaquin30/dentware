@@ -293,7 +293,7 @@ def crear_tratamiento(historia_id):
         nuevo_tratamiento = Tratamiento(
             fecha_creacion=form.fecha_creacion.data,
             descripcion=form.descripcion.data,
-            en_curso=form.en_curso.data,
+            en_curso=True,
             costo=0,  # 👈 valor fijo por defecto
             odontologo_id=form.odontologo_id.data,
             historia_id=historia_id
