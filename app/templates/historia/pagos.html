@@ -19,6 +19,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
+    flex-wrap: wrap;
   }
 
   .header-main {
@@ -59,6 +60,8 @@
     padding: 10px 20px;
     border: 2px solid #ccc;
     border-radius: 10px;
+    margin-top: 10px;
+    background-color: #fff;
   }
 
   .historial {
@@ -144,7 +147,18 @@
         <small>DNI: {{ paciente.documento_identidad }}</small>
       </div>
     </div>
-    <div class="saldo">Total de presupuestos: <strong style="font-size: 1.5rem;">{{ total_presupuestos }}$</strong></div>
+    <div>
+      <div class="saldo">
+        Deuda total: 
+        <strong style="font-size: 1.5rem;">S/. {{ total_presupuestos }}</strong>
+      </div>
+      <div class="saldo">
+        Deuda pendiente: 
+        <strong style="font-size: 1.5rem; color: #c0392b;">
+          S/. {{ total_presupuestos - total_pagos }}
+        </strong>
+      </div>
+    </div>
   </div>
 
   <!-- Box de Tratamientos -->

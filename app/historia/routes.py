@@ -453,7 +453,7 @@ Función que permite ver los pagos de un paciente y el total de dauda pendiente.
 def pagos(paciente_id):
     paciente = db.get_or_404(Paciente, paciente_id)
     historia = paciente.historias[0]  # Obtener la primera historia del paciente
-    
+
     # Obtener todos los tratamientos asociados a la historia clínica
     tratamientos = db.session.query(Tratamiento).filter_by(historia_id=historia.historia_id).all()
 
@@ -462,14 +462,22 @@ def pagos(paciente_id):
     for tratamiento in tratamientos:
         if tratamiento.costo:
             total_presupuestos += float(tratamiento.costo)
-    
+
+    # Obtener todos los pagos del paciente
+    pagos = paciente.pagos
+
+    # Calcular el total de pagos realizados
+    total_pagos = sum(pago.monto for pago in pagos)
+
     return render_template(
         'historia/pagos.html',
         paciente=paciente,
         historia=historia,
         total_presupuestos=round(total_presupuestos, 2),
-        pagos=paciente.pagos  # Obtener los pagos del paciente
+        total_pagos=round(total_pagos, 2),
+        pagos=pagos
     )
+
 
 '''
 COD-019
