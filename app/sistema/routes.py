@@ -63,35 +63,50 @@ def editar_paciente(paciente_id):
     if not paciente.historias:
         flash("No hay historia clínica para este paciente.", "danger")
         return redirect(url_for('index'))
-    
+
     historia = paciente.historias[0]
 
-    # Aquí elegimos el primer antecedente o creamos uno si no existe
-    if historia.antecedentes_medicos:
-        antecedente = historia.antecedentes_medicos[0]
-    else:
-        antecedente = HistoriaAntecedentesMedicos(historia=historia)
-        historia.antecedentes_medicos.append(antecedente)
-    
     form_paciente = PacienteForm(obj=paciente)
-    form_antmed = AntMedForm(obj=antecedente)
 
-    if form_paciente.validate_on_submit() and form_antmed.validate_on_submit():
+    if form_paciente.validate_on_submit():
         form_paciente.populate_obj(paciente)
-        form_antmed.populate_obj(antecedente)
-        print("Antecedentes después de populate_obj:", antecedente.enfermedad_cardiaca, antecedente.vih, antecedente.diabetes, antecedente.alergias, antecedente.otros)
-
         db.session.add(paciente)
-        db.session.add(antecedente)
         db.session.commit()
-        
-        flash("Datos personales y antecedentes médicos actualizados correctamente.", "success")
+
+        flash("Datos personales actualizados.", "success")
         return redirect(url_for('historia.index', historia_id=historia.historia_id))
 
-    return render_template('sistema/editar.html', 
-                           form_paciente=form_paciente, 
-                           form_antmed=form_antmed,
-                           historia=historia, paciente=historia.paciente)
+    return render_template('sistema/editar.html',
+                           form_paciente=form_paciente,
+                           historia=historia, paciente=paciente)
+
+'''
+COD-003
+Función de formulario de edición de antecedentes médicos.
+'''
+@bp.route('/historia/<int:historia_id>/antecedentes', methods=['GET', 'POST'])
+def editar_antecedentes(historia_id):
+    historia = db.get_or_404(Historia, historia_id)
+
+    # Obtener el primer antecedente o crear uno nuevo si no existe
+    antecedente = historia.antecedentes_medicos[0] if historia.antecedentes_medicos else HistoriaAntecedentesMedicos(historia=historia)
+
+    form_antmed = AntMedForm(obj=antecedente)
+
+    if form_antmed.validate_on_submit():
+        form_antmed.populate_obj(antecedente)
+        if not hasattr(antecedente, 'id') or not getattr(antecedente, 'id', None):
+            db.session.add(antecedente)
+        db.session.commit()
+        flash("Antecedentes médicos actualizados.", "success")
+        return redirect(url_for('historia.index', historia_id=historia.historia_id))
+
+    return render_template(
+        'historia/editar_antecedentes.html',
+        form_antmed=form_antmed,
+        historia=historia
+    )
+
 
 '''
 COD-004

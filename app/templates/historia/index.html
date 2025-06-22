@@ -41,17 +41,18 @@
     font-size: 0.95rem;
   }
 
-  .btn-editar {
-    width: 110px;
-    text-decoration: none;
-    margin-top: 10px;
-    background-color: #2a2f65;
-    color: white;
-    border: none;
-    padding: 6px 6px;
-    border-radius: 6px;
-    font-size: 0.9rem;
-  }
+.btn-editar {
+  display: inline-block;           /* Hace que el botón se ajuste al contenido */
+  text-decoration: none;
+  margin-top: 10px;
+  background-color: #2a2f65;
+  color: white;
+  border: none;
+  padding: 6px 10px;               /* Puedes ajustar esto si quieres más aire */
+  border-radius: 6px;
+  font-size: 0.9rem;
+  white-space: nowrap;             /* Evita que el texto se divida en dos líneas */
+}
 
   .tratamientos-box {
     background: #ffffff;
@@ -194,7 +195,11 @@
         <p><strong>Fecha de nacimiento:</strong> {{ paciente.fecha_nacimiento }}</p>
       </div>
     </div>
-    <a href="{{ url_for('sistema.editar_paciente', paciente_id=paciente.paciente_id) }}" class="btn-editar">✎ Editar datos</a>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+      <a href="{{ url_for('sistema.editar_paciente', paciente_id=paciente.paciente_id) }}" class="btn-editar">✎ Editar datos</a>
+      <a href="{{ url_for('sistema.editar_antecedentes', historia_id=paciente.historias[0].historia_id) }}" class="btn-editar">🩺 Antecedentes médicos</a>
+    </div>
+
 
     <div class="tratamientos-box">
       <h4>Tratamientos</h4>
