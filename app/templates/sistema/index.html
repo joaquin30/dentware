@@ -98,7 +98,8 @@
 
   .illustration {
     position: static;
-    max-width: 200px;
+    max-width: 250px; 
+    width: 100%; 
     margin-top: 20px;
     opacity: 0.6;
     display: block;
@@ -166,10 +167,6 @@
       <img src="{{ url_for('static', filename='img/add_profile.png') }}" alt="Añadir" style="height: 20px; margin-right: 8px;">
       Añadir paciente
     </a>
-    <div class="btn" disabled>
-      <img src="{{ url_for('static', filename='img/profile.png') }}" alt="Pacientes" style="height: 20px; margin-right: 8px;">
-      {{ cantidad_pacientes }} Pacientes
-    </div>
     <a href="/odontologos" class="btn">
       <img src="{{ url_for('static', filename='img/dentist.png') }}" alt="Odontólogos" style="height: 20px; margin-right: 8px;">
       Odontólogos
@@ -192,6 +189,11 @@
       <div id="resultados_busqueda"></div>
 
       <img src="{{ url_for('static', filename='img/dentist.png') }}" class="illustration" alt="Ilustración de doctora"/>
+      <div style="display: flex; justify-content: center; align-items: center; margin-top: 16px; font-size: 1.4rem; color: #2a2f65; font-weight: 600;">
+        <img src="{{ url_for('static', filename='img/profile.png') }}" alt="Pacientes" style="height: 28px; margin-right: 10px;">
+        {{ cantidad_pacientes }} Pacientes
+      </div>
+
 
     </form>
   </div>
