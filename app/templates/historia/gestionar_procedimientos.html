@@ -25,22 +25,31 @@
     padding: 24px;
     width: 90%;
     margin: 10px auto;
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 
   .titulo-seccion {
     margin-top: 0;
     margin-bottom: 16px;
+    color: #2a2f65;
   }
 
   .lista-procedimientos {
     margin-top: 12px;
     margin-bottom: 24px;
-    font-size: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
 
-  .lista-procedimientos li {
-    margin-bottom: 6px;
+  .procedimiento-card {
+    background-color: #f4f6fb;
+    padding: 12px 16px;
+    border-left: 5px solid #2a2f65;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #333;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   }
 
   .form-group {
@@ -69,10 +78,18 @@
     border: none;
     font-weight: bold;
     cursor: pointer;
+    transition: background-color 0.3s ease;
   }
 
   .btn-agregar:hover {
     background-color: #1e234d;
+  }
+
+  hr {
+    margin: 30px 0;
+    border: none;
+    height: 1px;
+    background-color: #ddd;
   }
 </style>
 
@@ -82,11 +99,13 @@
   <h2 class="titulo-seccion">Procedimientos Asociados</h2>
 
   {% if tratamiento.procedimientos %}
-    <ul class="lista-procedimientos">
+    <div class="lista-procedimientos">
       {% for proc in tratamiento.procedimientos %}
-        <li>{{ proc.nombre }}</li>
+        <div class="procedimiento-card">
+          {{ proc.nombre }}
+        </div>
       {% endfor %}
-    </ul>
+    </div>
   {% else %}
     <p class="lista-procedimientos">No hay procedimientos asociados aún.</p>
   {% endif %}
