@@ -9,7 +9,7 @@ from app.utils import remove_csrf_token
 from flask import jsonify, request
 
 '''
-COD-001
+F-index_pacients
 Función que muestra la lista de pacientes.
 '''
 @bp.route('/', methods=['GET', 'POST'])
@@ -31,7 +31,7 @@ def index():
 
 
 '''
-COD-002
+F-register_paciente
 Función del formulario de registro de datos de paciente.
 '''
 @bp.route('/registrar', methods=['GET', 'POST'])
@@ -53,7 +53,7 @@ def registrar_paciente():
 
 
 '''
-COD-003
+F-edit_paciente
 Función de formulario de edición de datos del paciente.
 '''
 @bp.route('/paciente/<int:paciente_id>/editar', methods=['GET', 'POST'])
@@ -81,7 +81,7 @@ def editar_paciente(paciente_id):
                            historia=historia, paciente=paciente)
 
 '''
-COD-003
+F-edit_antecedentes
 Función de formulario de edición de antecedentes médicos.
 '''
 @bp.route('/historia/<int:historia_id>/antecedentes', methods=['GET', 'POST'])
@@ -109,7 +109,7 @@ def editar_antecedentes(historia_id):
 
 
 '''
-COD-004
+F-exam_estoma
 Función que muestra el formualrio de exámenes clínicos estomatológicos.
 '''
 @bp.route('/paciente/<int:paciente_id>/examenes-estomatologicos', methods=['GET', 'POST'])
@@ -141,7 +141,7 @@ def examenes_estomatologicos(paciente_id):
     return render_template('historia/examenes_estomatologicos.html', form_examen=form_examen, historia=historia, paciente=historia.paciente)
 
 '''
-COD-005
+F-buscar_paciente
 Función que permite mostrar el formulario de búsqueda de pacientes y mostrar las coincidencias de la búsqueda.
 '''
 @bp.route('/sistema/buscar_pacientes')
@@ -170,6 +170,12 @@ def buscar_pacientes():
 
     return jsonify(resultados)
 
+'''
+F-ondontologos
+Función que permite mostrar el los odontologos de la cínica
+'''
+
+
 @bp.route('/odontologos')
 def odontologos():
     odontologos_internos = db.session.query(Odontologo).filter_by(tipo_odontologo='Interno').all()
@@ -180,6 +186,13 @@ def odontologos():
                            internos=odontologos_internos,
                            externos=odontologos_externos,
                            temporales=odontologos_temporales)
+
+
+
+'''
+F-edit_ondontologo
+Función que permite actualizar el registro sobre un odontologo
+'''
 
 @bp.route('/odontologo/<int:odontologo_id>/editar', methods=['GET', 'POST'])
 def editar_odontologo(odontologo_id):
@@ -195,6 +208,11 @@ def editar_odontologo(odontologo_id):
     return render_template('sistema/editar_odontologo.html', form=form, odontologo=odontologo)
 
 
+'''
+F-elim_ondontologo
+Función que permite eliminar un odontologo
+'''
+
 @bp.route('/odontologo/<int:odontologo_id>/eliminar', methods=['POST'])
 def eliminar_odontologo(odontologo_id):
     odontologo = db.get_or_404(Odontologo, odontologo_id)
@@ -202,6 +220,11 @@ def eliminar_odontologo(odontologo_id):
     db.session.commit()
     flash('Odontólogo eliminado correctamente.', 'success')
     return redirect(url_for('sistema.odontologos'))
+
+'''
+F-add_ondontologo
+Función que permite agregar un odontologo
+'''
 
 @bp.route('/odontologos/agregar', methods=['GET', 'POST'])
 def agregar_odontologo():

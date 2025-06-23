@@ -15,7 +15,7 @@ from datetime import datetime
 
 
 '''
-COD-006
+F-hist_index
 Función que muestra la información de una historia clínica específica.
 '''
 @bp.route('/<int:historia_id>')
@@ -38,7 +38,7 @@ def index(historia_id):
     )
 
 '''
-COD-007
+F-subir_exam_aux
 Función que permite la subida de exámenes auxiliares.
 '''
 @bp.route('/historia/<int:historia_id>/examenes/subir', methods=['GET', 'POST'])
@@ -76,7 +76,7 @@ def subir_examen(historia_id):
     return render_template('examenes_aux/subir_examen.html', form=form, historia=historia, paciente=historia.paciente, examenes=examenes)
 
 '''
-COD-008
+F-descar_exam_aux
 Función que permite la descarga de exámenes auxiliares.
 '''
 @bp.route('/historia/<int:historia_id>/examenes/<int:examen_id>/descargar')
@@ -94,7 +94,7 @@ def descargar_examen(historia_id, examen_id):
 
 
 '''
-COD-009
+F-ver_exam_aux
 Función que permite ver los exámenes auxiliares de una resoluación más alta.
 '''
 @bp.route('/historia/<int:historia_id>/examenes/<int:examen_id>/ver')
@@ -105,7 +105,7 @@ def ver_examen(historia_id, examen_id):
     return send_from_directory(upload_folder, examen.ruta_archivo)
 
 '''
-COD-010
+F-elim_exam_aux
 Función que permite borrar un examen auxiliar.
 '''
 @bp.route('/historia/<int:historia_id>/examenes/<int:examen_id>/borrar', methods=['POST'])
@@ -124,7 +124,7 @@ def borrar_examen(historia_id, examen_id):
     return redirect(url_for('historia.index', historia_id=historia_id))
 
 '''
-COD-011
+F-actua_observaciones
 Función que permite actualizar la observación de un examen auxiliar.
 '''
 @bp.route('/historia/<int:historia_id>/examenes/<int:examen_id>/actualizar-observacion', methods=['POST'])
@@ -138,7 +138,7 @@ def actualizar_observacion(historia_id, examen_id):
 
 
 '''
-COD-012
+F-edit_contraindi
 Función que permite agregar o editar contraindicaciones de una historia clínica y sugerencias de contraindicaciones frecuentes.
 '''
 @bp.route('/historia/<int:historia_id>/contraindicaciones', methods=['GET', 'POST'])
@@ -203,7 +203,7 @@ def contraindicaciones(historia_id):
     )
 
 '''
-COD-013
+F-paciente_novedades
 Función que permite agregar o editar novedades de un paciente y asignarles una prioridad.
 '''
 @bp.route('/paciente/<string:paciente_id>/novedades', methods=['GET', 'POST'])
@@ -277,7 +277,7 @@ def paciente_novedades(paciente_id):
     )
 
 '''
-COD-014
+F-crear_tratamnt
 Función que permite crear un tratamiento para un paciente.
 '''
 @bp.route('/historia/<int:historia_id>/tratamiento/nuevo', methods=['GET', 'POST'])
@@ -313,7 +313,7 @@ def crear_tratamiento(historia_id):
     )
 
 '''
-COD-015
+F-ver_tratamnt
 Función que permite ver un tratamiento específico y editarlo.
 '''
 @bp.route('/tratamiento/<int:tratamiento_id>', methods=['GET', 'POST'])
@@ -359,7 +359,7 @@ def ver_tratamiento(tratamiento_id):
     )
 
 '''
-COD-016
+F-crear_sesion
 Función que permite crear una sesión de tratamiento.
 '''
 @bp.route('/historia/tratamiento/<int:tratamiento_id>/sesion/nuevo', methods=['GET', 'POST'])
@@ -409,7 +409,7 @@ def crear_sesion_tratamiento(tratamiento_id):
     )
 
 '''
-COD-017
+F_edit-sesion
 Función que permite ver una sesión de tratamiento y editarla.
 '''
 @bp.route('/historia/tratamiento/<int:tratamiento_id>/sesion/<int:sesion_id>/editar', methods=['GET', 'POST'])
@@ -446,7 +446,7 @@ def editar_sesion_tratamiento(tratamiento_id, sesion_id):
 
 
 '''
-COD-018
+F-pagos
 Función que permite ver los pagos de un paciente y el total de dauda pendiente.
 '''
 @bp.route('/paciente/<string:paciente_id>/pagos', methods=['GET'])
@@ -480,7 +480,7 @@ def pagos(paciente_id):
 
 
 '''
-COD-019
+F-add_pago
 Función que permite agregar un pago a un tratamiento específico.
 '''
 @bp.route('/paciente/<int:paciente_id>/pago', methods=['GET', 'POST'])
@@ -511,7 +511,7 @@ def agregar_pago(paciente_id):
     )
 
 '''
-COD-020
+F-presupuesto
 Función que permite crear un presupuesto para un tratamiento específico.
 '''
 @bp.route('/paciente/<int:paciente_id>/tratamiento/<int:tratamiento_id>/presupuesto', methods=['GET', 'POST'])
@@ -547,7 +547,7 @@ def presupuesto(paciente_id, tratamiento_id):
 
 
 '''
-COD-021
+F-gestionar_procedimnts
 Función que permite agregar un procedimiento a un procedimiento específico.
 '''
 
