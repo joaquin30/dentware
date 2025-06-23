@@ -555,27 +555,45 @@ Función que permite agregar un procedimiento a un procedimiento específico.
 def gestionar_procedimientos(tratamiento_id):
     tratamiento = db.get_or_404(Tratamiento, tratamiento_id)
     form = FormularioAgregarProcedimiento()
-    
-    if form.validate_on_submit():
-        try:
-            nuevo_proc = Procedimiento(
-                nombre=form.nombre.data.strip(),
-                costo_referencial=0  
-            )
-            db.session.add(nuevo_proc)
 
-            tratamiento.procedimientos.append(nuevo_proc)
-            db.session.commit()
+    # Verificamos si viene un 'delete_id' en el POST (es decir, solicitud para eliminar)
+    if request.method == 'POST':
+        delete_id = request.form.get('delete_id')
+        if delete_id:
+            procedimiento = db.get_or_404(Procedimiento, int(delete_id))
+            try:
+                tratamiento.procedimientos.remove(procedimiento)
 
-            flash('Procedimiento agregado correctamente.', 'success')
+                # Recalcular costo total
+                tratamiento.costo = sum(p.costo_referencial or 0 for p in tratamiento.procedimientos)
+
+                db.session.commit()
+                flash('Procedimiento eliminado correctamente.', 'success')
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Error al eliminar el procedimiento: {e}', 'danger')
             return redirect(url_for('historia.gestionar_procedimientos', tratamiento_id=tratamiento_id))
 
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Error al registrar el procedimiento: {e}', 'danger')
+        # Si no hay delete_id, se asume que es una adición de procedimiento
+        if form.validate_on_submit():
+            try:
+                nuevo_proc = Procedimiento(
+                    nombre=form.nombre.data.strip(),
+                    costo_referencial=0
+                )
+                db.session.add(nuevo_proc)
 
+                tratamiento.procedimientos.append(nuevo_proc)
 
+                # Recalcular costo también aquí por consistencia
+                tratamiento.costo = sum(p.costo_referencial or 0 for p in tratamiento.procedimientos)
+
+                db.session.commit()
+                flash('Procedimiento agregado correctamente.', 'success')
+                return redirect(url_for('historia.gestionar_procedimientos', tratamiento_id=tratamiento_id))
+
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Error al registrar el procedimiento: {e}', 'danger')
 
     return render_template('historia/gestionar_procedimientos.html', tratamiento=tratamiento, form=form)
-
-

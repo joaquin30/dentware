@@ -101,11 +101,17 @@
   {% if tratamiento.procedimientos %}
     <div class="lista-procedimientos">
       {% for proc in tratamiento.procedimientos %}
-        <div class="procedimiento-card">
-          {{ proc.nombre }}
+        <div class="procedimiento-card" style="display: flex; justify-content: space-between; align-items: center;">
+          <span>{{ proc.nombre }}</span>
+          <form method="POST" style="margin: 0;">
+            {{ form.csrf_token }}
+            <input type="hidden" name="delete_id" value="{{ proc.procedimiento_id }}">
+            <button type="submit" class="btn-agregar" style="background-color: #d9534f;" onclick="return confirm('¿Eliminar procedimiento?')">Eliminar</button>
+          </form>
         </div>
       {% endfor %}
     </div>
+
   {% else %}
     <p class="lista-procedimientos">No hay procedimientos asociados aún.</p>
   {% endif %}
