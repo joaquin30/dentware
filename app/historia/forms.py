@@ -10,7 +10,7 @@ from flask_wtf import FlaskForm
 from wtforms import DecimalField
 from wtforms.validators import NumberRange
 from wtforms import StringField, SelectField, BooleanField, DateField, DecimalField
-from wtforms.validators import DataRequired, NumberRange
+from wtforms.validators import DataRequired, NumberRange, ValidationError
 
 from wtforms import TextAreaField
 from wtforms.validators import Optional
@@ -79,24 +79,33 @@ class PresupuestoForm(FlaskForm):
     lineas = FieldList(FormField(LineaPresupuestoForm), min_entries=1)
         
 class FormularioPago(FlaskForm):
-    tratamiento_id = HiddenField(validators=[DataRequired()])
+    # Método de pago
     metodo = SelectField(
         'Método de pago',
         choices=[
-            ('efectivo', 'Efectivo'),
-            ('tarjeta', 'Tarjeta'),
-            ('transferencia', 'Transferencia'),
-            ('yape', 'Yape'),
-            ('plin', 'Plin'),
+            ('Efectivo', 'Efectivo'),
+            ('Tarjeta', 'Tarjeta'),
+            ('Transferencia', 'Transferencia'),
+            ('Yape', 'Yape'),
+            ('Plin', 'Plin'),
+            ('Otros', 'Otros'),
         ],
-        validators=[DataRequired()]
+        validators=[DataRequired()],
+        render_kw={"aria-label": "Método de pago"}  # Mejora accesibilidad
     )
-    monto = DecimalField('Monto a pagar', validators=[
-        DataRequired(),
-        NumberRange(min=0.01, message="Debe ingresar un monto positivo")
-    ])
-    submit = SubmitField('Registrar pago')
 
+    # Monto
+    monto = DecimalField('Monto a pagar', validators=[
+        DataRequired(message="El monto es obligatorio."),
+        NumberRange(min=0.01, message="Debe ingresar un monto positivo mayor a cero.")
+    ], places=2, render_kw={"aria-label": "Monto a pagar"})
+    
+    submit = SubmitField('Registrar pago', render_kw={"class": "btn-submit"})
+
+    # Custom validation if needed (for example, if you want to check if the monto is a valid amount)
+    def validate_monto(form, field):
+        if field.data <= 0:
+            raise ValidationError("El monto debe ser un valor positivo.")
 
 
 class FormularioAgregarProcedimiento(FlaskForm):

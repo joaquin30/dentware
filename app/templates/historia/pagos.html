@@ -1,20 +1,9 @@
 {% extends "base.html" %}
+
 {% block title %}Pagos{% endblock %}
+
 {% block content %}
-
 <style>
-  .btn-volver {
-    position: absolute;
-    top: 30px;
-    left: 30px;
-    font-size: 2rem;
-    color: #0d2f6c;
-    background: none;
-    border: none;
-    cursor: pointer;
-    text-decoration: none;
-  }
-
   .container-pagos {
     max-width: 900px;
     margin: 60px auto;
@@ -30,9 +19,9 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
+    flex-wrap: wrap;
   }
 
-   /* Título y botón volver */
   .header-main {
     display: flex;
     align-items: center;
@@ -42,15 +31,18 @@
     font-size: 1.5rem;
     color: #2a2f65;
   }
+
   .header-main a.back-btn {
     font-size: 1.7rem;
     color: #2a2f65;
     text-decoration: none;
     font-weight: 900;
   }
+
   .header-main a.back-btn:hover {
     color: #5a5f9e;
   }
+
   .paciente-info {
     display: flex;
     align-items: center;
@@ -68,6 +60,8 @@
     padding: 10px 20px;
     border: 2px solid #ccc;
     border-radius: 10px;
+    margin-top: 10px;
+    background-color: #fff;
   }
 
   .historial {
@@ -114,14 +108,33 @@
     background-color: #0d2f6c;
     color: white;
   }
+
+  .tratamientos-box {
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+  }
+
+  .tratamientos-box h5 {
+    margin-bottom: 16px;
+    color: #2a2f65;
+  }
+
+  .tratamiento-item {
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  .tratamiento-item:last-child {
+    border-bottom: none;
+  }
 </style>
 
-<!-- Botón volver fuera del container -->
 <div class="header-main">
-  <a href="{{ url_for('historia.index', historia_id=historia.historia_id) }}" class="back-btn" title="Volver" style="font-size: 1.5rem; text-decoration: none; margin-right: 10px;">&#x2190;</a>
+  <a href="{{ url_for('historia.index', historia_id=historia.historia_id) }}" class="back-btn" title="Volver">&#x2190;</a>
   <span>Pagos de {{ historia.paciente.nombres }} {{ historia.paciente.apellidos }}</span>
 </div>
-
 
 <div class="container-pagos">
   <h3 class="fw-bold mb-3">Pagos</h3>
@@ -134,7 +147,35 @@
         <small>DNI: {{ paciente.documento_identidad }}</small>
       </div>
     </div>
-    <div class="saldo">Saldo pendiente: <strong style="font-size: 1.5rem;">{{ saldo }}$</strong></div>
+    <div>
+      <div class="saldo">
+        Deuda total: 
+        <strong style="font-size: 1.5rem;">S/. {{ total_presupuestos }}</strong>
+      </div>
+      <div class="saldo">
+        Deuda pendiente: 
+        <strong style="font-size: 1.5rem; color: #c0392b;">
+          S/. {{ total_presupuestos - total_pagos }}
+        </strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Box de Tratamientos -->
+  <div class="tratamientos-box">
+    <h5 class="fw-semibold">Tratamientos del paciente</h5>
+    {% if historia.tratamientos %}
+      <ul style="list-style: none; padding-left: 0; margin: 0;">
+        {% for tratamiento in historia.tratamientos %}
+          <li class="tratamiento-item">
+            <strong>{{ tratamiento.descripcion }}</strong><br>
+            Costo total: <strong>S/. {{ tratamiento.costo or '0.00' }}</strong>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No hay tratamientos registrados.</p>
+    {% endif %}
   </div>
 
   <h5 class="fw-semibold">Historial de pagos</h5>
@@ -143,13 +184,18 @@
     <div class="pago-item">
       <div class="pago-color"></div>
       <div class="pago-info">
-        <span><strong>Monto:</strong> {{ pago.monto }}$</span>
+        <span><strong>Monto:</strong> S/. {{ pago.monto }}</span>
         <span><strong>Fecha:</strong> {{ pago.fecha.strftime('%d/%m/%Y') }}</span>
         <span><strong>Método de pago:</strong> {{ pago.metodo }}</span>
       </div>
     </div>
     {% endfor %}
-    <button class="btn-add">➕ Agregar pago</button>
+
+    <button class="btn-add">
+      <a href="{{ url_for('historia.agregar_pago', paciente_id=paciente.paciente_id) }}" style="text-decoration: none; color: inherit;">
+        ➕ Agregar pago
+      </a>
+    </button>
   </div>
 </div>
 

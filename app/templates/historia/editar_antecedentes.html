@@ -1,6 +1,6 @@
 {% from 'bootstrap5/form.html' import render_field %}
 {% extends "base.html" %}
-{% block title %}Editar paciente {{ paciente.nombres }} {{ paciente.apellidos }}{% endblock %}
+{% block title %}Editar antecedentes médicos{% endblock %}
 {% block content %}
 
 <style>
@@ -16,11 +16,15 @@
     color: #2a2f65;
     margin-bottom: 0.75rem;
   }
-  label {
-    font-weight: 600;
-    color: #2a2f65;
-    margin-bottom: 0.25rem;
-    display: block;
+  .form-check-label {
+    margin-left: 0.3rem;
+    color: #333;
+    font-size: 0.9rem;
+  }
+  .form-check-input {
+    margin-top: 0.2rem;
+    width: 16px;
+    height: 16px;
   }
   .form-control {
     border-radius: 6px;
@@ -43,20 +47,29 @@
 <div class="container mt-3">
   <div class="form-container">
     <form method="POST">
-      {{ form_paciente.csrf_token }}
+      {{ form_antmed.csrf_token }}
 
       <div class="d-flex align-items-center mb-2">
         <a href="{{ url_for('historia.index', historia_id=historia.historia_id) }}" class="btn btn-secondary me-3" style="height: 36px; padding: 0 12px;">
           ← Volver
         </a>
-        <div class="section-title mb-0">Datos personales</div>
+        <div class="section-title mb-0">Antecedentes médicos</div>
       </div>
 
-      <div class="row gx-2 gy-2">
-        {% for field in form_paciente if field.name != 'csrf_token' %}
-          <div class="col-md-4 col-sm-6 col-12">
-            {{ render_field(field) }}
-          </div>
+      <div class="row gx-2 gy-1 align-items-center">
+        {% for field in form_antmed if field.name != 'csrf_token' %}
+          {% if field.type == 'BooleanField' %}
+            <div class="col-md-2 col-sm-3 col-4">
+              <div class="form-check">
+                {{ field(class="form-check-input") }}
+                <label class="form-check-label" for="{{ field.id }}">{{ field.label.text }}</label>
+              </div>
+            </div>
+          {% else %}
+            <div class="col-md-4 col-sm-6 col-12">
+              {{ render_field(field) }}
+            </div>
+          {% endif %}
         {% endfor %}
       </div>
 

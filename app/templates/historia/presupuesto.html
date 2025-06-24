@@ -2,45 +2,136 @@
 {% block title %}Presupuesto{% endblock %}
 {% block content %}
 
-<h2>Presupuesto del tratamiento</h2>
+<style>
+  .btn-volver {
+    background-color: #6c757d;
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin: 20px auto 0 5%;
+    display: inline-block;
+  }
 
-<p><strong>Paciente:</strong> {{ paciente.nombres }} {{ paciente.apellidos }}</p>
-<p><strong>Tratamiento:</strong> {{ tratamiento.descripcion }}</p>
+  .btn-volver:hover {
+    background-color: #5a6268;
+  }
 
-<form method="POST">
-  {{ form.hidden_tag() }}
+  .card-historia {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    width: 90%;
+    margin: 10px auto;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
+  }
 
-  <table>
-    <thead>
-      <tr>
-        <th>Procedimiento</th>
-        <th>Costo referencial (S/)</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for procedimiento in tratamiento.procedimientos %}
-      <tr>
-        <td>{{ procedimiento.nombre }}</td>
-        <td>
-          <input
-            type="number"
-            name="costo_{{ procedimiento.procedimiento_id }}"
-            value="{{ procedimiento.costo_referencial }}"
-            step="0.01"
-            min="0"
-          >
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  .presupuesto-header h2 {
+    margin-top: 0;
+  }
 
-  <h3 style="margin-top: 20px;">Total: S/ {{ total_costo }}</h3>
+  .presupuesto-info p {
+    font-size: 1.05rem;
+    margin: 8px 0;
+  }
 
-  <div style="margin-top: 20px;">
-    <button type="submit" class="btn">Guardar cambios</button>
+  .presupuesto-info strong {
+    font-size: 1.1rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+    font-size: 0.95rem;
+  }
+
+  th {
+    background-color: #f4f6fb;
+    font-weight: bold;
+  }
+
+  input[type="number"] {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+
+  .total-text {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-top: 20px;
+  }
+
+  .btn-guardar {
+    background-color: #2a2f65;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 6px;
+    border: none;
+    font-weight: bold;
+    margin-top: 20px;
+    cursor: pointer;
+  }
+
+  .btn-guardar:hover {
+    background-color: #1e234d;
+  }
+</style>
+
+<a href="{{ url_for('historia.ver_tratamiento', tratamiento_id=tratamiento.tratamiento_id) }}" class="btn-volver">← Volver</a>
+
+<div class="card-historia">
+  <div class="presupuesto-header">
+    <h2>Presupuesto del tratamiento</h2>
   </div>
-</form>
 
+  <div class="presupuesto-info">
+    <p><strong>Paciente:</strong> {{ paciente.nombres }} {{ paciente.apellidos }}</p>
+    <p><strong>Tratamiento:</strong> {{ tratamiento.descripcion }}</p>
+  </div>
+
+  <form method="POST">
+    {{ form.hidden_tag() }}
+
+    <table>
+      <thead>
+        <tr>
+          <th>Procedimiento</th>
+          <th>Costo referencial (S/)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for procedimiento in tratamiento.procedimientos %}
+        <tr>
+          <td>{{ procedimiento.nombre }}</td>
+          <td>
+            <input
+              type="number"
+              name="costo_{{ procedimiento.procedimiento_id }}"
+              value="{{ procedimiento.costo_referencial }}"
+              step="0.01"
+              min="0"
+            >
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="total-text">Total: S/ {{ total_costo }}</div>
+
+    <button type="submit" class="btn-guardar">Guardar cambios</button>
+  </form>
+</div>
 
 {% endblock %}

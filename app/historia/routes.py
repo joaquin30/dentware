@@ -1,19 +1,21 @@
 from flask import render_template, abort, redirect, url_for, flash, request, current_app, jsonify
 from app.historia import bp
 from app.extensions import db
-from app.models import Paciente, Historia, HistoriaContraindicacion, Tratamiento, Odontologo, TratamientoSesion, Procedimiento
+from app.models import Paciente, Historia, HistoriaContraindicacion, Tratamiento, Odontologo, TratamientoSesion, Procedimiento, Pago
 from sqlalchemy import select
 import os
 from werkzeug.utils import secure_filename
 from app.models import HistoriaExamen, PacienteNovedad
-from app.historia.forms import HistoriaExamenForm, HistoriaContraindicacionForm, ContraindicacionesForm, NovedadForm, PacienteNovedadesForm, FormularioTratamiento, FormularioTratamientoSesion, PresupuestoForm, LineaPresupuestoForm, FormularioAgregarProcedimiento, FormularioPresupuesto
+from app.historia.forms import HistoriaExamenForm, HistoriaContraindicacionForm, ContraindicacionesForm, NovedadForm, PacienteNovedadesForm, FormularioTratamiento, FormularioTratamientoSesion, PresupuestoForm, LineaPresupuestoForm, FormularioAgregarProcedimiento, FormularioPresupuesto, FormularioPago
 from datetime import date
 from flask import send_from_directory
 from sqlalchemy.orm import joinedload
+from datetime import datetime
+
 
 
 '''
-COD-006
+F-hist_index
 Función que muestra la información de una historia clínica específica.
 '''
 @bp.route('/<int:historia_id>')
@@ -36,7 +38,7 @@ def index(historia_id):
     )
 
 '''
-COD-007
+F-subir_exam_aux
 Función que permite la subida de exámenes auxiliares.
 '''
 @bp.route('/historia/<int:historia_id>/examenes/subir', methods=['GET', 'POST'])
@@ -74,7 +76,7 @@ def subir_examen(historia_id):
     return render_template('examenes_aux/subir_examen.html', form=form, historia=historia, paciente=historia.paciente, examenes=examenes)
 
 '''
-COD-008
+F-descar_exam_aux
 Función que permite la descarga de exámenes auxiliares.
 '''
 @bp.route('/historia/<int:historia_id>/examenes/<int:examen_id>/descargar')
@@ -92,7 +94,7 @@ def descargar_examen(historia_id, examen_id):
 
 
 '''
-COD-009
+F-ver_exam_aux
 Función que permite ver los exámenes auxiliares de una resoluación más alta.
 '''
 @bp.route('/historia/<int:historia_id>/examenes/<int:examen_id>/ver')
@@ -103,7 +105,7 @@ def ver_examen(historia_id, examen_id):
     return send_from_directory(upload_folder, examen.ruta_archivo)
 
 '''
-COD-010
+F-elim_exam_aux
 Función que permite borrar un examen auxiliar.
 '''
 @bp.route('/historia/<int:historia_id>/examenes/<int:examen_id>/borrar', methods=['POST'])
@@ -122,7 +124,7 @@ def borrar_examen(historia_id, examen_id):
     return redirect(url_for('historia.index', historia_id=historia_id))
 
 '''
-COD-011
+F-actua_observaciones
 Función que permite actualizar la observación de un examen auxiliar.
 '''
 @bp.route('/historia/<int:historia_id>/examenes/<int:examen_id>/actualizar-observacion', methods=['POST'])
@@ -136,7 +138,7 @@ def actualizar_observacion(historia_id, examen_id):
 
 
 '''
-COD-012
+F-edit_contraindi
 Función que permite agregar o editar contraindicaciones de una historia clínica y sugerencias de contraindicaciones frecuentes.
 '''
 @bp.route('/historia/<int:historia_id>/contraindicaciones', methods=['GET', 'POST'])
@@ -201,7 +203,7 @@ def contraindicaciones(historia_id):
     )
 
 '''
-COD-013
+F-paciente_novedades
 Función que permite agregar o editar novedades de un paciente y asignarles una prioridad.
 '''
 @bp.route('/paciente/<string:paciente_id>/novedades', methods=['GET', 'POST'])
@@ -275,7 +277,7 @@ def paciente_novedades(paciente_id):
     )
 
 '''
-COD-014
+F-crear_tratamnt
 Función que permite crear un tratamiento para un paciente.
 '''
 @bp.route('/historia/<int:historia_id>/tratamiento/nuevo', methods=['GET', 'POST'])
@@ -291,7 +293,7 @@ def crear_tratamiento(historia_id):
         nuevo_tratamiento = Tratamiento(
             fecha_creacion=form.fecha_creacion.data,
             descripcion=form.descripcion.data,
-            en_curso=form.en_curso.data,
+            en_curso=True,
             costo=0,  # 👈 valor fijo por defecto
             odontologo_id=form.odontologo_id.data,
             historia_id=historia_id
@@ -310,7 +312,10 @@ def crear_tratamiento(historia_id):
         paciente=paciente
     )
 
-
+'''
+F-ver_tratamnt
+Función que permite ver un tratamiento específico y editarlo.
+'''
 @bp.route('/tratamiento/<int:tratamiento_id>', methods=['GET', 'POST'])
 def ver_tratamiento(tratamiento_id):
     tratamiento = (
@@ -353,7 +358,10 @@ def ver_tratamiento(tratamiento_id):
         form=form
     )
 
-
+'''
+F-crear_sesion
+Función que permite crear una sesión de tratamiento.
+'''
 @bp.route('/historia/tratamiento/<int:tratamiento_id>/sesion/nuevo', methods=['GET', 'POST'])
 def crear_sesion_tratamiento(tratamiento_id):
     tratamiento = db.get_or_404(Tratamiento, tratamiento_id)
@@ -400,7 +408,10 @@ def crear_sesion_tratamiento(tratamiento_id):
         historia=historia
     )
 
-
+'''
+F_edit-sesion
+Función que permite ver una sesión de tratamiento y editarla.
+'''
 @bp.route('/historia/tratamiento/<int:tratamiento_id>/sesion/<int:sesion_id>/editar', methods=['GET', 'POST'])
 def editar_sesion_tratamiento(tratamiento_id, sesion_id):
     sesion = db.session.query(TratamientoSesion).filter_by(
@@ -435,20 +446,73 @@ def editar_sesion_tratamiento(tratamiento_id, sesion_id):
 
 
 '''
-COD-015
-Función que muestra los pagos realizados por un paciente.
+F-pagos
+Función que permite ver los pagos de un paciente y el total de dauda pendiente.
 '''
 @bp.route('/paciente/<string:paciente_id>/pagos', methods=['GET'])
 def pagos(paciente_id):
     paciente = db.get_or_404(Paciente, paciente_id)
-    historia = paciente.historias[0]
-    return render_template('historia/pagos.html', paciente=paciente, historia=historia)
+    historia = paciente.historias[0]  # Obtener la primera historia del paciente
 
+    # Obtener todos los tratamientos asociados a la historia clínica
+    tratamientos = db.session.query(Tratamiento).filter_by(historia_id=historia.historia_id).all()
+
+    # Calcular el presupuesto total sumando los costos de los tratamientos
+    total_presupuestos = 0.0
+    for tratamiento in tratamientos:
+        if tratamiento.costo:
+            total_presupuestos += float(tratamiento.costo)
+
+    # Obtener todos los pagos del paciente
+    pagos = paciente.pagos
+
+    # Calcular el total de pagos realizados
+    total_pagos = sum(pago.monto for pago in pagos)
+
+    return render_template(
+        'historia/pagos.html',
+        paciente=paciente,
+        historia=historia,
+        total_presupuestos=round(total_presupuestos, 2),
+        total_pagos=round(total_pagos, 2),
+        pagos=pagos
+    )
 
 
 '''
-COD-016
-Función que muestra el presupuesto
+F-add_pago
+Función que permite agregar un pago a un tratamiento específico.
+'''
+@bp.route('/paciente/<int:paciente_id>/pago', methods=['GET', 'POST'])
+def agregar_pago(paciente_id):
+    paciente = db.get_or_404(Paciente, paciente_id)
+
+    form = FormularioPago()
+
+    if form.validate_on_submit():
+        monto = float(form.monto.data)
+        metodo = form.metodo.data
+
+        nuevo_pago = Pago(
+            monto=monto,
+            metodo=metodo,
+            paciente=paciente
+        )
+        db.session.add(nuevo_pago)
+        db.session.commit()
+
+        flash("Pago registrado con éxito.", "success")
+        return redirect(url_for('historia.pagos', paciente_id=paciente_id))
+
+    return render_template(
+        'historia/agregar_pago.html',
+        form=form,
+        paciente=paciente
+    )
+
+'''
+F-presupuesto
+Función que permite crear un presupuesto para un tratamiento específico.
 '''
 @bp.route('/paciente/<int:paciente_id>/tratamiento/<int:tratamiento_id>/presupuesto', methods=['GET', 'POST'])
 def presupuesto(paciente_id, tratamiento_id):
@@ -468,7 +532,7 @@ def presupuesto(paciente_id, tratamiento_id):
         total_costo = sum(p.costo_referencial or 0 for p in tratamiento.procedimientos)
 
 
-        tratamiento.costo = total_costo
+        tratamiento.costo = int(total_costo)
 
         db.session.commit()
         return redirect(request.url)
@@ -483,35 +547,53 @@ def presupuesto(paciente_id, tratamiento_id):
 
 
 '''
-COD-017
-Función que gestiona los procedimientos
+F-gestionar_procedimnts
+Función que permite agregar un procedimiento a un procedimiento específico.
 '''
 
 @bp.route('/tratamiento/<int:tratamiento_id>/procedimientos', methods=['GET', 'POST'])
 def gestionar_procedimientos(tratamiento_id):
     tratamiento = db.get_or_404(Tratamiento, tratamiento_id)
     form = FormularioAgregarProcedimiento()
-    
-    if form.validate_on_submit():
-        try:
-            nuevo_proc = Procedimiento(
-                nombre=form.nombre.data.strip(),
-                costo_referencial=0  
-            )
-            db.session.add(nuevo_proc)
 
-            tratamiento.procedimientos.append(nuevo_proc)
-            db.session.commit()
+    # Verificamos si viene un 'delete_id' en el POST (es decir, solicitud para eliminar)
+    if request.method == 'POST':
+        delete_id = request.form.get('delete_id')
+        if delete_id:
+            procedimiento = db.get_or_404(Procedimiento, int(delete_id))
+            try:
+                tratamiento.procedimientos.remove(procedimiento)
 
-            flash('Procedimiento agregado correctamente.', 'success')
+                # Recalcular costo total
+                tratamiento.costo = sum(p.costo_referencial or 0 for p in tratamiento.procedimientos)
+
+                db.session.commit()
+                flash('Procedimiento eliminado correctamente.', 'success')
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Error al eliminar el procedimiento: {e}', 'danger')
             return redirect(url_for('historia.gestionar_procedimientos', tratamiento_id=tratamiento_id))
 
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Error al registrar el procedimiento: {e}', 'danger')
+        # Si no hay delete_id, se asume que es una adición de procedimiento
+        if form.validate_on_submit():
+            try:
+                nuevo_proc = Procedimiento(
+                    nombre=form.nombre.data.strip(),
+                    costo_referencial=0
+                )
+                db.session.add(nuevo_proc)
 
+                tratamiento.procedimientos.append(nuevo_proc)
 
+                # Recalcular costo también aquí por consistencia
+                tratamiento.costo = sum(p.costo_referencial or 0 for p in tratamiento.procedimientos)
+
+                db.session.commit()
+                flash('Procedimiento agregado correctamente.', 'success')
+                return redirect(url_for('historia.gestionar_procedimientos', tratamiento_id=tratamiento_id))
+
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Error al registrar el procedimiento: {e}', 'danger')
 
     return render_template('historia/gestionar_procedimientos.html', tratamiento=tratamiento, form=form)
-
-

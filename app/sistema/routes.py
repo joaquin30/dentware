@@ -9,7 +9,7 @@ from app.utils import remove_csrf_token
 from flask import jsonify, request
 
 '''
-COD-001
+F-index_pacients
 Función que muestra la lista de pacientes.
 '''
 @bp.route('/', methods=['GET', 'POST'])
@@ -31,7 +31,7 @@ def index():
 
 
 '''
-COD-002
+F-register_paciente
 Función del formulario de registro de datos de paciente.
 '''
 @bp.route('/registrar', methods=['GET', 'POST'])
@@ -53,7 +53,7 @@ def registrar_paciente():
 
 
 '''
-COD-003
+F-edit_paciente
 Función de formulario de edición de datos del paciente.
 '''
 @bp.route('/paciente/<int:paciente_id>/editar', methods=['GET', 'POST'])
@@ -63,38 +63,53 @@ def editar_paciente(paciente_id):
     if not paciente.historias:
         flash("No hay historia clínica para este paciente.", "danger")
         return redirect(url_for('index'))
-    
+
     historia = paciente.historias[0]
 
-    # Aquí elegimos el primer antecedente o creamos uno si no existe
-    if historia.antecedentes_medicos:
-        antecedente = historia.antecedentes_medicos[0]
-    else:
-        antecedente = HistoriaAntecedentesMedicos(historia=historia)
-        historia.antecedentes_medicos.append(antecedente)
-    
     form_paciente = PacienteForm(obj=paciente)
-    form_antmed = AntMedForm(obj=antecedente)
 
-    if form_paciente.validate_on_submit() and form_antmed.validate_on_submit():
+    if form_paciente.validate_on_submit():
         form_paciente.populate_obj(paciente)
-        form_antmed.populate_obj(antecedente)
-        print("Antecedentes después de populate_obj:", antecedente.enfermedad_cardiaca, antecedente.vih, antecedente.diabetes, antecedente.alergias, antecedente.otros)
-
         db.session.add(paciente)
-        db.session.add(antecedente)
         db.session.commit()
-        
-        flash("Datos personales y antecedentes médicos actualizados correctamente.", "success")
+
+        flash("Datos personales actualizados.", "success")
         return redirect(url_for('historia.index', historia_id=historia.historia_id))
 
-    return render_template('sistema/editar.html', 
-                           form_paciente=form_paciente, 
-                           form_antmed=form_antmed,
-                           historia=historia, paciente=historia.paciente)
+    return render_template('sistema/editar.html',
+                           form_paciente=form_paciente,
+                           historia=historia, paciente=paciente)
 
 '''
-COD-004
+F-edit_antecedentes
+Función de formulario de edición de antecedentes médicos.
+'''
+@bp.route('/historia/<int:historia_id>/antecedentes', methods=['GET', 'POST'])
+def editar_antecedentes(historia_id):
+    historia = db.get_or_404(Historia, historia_id)
+
+    # Obtener el primer antecedente o crear uno nuevo si no existe
+    antecedente = historia.antecedentes_medicos[0] if historia.antecedentes_medicos else HistoriaAntecedentesMedicos(historia=historia)
+
+    form_antmed = AntMedForm(obj=antecedente)
+
+    if form_antmed.validate_on_submit():
+        form_antmed.populate_obj(antecedente)
+        if not hasattr(antecedente, 'id') or not getattr(antecedente, 'id', None):
+            db.session.add(antecedente)
+        db.session.commit()
+        flash("Antecedentes médicos actualizados.", "success")
+        return redirect(url_for('historia.index', historia_id=historia.historia_id))
+
+    return render_template(
+        'historia/editar_antecedentes.html',
+        form_antmed=form_antmed,
+        historia=historia
+    )
+
+
+'''
+F-exam_estoma
 Función que muestra el formualrio de exámenes clínicos estomatológicos.
 '''
 @bp.route('/paciente/<int:paciente_id>/examenes-estomatologicos', methods=['GET', 'POST'])
@@ -126,7 +141,7 @@ def examenes_estomatologicos(paciente_id):
     return render_template('historia/examenes_estomatologicos.html', form_examen=form_examen, historia=historia, paciente=historia.paciente)
 
 '''
-COD-005
+F-buscar_paciente
 Función que permite mostrar el formulario de búsqueda de pacientes y mostrar las coincidencias de la búsqueda.
 '''
 @bp.route('/sistema/buscar_pacientes')
@@ -155,6 +170,12 @@ def buscar_pacientes():
 
     return jsonify(resultados)
 
+'''
+F-ondontologos
+Función que permite mostrar el los odontologos de la cínica
+'''
+
+
 @bp.route('/odontologos')
 def odontologos():
     odontologos_internos = db.session.query(Odontologo).filter_by(tipo_odontologo='Interno').all()
@@ -165,6 +186,13 @@ def odontologos():
                            internos=odontologos_internos,
                            externos=odontologos_externos,
                            temporales=odontologos_temporales)
+
+
+
+'''
+F-edit_ondontologo
+Función que permite actualizar el registro sobre un odontologo
+'''
 
 @bp.route('/odontologo/<int:odontologo_id>/editar', methods=['GET', 'POST'])
 def editar_odontologo(odontologo_id):
@@ -180,6 +208,11 @@ def editar_odontologo(odontologo_id):
     return render_template('sistema/editar_odontologo.html', form=form, odontologo=odontologo)
 
 
+'''
+F-elim_ondontologo
+Función que permite eliminar un odontologo
+'''
+
 @bp.route('/odontologo/<int:odontologo_id>/eliminar', methods=['POST'])
 def eliminar_odontologo(odontologo_id):
     odontologo = db.get_or_404(Odontologo, odontologo_id)
@@ -187,6 +220,11 @@ def eliminar_odontologo(odontologo_id):
     db.session.commit()
     flash('Odontólogo eliminado correctamente.', 'success')
     return redirect(url_for('sistema.odontologos'))
+
+'''
+F-add_ondontologo
+Función que permite agregar un odontologo
+'''
 
 @bp.route('/odontologos/agregar', methods=['GET', 'POST'])
 def agregar_odontologo():

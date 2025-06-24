@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Agregar Pago{% endblock %}
+
+{% block content %}
+<style>
+  .form-container {
+    max-width: 600px;
+    margin: 60px auto;
+    padding: 30px;
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .form-header {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #2a2f65;
+    margin-bottom: 20px;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  label {
+    font-weight: 600;
+    color: #333;
+  }
+
+  input[type="text"], input[type="number"], select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-top: 5px;
+  }
+
+  .btn-submit {
+    background-color: #0d2f6c;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 10px;
+  }
+
+  .btn-submit:hover {
+    background-color: #28447f;
+  }
+
+  .btn-cancelar {
+    background: none;
+    color: #0d2f6c;
+    border: none;
+    font-weight: bold;
+    text-decoration: underline;
+    cursor: pointer;
+    margin-top: 10px;
+    display: inline-block;
+  }
+  
+  /* Estilos para los errores generales del formulario */
+  .form-errors {
+    margin-bottom: 20px;
+    color: red;
+  }
+</style>
+
+<div class="form-container">
+  <div class="form-header">Agregar nuevo pago</div>
+
+  <!-- Mostrar los errores generales del formulario -->
+  {% if form.errors %}
+    <div class="form-errors">
+      <ul>
+        {% for field, errors in form.errors.items() %}
+          <li><strong>{{ form[field].label.text }}:</strong> {% for error in errors %}{{ error }} {% endfor %}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <form method="POST">
+    {{ form.hidden_tag() }}
+
+    {% if form.errors %}
+      <div class="alert alert-danger">
+        <ul>
+          {% for field, errors in form.errors.items() %}
+            {% for error in errors %}
+              <li><strong>{{ field }}:</strong> {{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <div class="form-group">
+      {{ form.metodo.label }}
+      {{ form.metodo(class="form-control", required=True) }}
+      {% for error in form.metodo.errors %}
+        <small class="text-danger">{{ error }}</small>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+      {{ form.monto.label }}
+      {{ form.monto(class="form-control", type="number", step="0.01", required=True) }}
+      {% for error in form.monto.errors %}
+        <small class="text-danger">{{ error }}</small>
+      {% endfor %}
+    </div>
+    <button type="submit" class="btn-submit">Agregar</button>
+    <a href="{{ url_for('historia.pagos', paciente_id=paciente.paciente_id) }}" class="btn-cancelar">Cancelar</a>
+  </form>
+</div>
+
+{% endblock %}

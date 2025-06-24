@@ -22,7 +22,7 @@
 
   .datos-paciente {
     flex-basis: 48%;
-    max-width: 500px; /* añadido */
+    max-width: 500px;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -41,17 +41,18 @@
     font-size: 0.95rem;
   }
 
-  .btn-editar {
-    width: 110px;
-    text-decoration: none;
-    margin-top: 10px;
-    background-color: #2a2f65;
-    color: white;
-    border: none;
-    padding: 6px 6px;
-    border-radius: 6px;
-    font-size: 0.9rem;
-  }
+.btn-editar {
+  display: inline-block;           /* Hace que el botón se ajuste al contenido */
+  text-decoration: none;
+  margin-top: 10px;
+  background-color: #2a2f65;
+  color: white;
+  border: none;
+  padding: 6px 10px;               /* Puedes ajustar esto si quieres más aire */
+  border-radius: 6px;
+  font-size: 0.9rem;
+  white-space: nowrap;             /* Evita que el texto se divida en dos líneas */
+}
 
   .tratamientos-box {
     background: #ffffff;
@@ -59,7 +60,7 @@
     border-radius: 10px;
     padding: 16px;
     min-height: 180px;
-    max-width: 100%; /* añadido */
+    max-width: 100%;
   }
 
   .tratamientos-box h4 {
@@ -73,24 +74,25 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+    align-items: flex-end;
   }
 
-  .acciones-panel a {
-    display: inline-block;
-    width: 360px;
-    text-align: center;
-    background-color: #2a2f65;
-    color: white;
-    padding: 10px;
+  .acciones-panel a.boton-accion {
+    background-color: white;
+    color: #2a2f65;
+    padding: 10px 14px;
     border-radius: 6px;
     font-weight: bold;
     text-decoration: none;
-    margin-left: auto;
-    margin-right: auto;
+    border: 2px solid #2a2f65;
+    white-space: nowrap;
+    width: 230px; /* Mismo tamaño para todos */
+    text-align: center;
   }
 
-  .acciones-panel a:hover {
+  .acciones-panel a.boton-accion:hover {
     background-color: #2a2f65;
+    color: white;
   }
 
   .btn-novedades {
@@ -105,6 +107,7 @@
     display: inline-block;
     text-align: center;
     transition: background-color 0.3s, color 0.3s;
+    width: 230px;
   }
 
   .btn-novedades:hover {
@@ -162,17 +165,18 @@
 
     .datos-paciente, .acciones-panel {
       flex-basis: 100%;
+      align-items: stretch;
     }
 
-    .acciones-panel a {
-      margin-left: 0;
+    .acciones-panel a.boton-accion, .btn-novedades {
       width: 100%;
     }
   }
+
   .scroll-tratamientos {
-      max-height: 300px; /* ajusta si quieres más alto o más bajo */
-      overflow-y: auto;
-      padding-right: 6px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 6px;
   }
 </style>
 
@@ -191,31 +195,34 @@
         <p><strong>Fecha de nacimiento:</strong> {{ paciente.fecha_nacimiento }}</p>
       </div>
     </div>
-    <a href="{{ url_for('sistema.editar_paciente', paciente_id=paciente.paciente_id) }}" class="btn-editar">✎ Editar datos</a>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+      <a href="{{ url_for('sistema.editar_paciente', paciente_id=paciente.paciente_id) }}" class="btn-editar">✎ Editar datos</a>
+      <a href="{{ url_for('sistema.editar_antecedentes', historia_id=paciente.historias[0].historia_id) }}" class="btn-editar">🩺 Antecedentes médicos</a>
+    </div>
+
 
     <div class="tratamientos-box">
       <h4>Tratamientos</h4>
-
       {% if historia.tratamientos %}
-          <div class="scroll-tratamientos">
-            {% for t in historia.tratamientos|sort(attribute='fecha_creacion', reverse=True) %}
-                <div class="d-flex align-items-start mb-3">
-                  <div class="flex-grow-1">
-                    <div><strong>{{ t.odontologo.nombre }}</strong></div>
-                    <div class="text-muted">{{ t.fecha_creacion.strftime('%d/%m/%Y') }}</div>
-                  </div>
-                  <div class="text-end" style="min-width: 80px; display: flex; flex-direction: column; align-items: flex-end;">
-                    <span class="badge bg-{{ 'success' if t.en_curso else 'secondary' }} mb-1">
-                      {{ 'En curso' if t.en_curso else 'Finalizado' }}
-                    </span>
-                    <a href="{{ url_for('historia.ver_tratamiento', tratamiento_id=t.tratamiento_id) }}" class="crear-tratamiento-btn" style="padding: 6px 10px; font-size: 0.85rem;">Ver tratamiento</a>
-                  </div>
-                </div>
-            {% endfor %}
+      <div class="scroll-tratamientos">
+        {% for t in historia.tratamientos|sort(attribute='fecha_creacion', reverse=True) %}
+        <div class="d-flex align-items-start mb-3">
+          <div class="flex-grow-1">
+            <div><strong>{{ t.odontologo.nombre }}</strong></div>
+            <div class="text-muted">{{ t.descripcion }}</div>
+            <div class="text-muted">{{ t.fecha_creacion.strftime('%d/%m/%Y') }}</div>
           </div>
-
+          <div class="text-end" style="min-width: 80px; display: flex; flex-direction: column; align-items: flex-end;">
+            <span class="badge bg-{{ 'success' if t.en_curso else 'secondary' }} mb-1">
+              {{ 'En curso' if t.en_curso else 'Finalizado' }}
+            </span>
+            <a href="{{ url_for('historia.ver_tratamiento', tratamiento_id=t.tratamiento_id) }}" class="crear-tratamiento-btn" style="padding: 6px 10px; font-size: 0.85rem;">Ver tratamiento</a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
       {% else %}
-          <p>No hay tratamientos registrados.</p>
+      <p>No hay tratamientos registrados.</p>
       {% endif %}
 
       <a href="{{ url_for('historia.crear_tratamiento', historia_id=historia.historia_id) }}" class="crear-tratamiento-btn">
@@ -225,15 +232,15 @@
   </div>
 
   <div class="acciones-panel">
-    <a href="{{ url_for('historia.contraindicaciones', historia_id=historia.historia_id) }}">
+    <a href="{{ url_for('historia.contraindicaciones', historia_id=historia.historia_id) }}" class="boton-accion">
       Contraindicaciones Médicas
     </a>
-    <a href="#">Crear Odontograma</a>
-    <a href="#">Actualizar Odontograma</a>
-    <a href="#">Ver Odontograma</a>
-    <a href="{{ url_for('historia.subir_examen', historia_id=historia.historia_id) }}">Exámenes Auxiliares</a>
-    <a href="{{ url_for('sistema.examenes_estomatologicos', paciente_id=paciente.paciente_id) }}">Exámenes Estomatológicos</a>
-    <a href="{{ url_for('historia.pagos', paciente_id=paciente.paciente_id) }}">Pagos</a>
+    <a href="#" class="boton-accion">Crear Odontograma</a>
+    <a href="#" class="boton-accion">Actualizar Odontograma</a>
+    <a href="#" class="boton-accion">Ver Odontograma</a>
+    <a href="{{ url_for('historia.subir_examen', historia_id=historia.historia_id) }}" class="boton-accion">Exámenes Auxiliares</a>
+    <a href="{{ url_for('sistema.examenes_estomatologicos', paciente_id=paciente.paciente_id) }}" class="boton-accion">Exámenes Estomatológicos</a>
+    <a href="{{ url_for('historia.pagos', paciente_id=paciente.paciente_id) }}" class="boton-accion">Pagos</a>
     <a href="{{ url_for('historia.paciente_novedades', paciente_id=paciente.paciente_id) }}" class="btn-novedades">
       <img src="{{ url_for('static', filename='img/novedad.png') }}" alt="Novedad" class="icono-novedad">
       Novedades
