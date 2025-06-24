@@ -2,334 +2,694 @@
 {% block title %}Odontograma{% endblock %}
 {% block content %}
 <div class="row mt-2">
-    <div class="col-3">
-        <form>
-            <label class="form-label w-100">
-                Hallazgo clínico
-                <input type="text" class="form-control" list="hallazgos-clinicos"/>
-            </label>
-            <label>Vista previa</label><br>
-            <canvas id="canvas-secondary" width="300" height="150"></canvas>
-            <div class="form-check mb-2">
-                <label class="form-check-label">
-                    <input class="form-check-input" type="checkbox" id="is-serious" />
-                    ¿Es grave?
-                </label>
-            </div>
-            <button type="button" class="btn btn-primary" id="button-save">Guardar</button>
-            <button type="reset" class="btn btn-danger">Deshacer</button>
-        </form>
-        <hr />
-        <label class="form-label w-100">
-            Especificaciones
-            <textarea class="form-control" rows="4"></textarea>
-        </label>
-         <label class="form-label w-100">
-            Observaciones
-            <textarea class="form-control" rows="4"></textarea>
-        </label>
-    </div>
-    <div class="col-9">
-        <canvas id="canvas-primary" width="1000" height="600"></canvas>
-    </div>
+  <div class="col-3">
+    <form>
+      <label class="form-label w-100">
+        Hallazgo clínico
+        <select class="form-select" id="select">
+          <option value="">-- Elegir --</option>
+        </select>
+      </label>
+      <label>Vista previa</label><br>
+      <canvas id="canvas-secondary" width="300" height="150"></canvas>
+      <div class="btn-group w-100 ps-4 pe-4" role="group">
+        <input type="radio" class="btn-check" name="color" autocomplete="off" id="color-azul" value="blue" checked />
+        <label class="btn btn-outline-primary btn-sm" for="color-azul">Azul</label>
+        <input type="radio" class="btn-check" name="color" autocomplete="off" id="color-rojo" value="red" />
+        <label class="btn btn-outline-danger btn-sm" for="color-rojo">Rojo</label>
+      </div>
+      <button type="button" class="btn btn-primary mt-2 w-100" id="btn-save">Añadir hallazgo</button>
+      <button type="button" class="btn btn-danger mt-1 w-100" id="btn-pop">Eliminar último hallazgo</button>
+    </form>
+    <label class="form-label w-100 mt-2">
+      Especificaciones
+      <textarea class="form-control" rows="2"></textarea>
+    </label>
+      <label class="form-label w-100">
+      Observaciones
+      <textarea class="form-control" rows="2"></textarea>
+    </label>
+    <button type="button" class="btn btn-success mt-2 w-100">Guardar cambios</button>
+  </div>
+  <div class="col-9 canvas-container">
+    <canvas id="canvas-primary" width="1000" height="600"></canvas>
+    <canvas id="canvas-selection" width="1000" height="600"></canvas>
+  </div>
 </div>
-<datalist id="hallazgos-clinicos">
-    <option value="Carie"></option>
-    <option value="Corona"></option>
-    <option value="Diastema"></option>
-    <option value="Espigón"></option>
-</datalist>
 <style>
 canvas {
-    background-color: #eee;
+  background-color: #eee;
+}
+
+#canvas-primary {
+  z-index: 0;
+}
+
+#canvas-selection {
+  background-color: transparent;
+  z-index: 1;
+}
+
+div.canvas-container {
+  position: relative;
+  width: 800px;
+  height: 600px;
+}
+
+div.canvas-container canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 </style>
 <script>
 'use strict';
-const SCALE = 10;
-const RECT_GAP = 0.25;
 
-const shapeDienteSimple = {
-    'width': 4,
-    'height': 8,
-    'lines': [
-        [2, 0, 0, 4],
-        [2, 0, 4, 4],
-        [0, 4, 4, 4],
-        [0, 4, 0, 8],
-        [0, 8, 4, 8],
-        [4, 8, 4, 4],
-        [0, 4, 1, 6],
-        [1, 6, 0, 8],
-        [4, 4, 3, 6],
-        [3, 6, 4, 8],
-        [1, 6, 3, 6]
-    ],
-    'polygons': [
-        [[2, 0], [0, 4], [4, 4]],
-        [[0, 4], [1, 6], [0, 8]],
-        [[4, 4], [3, 6], [4, 8]],
-        [[0, 4], [4, 4], [3, 6], [1, 6]],
-        [[0, 8], [1, 6], [3, 6], [4, 8]]
-    ]
-};
+class Diente {
+  constructor(image, x, y, id, lineId, flipH = false, flipV = false, scale = 8) {
+    this.scale = scale;
+    this.flipH = flipH;
+    this.flipV = flipV;
+    this.x = x;
+    this.y = y;
+    this.id = id;
+    this.selected = false;
+    this.lineId = lineId;
+    this.dienteRect = {};
+    this.tagY = y;
 
-function createDiente(shape, x, y) {
-    return { 
-        shape: shape,
-        x: x,
-        y: y,
-        selected: false,
-        lines: shape.lines.map((line) =>
-            [line[0] * SCALE + x, line[1] * SCALE + y, line[2] * SCALE + x, line[3] * SCALE + y]
-        ),
-        polygons: shape.polygons.map((points) =>
-            points.map((p) => [p[0] * SCALE + x, p[1] * SCALE + y])
-        ),
-        lineColored: new Array(shape.lines.length).fill(false),
-        polygonColored: new Array(shape.polygons.length).fill(false),
-        isSerious: false,
-        index: null,
-    }
-}
+    // Determinar dimensiones base (asume que el nombre contiene "500" si es más ancho)
+    this.originalWidth = image.width
+    this.originalHeight = image.height;
 
-function getRect(diente) {
+    this.width = Math.round((this.originalWidth / 100) * scale);
+    this.height = Math.round((this.originalHeight / 100) * scale);
+    this.rectHeight = this.height
+    this.image = image;
+    this.tags = [];
+  }
+
+  getRect() {
     return {
-        x: diente.x - RECT_GAP * SCALE,
-        y: diente.y - RECT_GAP * SCALE,
-        w: diente.shape.width * SCALE + 2 * RECT_GAP * SCALE,
-        h: diente.shape.height * SCALE + 2 * RECT_GAP * SCALE,
-    }
-}
+      x: this.x,
+      y: this.y,
+      w: this.width,
+      h: this.rectHeight
+    };
+  }
 
-function drawDiente(ctx, diente) {
-    const x = diente.x;
-    const y = diente.y;
-    const shape = diente.shape;
-    let color = diente.isSerious ? 'red': 'blue';
+  getDienteRect() {
+    return this.dienteRect;
+  }
 
-    // Dibujar polígonos
-    for (let i = 0; i < shape.polygons.length; i++) {
-        const polygon = shape.polygons[i];
-        ctx.beginPath();
-        ctx.moveTo(x + polygon[0][0] * SCALE, y + polygon[0][1] * SCALE);
-        for (let i = 1; i < polygon.length; i++) {
-            ctx.lineTo(x + polygon[i][0] * SCALE, y + polygon[i][1] * SCALE);
-        }
-        ctx.closePath();
-        ctx.fillStyle = diente.polygonColored[i] ? color : 'white';
-        ctx.fill();
-    }
-    
-    // Dibujar líneas
-    for (let i = 0; i < shape.lines.length; i++) {
-        ctx.beginPath();
-        const [x1, y1, x2, y2] = shape.lines[i]
-        ctx.moveTo(x + x1 * SCALE, y + y1 * SCALE);
-        ctx.lineTo(x + x2 * SCALE, y + y2 * SCALE);
-        ctx.strokeStyle = diente.lineColored[i] ? color : 'black';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-    }
+  draw(ctx) {
+    this.tags = [];
+    const tagsHeight = 20;
+    const numberHeight = 20;
 
-    if (diente.selected) {
-        drawRect(ctx, getRect(diente));
-    }
-}
+    let currentY = this.y;
 
-function drawRect(ctx, rect) {
-    ctx.beginPath();
-    ctx.setLineDash([5, 3]); // Patrón de línea discontinua: 5 píxeles dibujados, 3 píxeles vacíos
-    ctx.rect(rect.x, rect.y, rect.w, rect.h);
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    ctx.setLineDash([]); // Restaurar a línea continua para futuros dibujos
-}
+    const drawTags = () => {
+      ctx.save();
+      ctx.fillStyle = "#fff";
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 1;
+      ctx.fillRect(this.x, currentY, this.width, tagsHeight);
+      ctx.strokeRect(this.x, currentY, this.width, tagsHeight);
+      ctx.restore();
+      this.tagY = currentY;
+      currentY += tagsHeight + this.scale / 2;
+    };
 
-// UTILS
+    const drawNum = () => {
+      ctx.save();
+      ctx.fillStyle = "#000";
+      ctx.font = "16px monospace";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(!this.id ? 'XX' : String(this.id), this.x + this.width / 2, currentY + numberHeight / 2);
+      ctx.restore();
+      currentY += numberHeight + this.scale / 2;
+    };
 
-function rectsCollide(rectA, rectB) {
-    return !(
-        rectA.x + rectA.w <= rectB.x || // A está completamente a la izquierda de B
-        rectA.x >= rectB.x + rectB.w || // A está completamente a la derecha de B
-        rectA.y + rectA.h <= rectB.y || // A está completamente arriba de B
-        rectA.y >= rectB.y + rectB.h    // A está completamente debajo de B
-    );
-}
+    const drawDiente = () => {
+      ctx.save();
+      ctx.translate(this.x + this.width / 2, currentY + this.height / 2);
+      ctx.scale(this.flipH ? -1 : 1, this.flipV ? -1 : 1);
+      ctx.drawImage(this.image, -this.width / 2, -this.height / 2, this.width, this.height);
+      this.dienteRect = {
+        x: this.x,
+        y: currentY,
+        w: this.width,
+        h: this.height
+      };
+      ctx.restore();
+      currentY += this.height + this.scale / 2;
+    };
 
-function pointInPolygon(polygon, px, py) {
-    let inside = false;
-
-    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-        const [xi, yi] = polygon[i];
-        const [xj, yj] = polygon[j];
-
-        const intersect = ((yi > py) !== (yj > py)) &&
-                          (px < (xj - xi) * (py - yi) / (yj - yi + Number.EPSILON) + xi);
-        if (intersect) inside = !inside;
+    if (this.flipV) {
+      drawDiente();
+      drawNum();
+      drawTags();
+    } else {
+      drawTags();
+      drawNum();
+      drawDiente();
     }
 
-    return inside;
-}
+    this.rectHeight = currentY - this.y;
 
-function pointInRect(rect, px, py) {
-    return (
-        px >= rect.x &&
-        px <= rect.x + rect.w &&
-        py >= rect.y &&
-        py <= rect.y + rect.h
-    );
+    if (this.selected) {
+      ctx.save();
+      ctx.setLineDash([5, 3]);
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(this.x - this.scale / 2, this.y - this.scale / 2, this.width + this.scale, currentY - this.y + this.scale/2);
+      ctx.restore();
+    }
+  }
+
+  addTag(tag, color) {
+    this.tags.push([tag, color]);
+  }
+
+  drawTags(ctx) {
+    const fontSize = 12;
+    const y = this.tagY + fontSize/2; // posición encima del diente
+    let x = this.x + 4;
+
+    ctx.font = `${fontSize}px monospace`;
+    ctx.textBaseline = 'top';
+
+    for (const [texto, color] of this.tags) {
+      ctx.fillStyle = color;
+      ctx.fillText(texto, x, y);
+      x += ctx.measureText(texto).width + this.scale / 2; // agregar espacio entre palabras
+    }
+  }
 }
 
 const canvasPrimary = document.getElementById('canvas-primary'); 
 const ctxPrimary = canvasPrimary.getContext('2d');
+const canvasSelection = document.getElementById('canvas-selection'); 
+const ctxSelection = canvasSelection.getContext('2d');
 const canvasSecondary = document.getElementById('canvas-secondary');
 const ctxSecondary = canvasSecondary.getContext('2d');
-const checkbox = document.getElementById('is-serious');
-const buttonSave = document.getElementById('button-save');
+const select = document.getElementById('select');
 
-const dientes = [];
-let selectedDientes = [];
+let dientes = [];
+let dientesSecondary = [];
 let selectionOrigin = null;
+let selectedDientesIndexes = [];
+let tipoHallazgo = null;
+let currentHallazgo = null;
+let currentColor = 'blue';
+let hallazgosClinicos = [];
 
-function drawSelection(ctx, e) {
-    ctx.beginPath();
-    ctx.rect(selectionOrigin.x, selectionOrigin.y, e.offsetX - selectionOrigin.x, e.offsetY - selectionOrigin.y); 
-    ctx.strokeStyle = 'blue';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    ctx.fillStyle = 'rgba(0, 0, 255, 0.2)';
-    ctx.fill();
-}
+const hallazgosClinicosFns = {
+  simple: {
+    'Corona metálica': (ctx, diente, color) => {
+      diente.addTag('CM', color);
+      const rect = diente.getDienteRect();
+      // Dibujar un rectangulo de h/2 x w en la parte inferior del diente
+      // o superior si flipV es verdadero
 
-function renderCtxPrimary(e) {
-    ctxPrimary.clearRect(0, 0, canvasPrimary.width, canvasPrimary.height)
+      // Determinar la posición del rectángulo según la orientación
+      const x = rect.x;
+      const y = diente.flipV ? rect.y : rect.y + rect.h / 2;
 
-    for (let diente of dientes) {
-        drawDiente(ctxPrimary, diente);
-    }
+      ctx.save();
+      ctx.strokeStyle = color; // Color del borde
+      ctx.lineWidth = 3;
+      ctx.strokeRect(x, y, rect.w, rect.h / 2);
+      ctx.restore();
+    },
+    'Lesión de caries a nivel de la dentina': (ctx, diente, color) => {
+      diente.addTag('CD', color);
+      const rect = diente.getDienteRect();
+      // Dibujar un pequeño rectangulo en la parte central inferior del diente
+      // o superior si flipV es verdadero
 
-    if (selectionOrigin) {
-        drawSelection(ctxPrimary, e);
-    }
-}
+      const rectWidth = rect.w * 0.4;
+      const rectHeight = rect.h * 0.15;
 
-function selectDientes(e) {
-    const selectionRect = {
-        x: Math.min(selectionOrigin.x, e.offsetX),
-        y: Math.min(selectionOrigin.y, e.offsetY),
-        w: Math.abs(e.offsetX - selectionOrigin.x),
-        h: Math.abs(e.offsetY - selectionOrigin.y),
-    }
+      const x = rect.x + (rect.w - rectWidth) / 2;
+      const y = diente.flipV
+        ? rect.y + rect.h / 4 - rectHeight / 2 // parte superior
+        : rect.y + 3 * rect.h / 4 - rectHeight / 2; // parte inferior
 
-    for (let diente of dientes) {
-        diente.selected = rectsCollide(selectionRect, getRect(diente));
-    }
-}
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, rectWidth, rectHeight);
+      ctx.restore();
+    },
+    'Impactación': (ctx, diente, color) => {
+      diente.addTag('I', color);
+    },
+    'Pieza dentaria ausente': (ctx, diente, color) => {
+      diente.addTag('DEX', color);
+      const rect = diente.getDienteRect();
+      // Dibujar una X en el diente
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
 
-function renderCtxSecondary() {
-    ctxSecondary.clearRect(0, 0, canvasSecondary.width, canvasSecondary.height)
-    if (selectedDientes.length === 0) {
-        return;
-    }
+      // Línea diagonal de esquina a esquina
+      ctx.beginPath();
+      ctx.moveTo(rect.x, rect.y);
+      ctx.lineTo(rect.x + rect.w, rect.y + rect.h);
+      ctx.stroke();
 
-    for (let diente of selectedDientes) {
-        drawDiente(ctxSecondary, diente);
-    }
-}
+      ctx.beginPath();
+      ctx.moveTo(rect.x + rect.w, rect.y);
+      ctx.lineTo(rect.x, rect.y + rect.h);
+      ctx.stroke();
 
-function updateSelectedDientes() {
-    selectedDientes = [];
-    for (let diente of dientes) {
-        if (diente.selected) {
-            selectedDientes.push(diente);
-        }
-    }
-    if (selectedDientes.length > 0) {
-        const offsetX = 20 - selectedDientes[0].x;
-        const offsetY = 20 - selectedDientes[0].y;
-        selectedDientes = selectedDientes.map((diente) => {
-            const newDiente = createDiente(diente.shape, diente.x + offsetX, diente.y + offsetY);
-            newDiente.selected = false;
-            newDiente.lineColored = [...diente.lineColored];
-            newDiente.polygonColored = [...diente.polygonColored];
-            newDiente.isSerious = diente.isSerious;
-            newDiente.index = diente.index;
-            return newDiente;
-        })
-    }
-    renderCtxSecondary();
-}
+      ctx.restore();
+    },
+    'Pigmentación del esmalte': (ctx, diente, color) => {
+      diente.addTag('PE', color);
+    },
+  },
+  doble: {
+    'Fusión': (ctx, diente1, diente2, color) => {
+      // Dibujar dos ovalos arriba de los dientes (o abajo si flipV = true)
+      // tal que los ovalos se conecten
 
-canvasPrimary.onmousedown = (e) => {
-    selectionOrigin = {x: e.offsetX, y: e.offsetY};
+      const r1 = diente1.getDienteRect();
+      const r2 = diente2.getDienteRect();
+
+      const ovalWidth = Math.min(r1.w, r2.w) * 1;
+      const ovalHeight = 14;
+
+      const y = diente1.flipV
+        ? Math.max(r1.y + r1.h, r2.y + r2.h) + 12 // debajo
+        : Math.min(r1.y, r2.y) - ovalHeight - 2; // encima
+
+      const centerX1 = r1.x + r1.w / 2;
+      const centerX2 = r2.x + r2.w / 2;
+
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+
+      // Dibujar óvalo sobre diente1
+      ctx.beginPath();
+      ctx.ellipse(centerX1, y, ovalWidth / 2, ovalHeight / 2, 0, 0, 2 * Math.PI);
+      ctx.stroke();
+
+      // Dibujar óvalo sobre diente2
+      ctx.beginPath();
+      ctx.ellipse(centerX2, y, ovalWidth / 2, ovalHeight / 2, 0, 0, 2 * Math.PI);
+      ctx.stroke();
+
+      // Línea entre ambos óvalos para conexión visual
+      ctx.beginPath();
+      ctx.moveTo(centerX1 + ovalWidth / 2, y);
+      ctx.lineTo(centerX2 - ovalWidth / 2, y);
+      ctx.stroke();
+
+      ctx.restore();
+    },
+    'Diastema': (ctx, diente1, diente2, color) => {
+      // Dibujar dos arcos, uno en diente1 a la derecha y otro en diente2
+      // a la izquierda con altura h/2 en la parte inferior (o superior si flipV = true)
+
+      const r1 = diente1.getDienteRect();
+      const r2 = diente2.getDienteRect();
+
+      const arcRadius = (r1.h / 2); // altura aproximada del arco
+
+      const isFlip = diente1.flipV || diente2.flipV;
+
+      const yStart1 = isFlip ? r1.y + r1.h / 2 : r1.y + r1.h / 2;
+      const yEnd1   = isFlip ? r1.y : r1.y + r1.h;
+
+      const yStart2 = isFlip ? r2.y + r2.h / 2 : r2.y + r2.h / 2;
+      const yEnd2   = isFlip ? r2.y : r2.y + r2.h;
+
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+      const offsetX = 26
+
+      // Arco en diente1 (lado derecho)
+      ctx.beginPath();
+      ctx.arc(r1.x + r1.w - offsetX, (yStart1 + yEnd1) / 2, arcRadius,
+        Math.PI * 0.25, Math.PI * 1.75, true);
+      ctx.stroke();
+
+      // Arco en diente2 (lado izquierdo)
+      ctx.beginPath();
+      ctx.arc(r2.x + offsetX, (yStart2 + yEnd2) / 2, arcRadius,
+        Math.PI * 0.75, Math.PI * 1.25, false);
+      ctx.stroke();
+
+      ctx.restore();
+    },
+  },
+  multiple: {
+    'Aparato odontológico': (ctx, diente1, diente2, color) => {
+      // Línea por debajo de los dientes con rectangulos en sus puntos extremos
+      const r1 = diente1.getDienteRect();
+      const r2 = diente2.getDienteRect();
+      const y = diente1.flipV ? r1.y - 8 : r1.y + r1.h + 8;
+      const offsetY = -4
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+
+      ctx.beginPath();
+      ctx.moveTo(r1.x, y);
+      ctx.lineTo(r2.x + r2.w, y);
+      ctx.stroke();
+
+      ctx.fillStyle = color;
+      ctx.fillRect(r1.x, y + offsetY, 8, 8);
+      ctx.fillRect(r2.x + r2.w - 8, y + offsetY, 8, 8);
+
+      ctx.restore();
+    },
+    'Edéntulo total': (ctx, diente1, diente2, color) => {
+      // Línea que cruza los dientes
+      const r1 = diente1.getDienteRect();
+      const r2 = diente2.getDienteRect();
+      const y = diente1.flipV ? r1.y + r1.h / 4 : r1.y + 3 * r1.h / 4;
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+
+      ctx.beginPath();
+      ctx.moveTo(r1.x, y);
+      ctx.lineTo(r2.x + r2.w, y);
+      ctx.stroke();
+
+      ctx.restore();
+    },
+  }
 };
 
-canvasPrimary.onmouseup = (e) => {
-    selectDientes(e);
-    selectionOrigin = null;
-    renderCtxPrimary(e);
-    updateSelectedDientes();
-};
+function getFunc(tipo, nombre) {
+  return hallazgosClinicosFns[tipo][nombre];
+}
 
-canvasPrimary.onmousemove = (e) => {
-    if (selectionOrigin) {
-        selectDientes(e);
-        renderCtxPrimary(e);
-    }
-};
-
-canvasSecondary.onmouseup = (e) => {
-    for (let diente of selectedDientes) {
-        if (!pointInRect(getRect(diente), e.offsetX, e.offsetY)) {
-            continue;
-        }
-        for (let i = 0; i < diente.polygons.length; ++i) {
-            if (!pointInPolygon(diente.polygons[i], e.offsetX, e.offsetY)) {
-                continue;
-            }
-            diente.polygonColored[i] = !diente.polygonColored[i];
-        }
-    }
-
-    renderCtxSecondary();
-};
-
-checkbox.addEventListener('change', () => {
-    for (let diente of selectedDientes) {
-        diente.isSerious = !!checkbox.checked;
-    }
-
-    renderCtxSecondary();
-});
-
-buttonSave.addEventListener('click', () => {
-    for (let diente of selectedDientes) {
-        dientes[diente.index].lineColored = diente.lineColored;
-        dientes[diente.index].polygonColored = diente.polygonColored;
-        dientes[diente.index].isSerious = diente.isSerious;
-    }
-
-    selectedDientes = [];
-
-    for (let diente of dientes) {
-        diente.selected = false;
-    }
-
-    checkbox.checked = false;
-    renderCtxPrimary();
-    renderCtxSecondary();
-})
-
-
-for (let x = 20, i = 0; x < 500; x += 50, i++) {
-    const diente = createDiente(shapeDienteSimple, x, 20)
-    diente.index = i;
+function createDientes(images) {
+  dientes = [];
+  const offsetX = 130;
+  let currentX = 0 + offsetX, currentY = 20;
+  let dienteIds = [];
+  for (let i = 18; i >= 11; i--) dienteIds.push(i);
+  for (let i = 21; i <= 28; i++) dienteIds.push(i);
+  dienteIds.forEach((id, index) => {
+    let shape = 'triple';
+    if (id === 15 || id == 25) shape = 'solo';
+    else if (id === 14 || id === 24) shape = 'doble-punteado';
+    else if (id <= 13 || (21 <= id && id <= 23)) shape = 'simple';
+    const diente = new Diente(images[shape], currentX, currentY, id, 0, index > dienteIds.length / 2);
     dientes.push(diente);
+    currentX += diente.width + 10;
+  });
+
+  currentX = 150 + offsetX, currentY = 160;
+  dienteIds = [];
+  for (let i = 55; i >= 51; i--) dienteIds.push(i);
+  for (let i = 61; i <= 65; i++) dienteIds.push(i);
+  dienteIds.forEach((id, index) => {
+    let shape = 'triple';
+    if (id === 54 || id == 64) shape = 'triple-3';
+    else if (id <= 53|| (61 <= id && id <= 63)) shape = 'simple';
+    const diente = new Diente(images[shape], currentX, currentY, id, 1, index > dienteIds.length / 2);
+    dientes.push(diente);
+    currentX += diente.width + 10;
+  });
+
+  currentX = 150 + offsetX, currentY = 300;
+  dienteIds = [];
+  for (let i = 85; i >= 81; i--) dienteIds.push(i);
+  for (let i = 71; i <= 75; i++) dienteIds.push(i);
+  dienteIds.forEach((id, index) => {
+    let shape = 'doble-separado-5';
+    if (id === 84 || id == 74) shape = 'doble-separado';
+    else if (id % 10 <= 3) shape = 'simple';
+    const diente = new Diente(images[shape], currentX, currentY, id, 2, index > dienteIds.length / 2, true);
+    dientes.push(diente);
+    currentX += diente.width + 10;
+  });
+
+  currentX = 0 + offsetX, currentY = 440;
+  dienteIds = [];
+  for (let i = 18; i >= 11; i--) dienteIds.push(i);
+  for (let i = 21; i <= 28; i++) dienteIds.push(i);
+  dienteIds.forEach((id, index) => {
+    let shape = 'doble';
+    if (id % 10 == 6) shape = 'doble-5';
+    else if (id % 10 == 4 || id % 10 == 5) shape = 'solo';
+    else if (id % 10 <= 3) shape = 'simple';
+    const diente = new Diente(images[shape], currentX, currentY, id, 3, index > dienteIds.length / 2, true);
+    dientes.push(diente);
+    currentX += diente.width + 10;
+  });
 }
 
-renderCtxPrimary(null);
+function drawPrimaryCanvas() {
+  ctxPrimary.clearRect(0, 0, canvasPrimary.width, canvasPrimary.height);
+  dientes.forEach(diente => diente.draw(ctxPrimary));
 
+  hallazgosClinicos.forEach(args => {
+    if (args.length == 3) {
+      let func = getFunc('simple', args[0]);
+      if (func) func(ctxPrimary, dientes[args[1]], args[2]);
+    } else {
+      let func = getFunc('doble', args[0]);
+      if (func) func(ctxPrimary, dientes[args[1]], dientes[args[2]], args[3]);
+      func = getFunc('multiple', args[0]);
+      if (func) func(ctxPrimary, dientes[args[1]], dientes[args[2]], args[3]);
+    }
+  });
+
+  dientes.forEach(diente => diente.drawTags(ctxPrimary));
+}
+
+function preloadImages(shapeList) {
+  const images = {};
+  const loadPromises = shapeList.map(shape => {
+    return fetch(`/static/dientes/${shape}.svg`)
+      .then(res => res.text())
+      .then(svgText => {
+        return new Promise((resolve) => {
+          const blob = new Blob([svgText], { type: "image/svg+xml;charset=utf-8" });
+          const url = URL.createObjectURL(blob);
+          const img = new Image();
+          img.onload = () => {
+            URL.revokeObjectURL(url);
+            images[shape] = img;
+            resolve();
+          };
+          img.src = url;
+        });
+      });
+  });
+
+  return Promise.all(loadPromises).then(() => images);
+}
+
+function drawSelectionCanvas(e) {
+  // Limpia el canvas (transparente)
+  ctxSelection.clearRect(0, 0, canvasSelection.width, canvasSelection.height);
+
+  if (selectionOrigin) {
+    const x = selectionOrigin.x;
+    const y = selectionOrigin.y;
+    const width = e.offsetX - x;
+    const height = e.offsetY - y;
+
+    ctxSelection.setLineDash([4, 2]); // Opcional: línea punteada
+    ctxSelection.beginPath();
+    ctxSelection.strokeStyle = "#007bff"; // Azul
+    ctxSelection.rect(x, y, width, height);
+    ctxSelection.lineWidth = 1;
+    ctxSelection.fillStyle = "rgba(0, 123, 255, 0.2)";
+    ctxSelection.fillRect(x, y, width, height);
+    ctxSelection.stroke();
+    ctxSelection.setLineDash([]); // Restablecer patrón de línea
+  }
+}
+
+function rectsCollide(rectA, rectB) {
+  return !(
+    rectA.x + rectA.w <= rectB.x || // A está completamente a la izquierda de B
+    rectA.x >= rectB.x + rectB.w || // A está completamente a la derecha de B
+    rectA.y + rectA.h <= rectB.y || // A está completamente arriba de B
+    rectA.y >= rectB.y + rectB.h    // A está completamente debajo de B
+  );
+}
+
+function updateLeftPanel(images) {
+  select.innerHTML = '<option value="">-- Elegir --</option>';
+  currentHallazgo = null;
+
+  if (!tipoHallazgo) {
+    dientesSecondary = [];
+    drawSecondaryCanvas();
+    return;
+  }
+
+  Object.keys(hallazgosClinicosFns[tipoHallazgo]).forEach(key => {
+    const option = document.createElement('option');
+    option.value = key;
+    option.textContent = key;
+    select.appendChild(option);
+  });
+
+  if (tipoHallazgo == 'doble') {
+    Object.keys(hallazgosClinicosFns['multiple']).forEach(key => {
+      const option = document.createElement('option');
+      option.value = key;
+      option.textContent = key;
+      select.appendChild(option);
+    });
+  }
+
+  const length = Object.keys(hallazgosClinicosFns).indexOf(tipoHallazgo) + 1;
+  dientesSecondary = []
+  let currentX = 0, currentY = 20;
+
+  switch(tipoHallazgo) {
+    case 'simple':
+      currentX = 130;
+      break;
+    case 'doble':
+      currentX = 100;
+      break;
+    default:
+      currentX = 80;
+      break;
+  }
+
+  let dienteIds = [];
+  for (let i = 0; i < length; i++) dienteIds.push(null);
+  dienteIds.forEach((id, index) => {
+    if (length === 3 && index === 1) {
+      currentX += 50;
+      return;
+    }
+    const diente = new Diente(
+      dientes[selectedDientesIndexes[Math.min(index, 1)]].image,
+      currentX, currentY, id, 0, false,
+      dientes[selectedDientesIndexes[Math.min(index, 1)]].flipV
+    );
+    dientesSecondary.push(diente);
+    currentX += diente.width + 10;
+  });
+
+  drawSecondaryCanvas();
+}
+
+function drawSecondaryCanvas() {
+  ctxSecondary.clearRect(0, 0, canvasSecondary.width, canvasSecondary.height);
+  dientesSecondary.forEach(diente => diente.draw(ctxSecondary));
+  if (tipoHallazgo === 'multiple') {
+    ctxSecondary.font = "bold 16px monospace";
+    ctxSecondary.fillStyle = 'black';
+    ctxSecondary.fillText('...', 135, dientesSecondary[0].flipV ? 35 : 100);
+  }
+  if (dientesSecondary.length > 0 && currentHallazgo) {
+    if (tipoHallazgo === 'simple') getFunc(tipoHallazgo, currentHallazgo)(ctxSecondary, dientesSecondary[0], currentColor);
+    else getFunc(tipoHallazgo, currentHallazgo)(ctxSecondary, dientesSecondary[0], dientesSecondary[1], currentColor);
+  }
+  dientesSecondary.forEach(diente => diente.drawTags(ctxSecondary));
+}
+
+preloadImages(['doble-5', 'doble-punteado', 'doble-separado-5',
+    'doble-separado', 'doble', 'simple', 'solo', 'triple', 'triple-3'
+]).then(images => {
+  createDientes(images);
+  dientes.forEach(diente => diente.draw(ctxPrimary));
+
+  canvasSelection.onmousedown = (e) => {
+    selectionOrigin = {x: e.offsetX, y: e.offsetY};
+  };
+
+  canvasSelection.onmousemove = (e) => {
+    if (selectionOrigin) drawSelectionCanvas(e);
+  };
+
+  canvasSelection.onmouseup = (e) => {
+    if (!selectionOrigin) {
+      selectionOrigin = null;
+      drawSelectionCanvas(e);
+      drawPrimaryCanvas();
+      updateLeftPanel(images);
+      return;
+    }
+
+    const selectionRect = {
+      x: Math.min(selectionOrigin.x, e.offsetX),
+      y: Math.min(selectionOrigin.y, e.offsetY),
+      w: Math.abs(e.offsetX - selectionOrigin.x),
+      h: Math.abs(e.offsetY - selectionOrigin.y),
+    }
+
+    let lineSelection = null;
+    selectedDientesIndexes = []
+
+    dientes.forEach((diente, index) => {
+      diente.selected = rectsCollide(selectionRect, diente.getRect()) && (lineSelection == null || lineSelection == diente.lineId);
+      if (diente.selected) {
+        if (lineSelection === null) lineSelection = diente.lineId;
+        selectedDientesIndexes.push(index);
+      }
+    });
+
+    if (selectedDientesIndexes.length == 0) {
+      tipoHallazgo = null;
+    } else if (selectedDientesIndexes.length == 1) {
+      tipoHallazgo = 'simple';
+    } else {
+      tipoHallazgo = selectedDientesIndexes.length == 2 ? 'doble' : 'multiple';
+      selectedDientesIndexes = [selectedDientesIndexes[0], selectedDientesIndexes[selectedDientesIndexes.length - 1]];
+    }
+
+    selectionOrigin = null;
+    drawSelectionCanvas(e);
+    drawPrimaryCanvas();
+    updateLeftPanel(images);
+  };
+
+  select.addEventListener('change',() => {
+    if (!tipoHallazgo || !select.value) {
+      currentHallazgo = null;
+    } else {
+      currentHallazgo = select.value;
+    }
+    drawSecondaryCanvas();
+  });
+
+  document.getElementsByName('color').forEach(radio => {
+    radio.addEventListener('change', () => {
+      if (radio.checked) {
+        currentColor = radio.value;
+        drawSecondaryCanvas();
+      }
+    });
+  });
+
+  document.getElementById('btn-save').addEventListener('click', () => {
+    if (!tipoHallazgo || !currentHallazgo) return;
+    hallazgosClinicos.push([currentHallazgo, ...selectedDientesIndexes, currentColor]);
+    tipoHallazgo = null;
+    updateLeftPanel(images);
+    dientes.forEach(diente => diente.selected = false);
+    drawPrimaryCanvas();
+  });
+
+  document.getElementById('btn-pop').addEventListener('click', () => {
+    tipoHallazgo = null;
+    if (hallazgosClinicos.length > 0) hallazgosClinicos.pop();
+    updateLeftPanel(images);
+    dientes.forEach(diente => diente.selected = false);
+    drawPrimaryCanvas();
+  });
+});
 </script>
 {% endblock %}
