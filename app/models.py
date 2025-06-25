@@ -18,7 +18,7 @@ class Base(DeclarativeBase):
 
 '''
 CCOdontologo
-'''
+''' 
 class Odontologo(Base):
     __tablename__ = 'odontologo'
     __table_args__ = (
@@ -334,6 +334,7 @@ class Tratamiento(Base):
     descripcion: Mapped[str] = mapped_column(String, info={'label': 'Descripción de tratamientos'})
     en_curso: Mapped[bool] = mapped_column(Boolean)
     costo: Mapped[int] = mapped_column(BigInteger)
+    descuento_porcentaje: Mapped[int] = mapped_column(Integer, default=0)
     odontologo_id: Mapped[str] = mapped_column(String)
     historia_id: Mapped[int] = mapped_column(Integer)
 

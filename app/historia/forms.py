@@ -110,6 +110,7 @@ class FormularioPago(FlaskForm):
 
 class FormularioAgregarProcedimiento(FlaskForm):
     nombre = StringField('Nombre del procedimiento', validators=[DataRequired()])
+    #costo_referencial = DecimalField('Costo referencial (S/.), en caso el costo varíe por procedimiento, coloque 0', validators=[DataRequired(), NumberRange(min=0)])
     submit = SubmitField('Registrar')
 
 

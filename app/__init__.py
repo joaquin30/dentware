@@ -14,8 +14,8 @@ def create_app(config_class=Config):
     from app.gen_fake_data import gen_fake_data
     with app.app_context():
         db.create_all()
-        # Descomenta y corre una vez esta funcion
-        # gen_fake_data()
+        # Descomenta y corre una vez esta funciona
+        #gen_fake_data()
 
     from app.extensions import csrf
     csrf.init_app(app)
@@ -34,3 +34,4 @@ def create_app(config_class=Config):
     app.register_blueprint(odontograma_bp, url_prefix='/odontograma')
 
     return app
+

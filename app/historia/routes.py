@@ -1,4 +1,4 @@
-from flask import render_template, abort, redirect, url_for, flash, request, current_app, jsonify
+from flask import render_template, abort, redirect, url_for, flash, request, current_app, jsonify, session
 from app.historia import bp
 from app.extensions import db
 from app.models import Paciente, Historia, HistoriaContraindicacion, Tratamiento, Odontologo, TratamientoSesion, Procedimiento, Pago
@@ -11,8 +11,7 @@ from datetime import date
 from flask import send_from_directory
 from sqlalchemy.orm import joinedload
 from datetime import datetime
-
-
+from math import ceil
 
 '''
 F-hist_index
@@ -519,6 +518,8 @@ def presupuesto(paciente_id, tratamiento_id):
     tratamiento = db.get_or_404(Tratamiento, tratamiento_id)
     paciente = db.get_or_404(Paciente, paciente_id)
     form = FormularioPresupuesto()
+    descuento_porcentaje = 0
+    descuento_aplicado = 0
 
     if form.validate_on_submit():
         for procedimiento in tratamiento.procedimientos:
@@ -531,19 +532,37 @@ def presupuesto(paciente_id, tratamiento_id):
 
         total_costo = sum(p.costo_referencial or 0 for p in tratamiento.procedimientos)
 
+        # Obtener porcentaje de descuento ingresado (si existe)
+        descuento_input = request.form.get("descuento", "0")
+        try:
+            descuento_porcentaje = int(descuento_input)
+        except ValueError:
+            descuento_porcentaje = 0
 
-        tratamiento.costo = int(total_costo)
+                # Calcular descuento redondeado hacia arriba
+        descuento_aplicado = ceil(total_costo * descuento_porcentaje / 100)
+
+        # Guardar el total con descuento y el porcentaje
+        tratamiento.costo = total_costo - descuento_aplicado
+        tratamiento.descuento_porcentaje = descuento_porcentaje
 
         db.session.commit()
+        flash(f'Se aplicó un descuento del {descuento_porcentaje}% correctamente. Total actualizado: S/ {tratamiento.costo}', 'success')
         return redirect(request.url)
 
     total_costo = sum(p.costo_referencial or 0 for p in tratamiento.procedimientos)
+    descuento_porcentaje = tratamiento.descuento_porcentaje or 0
+    descuento_aplicado = ceil(total_costo * descuento_porcentaje / 100)
+    total_con_descuento = total_costo - descuento_aplicado
 
     return render_template('historia/presupuesto.html',
                            tratamiento=tratamiento,
                            paciente=paciente,
                            form=form,
-                           total_costo=total_costo)
+                           total_costo=total_costo,
+                           descuento=descuento_porcentaje,
+                           total_con_descuento=total_costo - descuento_aplicado
+    )
 
 
 '''
@@ -577,23 +596,41 @@ def gestionar_procedimientos(tratamiento_id):
         # Si no hay delete_id, se asume que es una adición de procedimiento
         if form.validate_on_submit():
             try:
-                nuevo_proc = Procedimiento(
-                    nombre=form.nombre.data.strip(),
-                    costo_referencial=0
-                )
-                db.session.add(nuevo_proc)
+                nombre_proc = form.nombre.data.strip()
 
-                tratamiento.procedimientos.append(nuevo_proc)
+                # Buscar si el procedimiento ya existe
+                procedimiento = db.session.execute(
+                    db.select(Procedimiento).filter_by(nombre=nombre_proc)
+                ).scalar_one_or_none()
+                if not procedimiento:
+                    # Crear nuevo procedimiento con costo_referencial null
+                    procedimiento = Procedimiento(nombre=nombre_proc, costo_referencial=0)
+                    db.session.add(procedimiento)
+                    db.session.flush()  # Obtener ID temporal
 
-                # Recalcular costo también aquí por consistencia
-                tratamiento.costo = sum(p.costo_referencial or 0 for p in tratamiento.procedimientos)
+                    flash('Nuevo procedimiento registrado.', 'info')
 
-                db.session.commit()
-                flash('Procedimiento agregado correctamente.', 'success')
-                return redirect(url_for('historia.gestionar_procedimientos', tratamiento_id=tratamiento_id))
+                # Verificar si ya está asociado al tratamiento
+                if procedimiento in tratamiento.procedimientos:
+                    flash('Este procedimiento ya está asociado al tratamiento.', 'info')
+                else:
+                    tratamiento.procedimientos.append(procedimiento)
+                    tratamiento.costo = sum(p.costo_referencial or 0 for p in tratamiento.procedimientos)
+                    db.session.commit()
+                    flash('Procedimiento agregado correctamente.', 'success')
 
             except Exception as e:
                 db.session.rollback()
-                flash(f'Error al registrar el procedimiento: {e}', 'danger')
+                flash(f'Error al agregar el procedimiento: {e}', 'danger')
 
-    return render_template('historia/gestionar_procedimientos.html', tratamiento=tratamiento, form=form)
+            return redirect(url_for('historia.gestionar_procedimientos', tratamiento_id=tratamiento_id))
+
+    # Para autocompletado en el formulario
+    procedimientos_disponibles = db.session.query(Procedimiento).all()
+
+    return render_template(
+        'historia/gestionar_procedimientos.html',
+        tratamiento=tratamiento,
+        form=form,
+        procedimientos_disponibles=procedimientos_disponibles
+    )

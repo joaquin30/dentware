@@ -98,6 +98,9 @@
   <div class="presupuesto-info">
     <p><strong>Paciente:</strong> {{ paciente.nombres }} {{ paciente.apellidos }}</p>
     <p><strong>Tratamiento:</strong> {{ tratamiento.descripcion }}</p>
+    <div style="margin-top: 12px; background-color: #fef3d5; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; padding: 12px; font-size: 0.95rem;">
+      ⚠️ <strong>Nota:</strong> Algunos procedimientos no tienen un costo referencial predefinido. Si ves un valor de <strong>0</strong> en la tabla, por favor ingresa manualmente el costo correspondiente, ya que este debe ser definido por el profesional tratante.
+    </div>
   </div>
 
   <form method="POST">
@@ -128,7 +131,15 @@
       </tbody>
     </table>
 
-    <div class="total-text">Total: S/ {{ total_costo }}</div>
+    <div class="form-group" style="margin-top: 20px;">
+      <p style="font-size: 1.05rem; margin-bottom: 6px;"><strong>Descuento (%):</strong></p>
+      <input type="number" id="descuento" name="descuento" min="0" max="100" value="{{ descuento or 0 }}" class="form-control" style="max-width: 120px;">
+    </div>
+
+    <div class="total-text">Total sin descuento: S/ {{ total_costo }}</div>
+    {% if descuento %}
+      <div class="total-text">Total con descuento: S/ {{ total_con_descuento }}</div>
+    {% endif %}
 
     <button type="submit" class="btn-guardar">Guardar cambios</button>
   </form>

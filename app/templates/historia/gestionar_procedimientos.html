@@ -118,13 +118,18 @@
 
   <hr>
 
-  <h3 class="titulo-seccion">Agregar nuevo procedimiento</h3>
+  <h3 class="titulo-seccion">Agregar procedimiento</h3>
   <form method="POST">
     {{ form.hidden_tag() }}
     
     <div class="form-group">
-      {{ form.nombre.label }}
-      {{ form.nombre(class="form-control") }}
+      <label for="procedimiento-input">Nombre del procedimiento</label>
+      <input id="procedimiento-input" name="nombre" class="form-control" list="procedimientos-list" placeholder="Escribe y selecciona...">
+      <datalist id="procedimientos-list">
+        {% for proc in procedimientos_disponibles %}
+          <option value="{{ proc.nombre }}">
+        {% endfor %}
+      </datalist>
     </div>
 
     <button type="submit" class="btn-agregar">Agregar</button>
