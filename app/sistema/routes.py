@@ -172,7 +172,7 @@ def buscar_pacientes():
 
 '''
 F-ondontologos
-Función que permite mostrar el los odontologos de la cínica
+Función que permite mostrar el los odontologos de la clínica
 '''
 
 
@@ -216,10 +216,17 @@ Función que permite eliminar un odontologo
 @bp.route('/odontologo/<int:odontologo_id>/eliminar', methods=['POST'])
 def eliminar_odontologo(odontologo_id):
     odontologo = db.get_or_404(Odontologo, odontologo_id)
+
+    # Verificar si tiene tratamientos asociados
+    if odontologo.tratamientos:  # Asegúrate que la relación esté definida en el modelo
+        flash('No puedes eliminar un odontólogo que tiene tratamientos asignados.', 'warning')
+        return redirect(url_for('sistema.odontologos'))
+
     db.session.delete(odontologo)
     db.session.commit()
     flash('Odontólogo eliminado correctamente.', 'success')
     return redirect(url_for('sistema.odontologos'))
+
 
 '''
 F-add_ondontologo
