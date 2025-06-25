@@ -3,29 +3,12 @@
 {% block title %}Inicio{% endblock %}
 {% block content %}
 
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+
 <style>
   body {
     background-color: #f7f9fc;
-  }
-
-  .header-top {
-    border-bottom: 1px solid #d3d3d3;
-    padding: 12px 24px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background-color: #fff;
-  }
-
-  .header-top img {
-    height: 40px;
-  }
-
-  .header-top h1 {
-    font-weight: 700;
-    font-size: 1.25rem;
-    color: #2a2f65;
-    margin: 0;
   }
 
   .main-container {
@@ -67,10 +50,10 @@
     flex-grow: 1;
     background-color: white;
     padding: 60px;
+    padding-top: 20px;
     display: flex;
     flex-direction: column;
     position: relative;
-    padding-top: 20px;
   }
 
   .main-content h2 {
@@ -80,31 +63,52 @@
     margin-bottom: 30px;
   }
 
-  .search-bar {
-    max-width: 400px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 40px;
+  .input-icon {
+    position: relative;
+    width: 100%;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
   }
 
-  .search-bar input {
-    flex-grow: 1;
-    padding: 10px 15px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 1rem;
+  .input-icon img {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  .input-icon input {
+    padding-left: 40px !important;
+    padding-right: 40px;
+    width: 100%;
+  }
+
+  .input-icon .mic-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    font-size: 1.3rem;
+    color: #2a2f65;
+    cursor: pointer;
+  }
+
+  .input-icon .mic-btn.listening {
+    color: #0d6efd;
   }
 
   .illustration {
-    position: static;
-    max-width: 250px; 
-    width: 100%; 
-    margin-top: 20px;
+    max-width: 250px;
+    width: 100%;
+    margin: 20px auto 0;
     opacity: 0.6;
     display: block;
-    margin-left: auto;
-    margin-right: auto;
   }
 
   #resultados_busqueda {
@@ -113,6 +117,7 @@
     gap: 15px;
     margin-top: 15px;
   }
+
   #resultados_busqueda .paciente-card {
     background-color: #c9d6f3;
     border-radius: 8px;
@@ -122,46 +127,26 @@
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     transition: background-color 0.3s ease;
   }
+
   #resultados_busqueda .paciente-card:hover,
   #resultados_busqueda .paciente-card.selected {
     background-color: #428bca;
     color: white;
   }
+
   #resultados_busqueda .paciente-nombre {
     font-weight: 700;
     font-size: 1.1rem;
     margin-bottom: 6px;
   }
+
   #resultados_busqueda .paciente-dni {
     font-size: 0.9rem;
   }
-
-  .input-icon {
-    position: relative;
-    width: 100%; 
-    margin-top: 0.5rem;
-    margin-bottom: 1rem;
-  }
-  .input-icon img {
-    position: absolute;
-    left: 20px;
-    top: 55%;
-    transform: translateY(-50%);
-    width: 20px;
-    height: 20px;
-    pointer-events: none;
-    opacity: 0.6;
-  }
-  .input-icon input {
-    padding-left: 40px !important;
-    width: 100%; 
-  }
-
 </style>
 
-<!-- Contenido principal -->
 <div class="main-container">
-  <!-- Columna izquierda -->
+  <!-- Sidebar -->
   <div class="sidebar">
     <a href="/registrar" class="btn">
       <img src="{{ url_for('static', filename='img/add_profile.png') }}" alt="Añadir" style="height: 20px; margin-right: 8px;">
@@ -171,21 +156,23 @@
       <img src="{{ url_for('static', filename='img/dentist.png') }}" alt="Odontólogos" style="height: 20px; margin-right: 8px;">
       Odontólogos
     </a>
-</div>
+  </div>
 
-  <!-- Columna derecha -->
+  <!-- Main content -->
   <div class="main-content">
     <h2>Bienvenido a Dentware!</h2>
     <form class="row g-3" action="/" method="post" style="margin-top: 20px;">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-    
-    <div class="input-icon">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+      <div class="input-icon">
         <input type="text" id="paciente_search" name="paciente_search" class="form-control" autocomplete="off" required placeholder="Presione aquí para buscar paciente">
         <input type="hidden" id="historia_id" name="historia_id" />
         <img src="{{ url_for('static', filename='img/Buscar.png') }}" alt="Buscar">
-    </div>
+        <button type="button" class="mic-btn" id="mic-btn" title="Hablar">
+          <i class="bi bi-mic-fill"></i>
+        </button>
+      </div>
 
-    <!-- Contenedor para resultados -->
       <div id="resultados_busqueda"></div>
 
       <img src="{{ url_for('static', filename='img/dentist.png') }}" class="illustration" alt="Ilustración de doctora"/>
@@ -193,69 +180,94 @@
         <img src="{{ url_for('static', filename='img/profile.png') }}" alt="Pacientes" style="height: 28px; margin-right: 10px;">
         {{ cantidad_pacientes }} Pacientes
       </div>
-
-
     </form>
   </div>
 </div>
 
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+<!-- Scripts -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
 
-    <script>
-    $(document).ready(function() {
-      const $input = $("#paciente_search");
-      const $resultados = $("#resultados_busqueda");
-      const $historiaId = $("#historia_id");
-      let selectedCard = null;
+<script>
+  $(document).ready(function () {
+    const $input = $("#paciente_search");
+    const $resultados = $("#resultados_busqueda");
+    const $historiaId = $("#historia_id");
+    let selectedCard = null;
 
-      $input.on("input", function() {
-        const query = $(this).val().trim();
+    $input.on("input", function () {
+      const query = $(this).val().trim();
+      $historiaId.val("");
+      $resultados.empty();
+      if (query.length < 1) return;
 
-        $historiaId.val("");
-        $resultados.empty();
-
-        if(query.length < 1) return;
-
-        $.ajax({
-          url: "{{ url_for('sistema.buscar_pacientes') }}",
-          dataType: "json",
-          data: { q: query },
-          success: function(data) {
-            if(data.length === 0) {
-              $resultados.html("<p>No se encontraron pacientes.</p>");
-              return;
-            }
-            data.forEach(paciente => {
-              const card = $(`
-                <div class="paciente-card" tabindex="0">
-                  <img src="{{ url_for('static', filename='img/FichaIcon.png') }}" alt="Icono paciente" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 8px;">
-                  <div class="paciente-nombre" style="display: inline-block; vertical-align: middle;">${paciente.nombres} ${paciente.apellidos}</div>
-                  <div class="paciente-documento-identidad">DNI: ${paciente.documento_identidad}</div>
-                </div>
-              `);
-              card.on("click keypress", function(e) {
-                if(e.type === "click" || (e.type === "keypress" && (e.key === "Enter" || e.key === " "))) {
-                  if(selectedCard) {
-                    selectedCard.removeClass("selected");
-                  }
-                  selectedCard = $(this);
-                  selectedCard.addClass("selected");
-
-                  $historiaId.val(paciente.historia_id);
-                  $input.val(paciente.nombres + " " + paciente.apellidos);
-
-                  // Enviar el formulario
-                  $input.closest("form").submit();
-                }
-              });
-              $resultados.append(card);
-            });
+      $.ajax({
+        url: "{{ url_for('sistema.buscar_pacientes') }}",
+        dataType: "json",
+        data: { q: query },
+        success: function (data) {
+          if (data.length === 0) {
+            $resultados.html("<p>No se encontraron pacientes.</p>");
+            return;
           }
-        });
+          data.forEach(paciente => {
+            const card = $(`
+              <div class="paciente-card" tabindex="0">
+                <img src="{{ url_for('static', filename='img/FichaIcon.png') }}" alt="Icono paciente" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 8px;">
+                <div class="paciente-nombre" style="display: inline-block; vertical-align: middle;">${paciente.nombres} ${paciente.apellidos}</div>
+                <div class="paciente-documento-identidad">DNI: ${paciente.documento_identidad}</div>
+              </div>
+            `);
+            card.on("click keypress", function (e) {
+              if (e.type === "click" || (e.type === "keypress" && (e.key === "Enter" || e.key === " "))) {
+                if (selectedCard) selectedCard.removeClass("selected");
+                selectedCard = $(this).addClass("selected");
+                $historiaId.val(paciente.historia_id);
+                $input.val(paciente.nombres + " " + paciente.apellidos);
+                $input.closest("form").submit();
+              }
+            });
+            $resultados.append(card);
+          });
+        }
       });
     });
-    </script>
+
+    // Voz a texto
+    const micBtn = document.getElementById("mic-btn");
+    micBtn.addEventListener("click", () => {
+      const input = document.getElementById("paciente_search");
+
+      if (!('webkitSpeechRecognition' in window)) {
+        alert("Tu navegador no soporta reconocimiento de voz.");
+        return;
+      }
+
+      const recognition = new webkitSpeechRecognition();
+      recognition.lang = "es-ES";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      micBtn.classList.add("listening");
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        input.value = transcript;
+        $(input).trigger("input");
+      };
+
+      recognition.onerror = (event) => {
+        console.error("Error de reconocimiento:", event.error);
+      };
+
+      recognition.onend = () => {
+        micBtn.classList.remove("listening");
+      };
+
+      recognition.start();
+    });
+  });
+</script>
 
 {% endblock %}

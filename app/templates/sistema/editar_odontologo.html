@@ -34,6 +34,9 @@
     margin-top: 20px;
     gap: 10px;
   }
+  .mic-btn i {
+    pointer-events: none;
+  }
 </style>
 
 <div class="container">
@@ -42,9 +45,17 @@
     <form method="post">
       {{ form.csrf_token }}
       {% for field in form %}
-        {% if field.type != 'CSRFToken' and field.type != 'SubmitField' %}
+        {% if field.widget.input_type != 'hidden' and field.type != 'SubmitField' %}
           <div class="mb-3">
-            {{ render_field(field, class="form-control") }}
+            <label for="{{ field.id }}">{{ field.label.text }}</label>
+            <div class="input-group">
+              {{ field(class="form-control", id=field.id) }}
+              {% if field.type == 'StringField' %}
+              <button type="button" class="btn btn-outline-secondary mic-btn" data-target="{{ field.id }}">
+                <i class="bi bi-mic-fill"></i>
+              </button>
+              {% endif %}
+            </div>
           </div>
         {% endif %}
       {% endfor %}
@@ -55,4 +66,46 @@
     </form>
   </div>
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const micButtons = document.querySelectorAll(".mic-btn");
+
+    micButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const inputId = btn.getAttribute("data-target");
+        const input = document.getElementById(inputId);
+
+        if (!('webkitSpeechRecognition' in window)) {
+          alert("Tu navegador no soporta reconocimiento de voz.");
+          return;
+        }
+
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = "es-ES";
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        btn.classList.remove("btn-outline-secondary");
+        btn.classList.add("btn-primary");
+
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          input.value = transcript;
+        };
+
+        recognition.onerror = (event) => {
+          console.error("Error de reconocimiento:", event.error);
+        };
+
+        recognition.onend = () => {
+          btn.classList.remove("btn-primary");
+          btn.classList.add("btn-outline-secondary");
+        };
+
+        recognition.start();
+      });
+    });
+  });
+</script>
 {% endblock %}
