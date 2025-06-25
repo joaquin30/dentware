@@ -11,13 +11,11 @@ def create_app(config_class=Config):
     db.init_app(app)
 
     from app.gen_fake_data import gen_fake_data
+    from app.importar_procedimientos import importar_procedimientos_desde_json
     with app.app_context():
         db.create_all()
         # gen_fake_data()  # Uncomment to populate test data
-
-        # 👇 Ejecutar importación de procedimientos
-        from app.importar_procedimientos import importar_procedimientos_desde_json
-        importar_procedimientos_desde_json()
+        # importar_procedimientos_desde_json()
 
     from app.extensions import csrf
     csrf.init_app(app)

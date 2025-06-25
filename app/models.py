@@ -179,17 +179,30 @@ class HistoriaExamenesEstomatologicos(Base):
 
     historia_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     maxilares: Mapped[bool] = mapped_column(Boolean, default=False)
-    vestíbulo: Mapped[bool] = mapped_column(Boolean, default=False)
+    maxilares_descripcion: Mapped[str] = mapped_column(String, default='')
+    vestibulo: Mapped[bool] = mapped_column(Boolean, default=False)
+    vestibulo_descripcion: Mapped[str] = mapped_column(String, default='')
     labios: Mapped[bool] = mapped_column(Boolean, default=False)
+    labios_descripcion: Mapped[str] = mapped_column(String, default='')
     encia: Mapped[bool] = mapped_column(Boolean, default=False)
+    encia_descripcion: Mapped[str] = mapped_column(String, default='')
     paladar: Mapped[bool] = mapped_column(Boolean, default=False)
+    paladar_descripcion: Mapped[str] = mapped_column(String, default='')
     oclusión: Mapped[bool] = mapped_column(Boolean, default=False)
+    oclusión_descripcion: Mapped[str] = mapped_column(String, default='')
     lengua: Mapped[bool] = mapped_column(Boolean, default=False)
+    lengua_descripcion: Mapped[str] = mapped_column(String, default='')
     atm: Mapped[bool] = mapped_column(Boolean, default=False)
+    atm_descripcion: Mapped[str] = mapped_column(String, default='')
     piso_de_boca: Mapped[bool] = mapped_column(Boolean, default=False)
+    piso_de_boca_descripcion: Mapped[str] = mapped_column(String, default='')
     ganglios: Mapped[bool] = mapped_column(Boolean, default=False)
+    ganglios_descripcion: Mapped[str] = mapped_column(String, default='')
     orifaringe: Mapped[bool] = mapped_column(Boolean, default=False)
+    orifaringe_descripcion: Mapped[str] = mapped_column(String, default='')
     halitosis: Mapped[bool] = mapped_column(Boolean, default=False)
+    halitosis_descripcion: Mapped[str] = mapped_column(String, default='')
+
 
     historia: Mapped['Historia'] = relationship('Historia', backref='examenes_estomatologicos')
 
@@ -207,109 +220,11 @@ class Odontograma(Base):
     historia_id: Mapped[int] = mapped_column(Integer)
     tipo_odontograma: Mapped[str] = mapped_column(Enum('Inicial', 'Tratamiento', 'Evolución', name='tipo_odontograma_t'))
     ultima_edicion: Mapped[datetime.date] = mapped_column(Date)
-    especificaciones: Mapped[str] = mapped_column(Text)
-    observaciones: Mapped[str] = mapped_column(Text)
+    especificaciones: Mapped[str] = mapped_column(Text, default='')
+    observaciones: Mapped[str] = mapped_column(Text, default='')
+    hallazgos_clinicos: Mapped[str] = mapped_column(Text, default='[]')
 
     historia: Mapped['Historia'] = relationship('Historia', back_populates='odontogramas')
-    entradas_areas_diente: Mapped[List['OdontogramaEntradaAreasDiente']] = relationship('OdontogramaEntradaAreasDiente', back_populates='odontograma')
-    entradas_bordes_diente: Mapped[List['OdontogramaEntradaBordesDiente']] = relationship('OdontogramaEntradaBordesDiente', back_populates='odontograma')
-    entradas_diente: Mapped[List['OdontogramaEntradaDiente']] = relationship('OdontogramaEntradaDiente', back_populates='odontograma')
-    entradas_par_dientes: Mapped[List['OdontogramaEntradaParDientes']] = relationship('OdontogramaEntradaParDientes', back_populates='odontograma')
-    entradas_rango_dientes: Mapped[List['OdontogramaEntradaRangoDientes']] = relationship('OdontogramaEntradaRangoDientes', back_populates='odontograma')
-
-'''
-CCEntradaAreas
-'''
-class OdontogramaEntradaAreasDiente(Base):
-    __tablename__ = 'odontograma_entrada_areas_diente'
-    __table_args__ = (
-        ForeignKeyConstraint(['odontograma_id'], ['odontograma.odontograma_id'], name='odontograma_entrada_areas_diente_odontograma_id_fkey'),
-        PrimaryKeyConstraint('odontograma_id', 'id', name='odontograma_entrada_areas_diente_pkey')
-    )
-
-    odontograma_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    diente: Mapped[int] = mapped_column(Integer)
-    tipo_entrada: Mapped[str] = mapped_column(String)
-    areas: Mapped[list[int]] = mapped_column(ScalarListType) # Esto era array
-    es_grave: Mapped[bool] = mapped_column(Boolean)
-
-    odontograma: Mapped['Odontograma'] = relationship('Odontograma', back_populates='entradas_areas_diente')
-
-'''
-CCEntradaBordes
-'''
-class OdontogramaEntradaBordesDiente(Base):
-    __tablename__ = 'odontograma_entrada_bordes_diente'
-    __table_args__ = (
-        ForeignKeyConstraint(['odontograma_id'], ['odontograma.odontograma_id'], name='odontograma_entrada_bordes_diente_odontograma_id_fkey'),
-        PrimaryKeyConstraint('odontograma_id', 'id', name='odontograma_entrada_bordes_diente_pkey')
-    )
-
-    odontograma_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    diente: Mapped[int] = mapped_column(Integer)
-    tipo_entrada: Mapped[str] = mapped_column(String)
-    bordes: Mapped[list[int]] = mapped_column(ScalarListType) # Esto era array
-    es_grave: Mapped[bool] = mapped_column(Boolean)
-
-    odontograma: Mapped['Odontograma'] = relationship('Odontograma', back_populates='entradas_bordes_diente')
-
-'''
-CCEntradaDiente
-'''
-class OdontogramaEntradaDiente(Base):
-    __tablename__ = 'odontograma_entrada_diente'
-    __table_args__ = (
-        ForeignKeyConstraint(['odontograma_id'], ['odontograma.odontograma_id'], name='odontograma_entrada_diente_odontograma_id_fkey'),
-        PrimaryKeyConstraint('odontograma_id', 'id', name='odontograma_entrada_diente_pkey')
-    )
-
-    odontograma_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    diente: Mapped[int] = mapped_column(Integer)
-    tipo_entrada: Mapped[str] = mapped_column(String)
-    es_grave: Mapped[bool] = mapped_column(Boolean)
-
-    odontograma: Mapped['Odontograma'] = relationship('Odontograma', back_populates='entradas_diente')
-
-'''
-CCEntradaParDientes
-'''
-class OdontogramaEntradaParDientes(Base):
-    __tablename__ = 'odontograma_entrada_par_dientes'
-    __table_args__ = (
-        ForeignKeyConstraint(['odontograma_id'], ['odontograma.odontograma_id'], name='odontograma_entrada_par_dientes_odontograma_id_fkey'),
-        PrimaryKeyConstraint('odontograma_id', 'id', name='odontograma_entrada_par_dientes_pkey')
-    )
-
-    odontograma_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    diente_uno: Mapped[int] = mapped_column(Integer)
-    diente_dos: Mapped[int] = mapped_column(Integer)
-    tipo_entrada: Mapped[str] = mapped_column(String)
-    es_grave: Mapped[bool] = mapped_column(Boolean)
-
-    odontograma: Mapped['Odontograma'] = relationship('Odontograma', back_populates='entradas_par_dientes')
-
-'''
-CCEntradaRango
-'''
-class OdontogramaEntradaRangoDientes(Base):
-    __tablename__ = 'odontograma_entrada_rango_dientes'
-    __table_args__ = (
-        ForeignKeyConstraint(['odontograma_id'], ['odontograma.odontograma_id'], name='odontograma_entrada_rango_dientes_odontograma_id_fkey'),
-        PrimaryKeyConstraint('odontograma_id', 'id', name='odontograma_entrada_rango_dientes_pkey')
-    )
-
-    odontograma_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    diente_inicial: Mapped[int] = mapped_column(Integer)
-    diente_final: Mapped[int] = mapped_column(Integer)
-    tipo_entrada: Mapped[str] = mapped_column(String)
-    es_grave: Mapped[bool] = mapped_column(Boolean)
-
-    odontograma: Mapped['Odontograma'] = relationship('Odontograma', back_populates='entradas_rango_dientes')
 
 tratamiento_procedimiento = Table(
     'tratamiento_procedimiento',

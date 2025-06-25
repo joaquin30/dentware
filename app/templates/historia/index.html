@@ -235,9 +235,9 @@
     <a href="{{ url_for('historia.contraindicaciones', historia_id=historia.historia_id) }}" class="boton-accion">
       Contraindicaciones Médicas
     </a>
-    <a href="#" class="boton-accion">Crear Odontograma</a>
-    <a href="#" class="boton-accion">Actualizar Odontograma</a>
-    <a href="#" class="boton-accion">Ver Odontograma</a>
+    <a href="/odontograma/{{ historia.historia_id }}/inicial" class="boton-accion">Odontograma Inicial</a>
+    <a href="/odontograma/{{ historia.historia_id }}/tratamiento" class="boton-accion text-wrap">Odontograma de Tratamiento</a>
+    <a href="/odontograma/{{ historia.historia_id }}/evolucion" class="boton-accion">Odontograma de Evolución</a>
     <a href="{{ url_for('historia.subir_examen', historia_id=historia.historia_id) }}" class="boton-accion">Exámenes Auxiliares</a>
     <a href="{{ url_for('sistema.examenes_estomatologicos', paciente_id=paciente.paciente_id) }}" class="boton-accion">Exámenes Estomatológicos</a>
     <a href="{{ url_for('historia.pagos', paciente_id=paciente.paciente_id) }}" class="boton-accion">Pagos</a>

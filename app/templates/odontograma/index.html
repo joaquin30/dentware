@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Odontograma{% endblock %}
+{% block subtitle %}{{ historia.paciente.nombres }} {{ historia.paciente.apellidos }} ({{ odontograma.tipo_odontograma }}){% endblock %} 
 {% block content %}
 <div class="row mt-2">
   <div class="col-3">
@@ -23,13 +24,13 @@
     </form>
     <label class="form-label w-100 mt-2">
       Especificaciones
-      <textarea class="form-control" rows="2"></textarea>
+      <textarea id="especificaciones" class="form-control" rows="2">{{ odontograma.especificaciones }}</textarea>
     </label>
       <label class="form-label w-100">
       Observaciones
-      <textarea class="form-control" rows="2"></textarea>
+      <textarea id="observaciones" class="form-control" rows="2">{{ odontograma.observaciones }}</textarea>
     </label>
-    <button type="button" class="btn btn-success mt-2 w-100">Guardar cambios</button>
+    <button id='btn-save-all' class="btn btn-success mt-2 w-100">Guardar cambios y salir</button>
   </div>
   <div class="col-9 canvas-container">
     <canvas id="canvas-primary" width="1000" height="600"></canvas>
@@ -196,6 +197,8 @@ const ctxSelection = canvasSelection.getContext('2d');
 const canvasSecondary = document.getElementById('canvas-secondary');
 const ctxSecondary = canvasSecondary.getContext('2d');
 const select = document.getElementById('select');
+const especificaciones = document.getElementById('especificaciones');
+const observaciones = document.getElementById('observaciones');
 
 let dientes = [];
 let dientesSecondary = [];
@@ -204,7 +207,7 @@ let selectedDientesIndexes = [];
 let tipoHallazgo = null;
 let currentHallazgo = null;
 let currentColor = 'blue';
-let hallazgosClinicos = [];
+let hallazgosClinicos = JSON.parse({{ odontograma.hallazgos_clinicos|tojson }});
 
 const hallazgosClinicosFns = {
   simple: {
@@ -375,7 +378,7 @@ const hallazgosClinicosFns = {
       const ovalHeight = 14;
 
       const y = diente1.flipV
-        ? Math.max(r1.y + r1.h, r2.y + r2.h) + 12 // debajo
+        ? Math.max(r1.y + r1.h, r2.y + r2.h) + 10 // debajo
         : Math.min(r1.y, r2.y) - ovalHeight - 2; // encima
 
       const centerX1 = r1.x + r1.w / 2;
@@ -747,7 +750,7 @@ preloadImages(['doble-5', 'doble-punteado', 'doble-separado-5',
     'doble-separado', 'doble', 'simple', 'solo', 'triple', 'triple-3'
 ]).then(images => {
   createDientes(images);
-  dientes.forEach(diente => diente.draw(ctxPrimary));
+  drawPrimaryCanvas();
 
   canvasSelection.onmousedown = (e) => {
     selectionOrigin = {x: e.offsetX, y: e.offsetY};
@@ -832,6 +835,40 @@ preloadImages(['doble-5', 'doble-punteado', 'doble-separado-5',
     updateLeftPanel(images);
     dientes.forEach(diente => diente.selected = false);
     drawPrimaryCanvas();
+  });
+
+  document.getElementById('btn-save-all').addEventListener('click', (e) => {
+    const csrf_token = "{{ csrf_token() }}";
+    const url = window.location.href;
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrf_token
+      },
+      body: JSON.stringify({
+        'hallazgos_clinicos': hallazgosClinicos,
+        'especificaciones': especificaciones.value,
+        'observaciones': observaciones.value,
+      })
+    })
+    .then(response => {
+      // Verifica si la respuesta HTTP fue exitosa (código 2xx)
+      if (!response.ok) {
+        return response.json().then(errorData => {
+          throw new Error(errorData.message || "Error desconocido del servidor.");
+        });
+      }
+      return response.json();
+    })
+    .then(result => {
+      console.log("Éxito al guardar");
+      window.location.href = '/historia/{{ historia.historia_id }}';
+    })
+    .catch(error => {
+      console.error("Error en la solicitud fetch o del servidor:", error.message);
+      alert("Error al guardar hallazgos: " + error.message);
+    });
   });
 });
 </script>
