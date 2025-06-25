@@ -4,7 +4,6 @@
 {% block content %}
 
 <style>
-  /* Encabezado principal con logo */
   .header-top {
     border-bottom: 1px solid #d3d3d3;
     padding: 12px 24px;
@@ -22,8 +21,6 @@
     color: #2a2f65;
     margin: 0;
   }
-
-  /* Título y botón volver */
   .header-main {
     display: flex;
     align-items: center;
@@ -42,8 +39,6 @@
   .header-main a.back-btn:hover {
     color: #5a5f9e;
   }
-
-  /* Cards estilo */
   .examenes-lista .card {
     border-radius: 10px;
     box-shadow: 0 3px 6px rgb(0 0 0 / 0.12);
@@ -81,8 +76,6 @@
   .card-footer form {
     margin: 0;
   }
-
-  /* Botón subir archivo al centro */
   .upload-btn-container {
     margin: 32px 0 16px;
     display: flex;
@@ -102,8 +95,6 @@
   .upload-btn-container button:hover {
     background-color: #454c9b;
   }
-
-  /* Ajuste formulario archivo para alineación horizontal */
   form.enviar-examen {
     display: flex;
     align-items: center;
@@ -118,26 +109,94 @@
   form.enviar-examen input[type="file"] {
     flex-grow: 1;
   }
+  .mic-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #2a2f65;
+    cursor: pointer;
+    margin-left: 6px;
+  }
+  .mic-btn.listening {
+    color: #0d6efd;
+  }
+  .input-with-mic {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
 </style>
 
-<!-- Título y botón volver -->
 <div class="header-main">
-  <a href="{{ url_for('historia.index', historia_id=historia.historia_id) }}" class="back-btn" title="Volver" style="font-size: 1.5rem; text-decoration: none; margin-right: 10px;">&#x2190;</a>
+  <a href="{{ url_for('historia.index', historia_id=historia.historia_id) }}" class="back-btn" title="Volver">&#x2190;</a>
   <span>Exámenes clínicos estomatológicos de {{ historia.paciente.nombres }} {{ historia.paciente.apellidos }}</span>
 </div>
 
-  <form class="row row-cols-2" action="" method="post">
-    {{ form_examen.csrf_token }}
-    {% for field in form_examen %}
-      {% if field.name != 'csrf_token' %}
-        <div class="col-6">
+<form class="row row-cols-2" action="" method="post">
+  {{ form_examen.csrf_token }}
+  {% for field in form_examen %}
+    {% if field.name != 'csrf_token' %}
+      <div class="col-6">
+        {% if field.type in ['StringField', 'TextAreaField'] %}
+          <label for="{{ field.id }}">{{ field.label.text }}</label>
+          <div class="input-with-mic">
+            {{ field(class="form-control", id=field.id) }}
+            <button type="button" class="mic-btn" data-target="{{ field.id }}" title="Dictar voz">
+              <i class="bi bi-mic-fill"></i>
+            </button>
+          </div>
+        {% else %}
           {{ render_field(field) }}
-        </div>
-      {% endif %}
-    {% endfor %}
-    
-    <div class="col-12 mt-3">
-      <input type="submit" class="btn btn-primary" value="Guardar Exámenes" />
-    </div>
-  </form>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% endfor %}
+
+  <div class="col-12 mt-3">
+    <input type="submit" class="btn btn-primary" value="Guardar Exámenes" />
+  </div>
+</form>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const micButtons = document.querySelectorAll(".mic-btn");
+
+    micButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const inputId = btn.getAttribute("data-target");
+        const input = document.getElementById(inputId);
+
+        if (!input) return;
+
+        if (!('webkitSpeechRecognition' in window)) {
+          alert("Tu navegador no soporta reconocimiento de voz.");
+          return;
+        }
+
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = "es-ES";
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        btn.classList.add("listening");
+
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          input.value += (input.value ? ' ' : '') + transcript;
+        };
+
+        recognition.onerror = (event) => {
+          console.error("Error de reconocimiento:", event.error);
+        };
+
+        recognition.onend = () => {
+          btn.classList.remove("listening");
+        };
+
+        recognition.start();
+      });
+    });
+  });
+</script>
+
 {% endblock %}

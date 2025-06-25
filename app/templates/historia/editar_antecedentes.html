@@ -42,6 +42,22 @@
   .btn-primary:hover {
     background-color: #454c9b;
   }
+  .mic-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #2a2f65;
+    cursor: pointer;
+    margin-left: 6px;
+  }
+  .mic-btn.listening {
+    color: #0d6efd;
+  }
+  .input-with-mic {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
 </style>
 
 <div class="container mt-3">
@@ -67,7 +83,13 @@
             </div>
           {% else %}
             <div class="col-md-4 col-sm-6 col-12">
-              {{ render_field(field) }}
+              <label for="{{ field.id }}">{{ field.label.text }}</label>
+              <div class="input-with-mic">
+                {{ field(class="form-control", id=field.id) }}
+                <button type="button" class="mic-btn" data-target="{{ field.id }}" title="Dictar voz">
+                  <i class="bi bi-mic-fill"></i>
+                </button>
+              </div>
             </div>
           {% endif %}
         {% endfor %}
@@ -79,5 +101,47 @@
     </form>
   </div>
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const micButtons = document.querySelectorAll(".mic-btn");
+
+    micButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const inputId = btn.getAttribute("data-target");
+        const input = document.getElementById(inputId);
+
+        if (!input) return;
+
+        if (!('webkitSpeechRecognition' in window)) {
+          alert("Tu navegador no soporta reconocimiento de voz.");
+          return;
+        }
+
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = "es-ES";
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        btn.classList.add("listening");
+
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          input.value += (input.value ? ' ' : '') + transcript;
+        };
+
+        recognition.onerror = (event) => {
+          console.error("Error de reconocimiento:", event.error);
+        };
+
+        recognition.onend = () => {
+          btn.classList.remove("listening");
+        };
+
+        recognition.start();
+      });
+    });
+  });
+</script>
 
 {% endblock %}

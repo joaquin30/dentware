@@ -12,16 +12,13 @@
     gap: 12px;
     background-color: #fff;
   }
-  .header-top img {
-    height: 40px;
-  }
+  .header-top img { height: 40px; }
   .header-top h1 {
     font-weight: 700;
     font-size: 1.25rem;
     color: #2a2f65;
     margin: 0;
   }
-
   .header-main {
     display: flex;
     align-items: center;
@@ -40,7 +37,6 @@
   .header-main a.back-btn:hover {
     color: #5a5f9e;
   }
-
   .novedad-item {
     position: relative;
     padding: 16px;
@@ -58,9 +54,24 @@
     color: #c00;
     cursor: pointer;
   }
+  .mic-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #2a2f65;
+    cursor: pointer;
+    margin-left: 6px;
+  }
+  .mic-btn.listening {
+    color: #0d6efd;
+  }
+  .input-with-mic {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
 </style>
 
-<!-- Encabezado -->
 <div class="header-main">
   <a href="{{ url_for('historia.index', historia_id=historia.historia_id) }}" class="back-btn" title="Volver">&#x2190;</a>
   <span>Novedades de {{ historia.paciente.nombres }} {{ historia.paciente.apellidos }}</span>
@@ -77,7 +88,10 @@
         <button type="button" class="btn-remove" onclick="removeNovedad(this)">×</button>
         <div class="mb-3">
           {{ subform.descripcion.label(class="form-label") }}
-          {{ subform.descripcion(class="form-control") }}
+          <div class="input-with-mic">
+            {{ subform.descripcion(class="form-control", id=subform.descripcion.id) }}
+            <button type="button" class="mic-btn" data-target="{{ subform.descripcion.id }}"><i class="bi bi-mic-fill"></i></button>
+          </div>
         </div>
         <div class="form-check mb-3">
           {{ subform.es_importante(class="form-check-input", onchange="moverNovedad(this)") }}
@@ -94,7 +108,10 @@
         <button type="button" class="btn-remove" onclick="removeNovedad(this)">×</button>
         <div class="mb-3">
           {{ subform.descripcion.label(class="form-label") }}
-          {{ subform.descripcion(class="form-control") }}
+          <div class="input-with-mic">
+            {{ subform.descripcion(class="form-control", id=subform.descripcion.id) }}
+            <button type="button" class="mic-btn" data-target="{{ subform.descripcion.id }}"><i class="bi bi-mic-fill"></i></button>
+          </div>
         </div>
         <div class="form-check mb-3">
           {{ subform.es_importante(class="form-check-input", onchange="moverNovedad(this)") }}
@@ -136,7 +153,10 @@
         <button type="button" class="btn-remove" onclick="removeNovedad(this)">×</button>
         <div class="mb-3">
           <label for="novedades-${index}-descripcion" class="form-label">Descripción</label>
-          <input class="form-control" id="novedades-${index}-descripcion" name="novedades-${index}-descripcion" type="text" required>
+          <div class="input-with-mic">
+            <input class="form-control" id="novedades-${index}-descripcion" name="novedades-${index}-descripcion" type="text" required>
+            <button type="button" class="mic-btn" data-target="novedades-${index}-descripcion"><i class="bi bi-mic-fill"></i></button>
+          </div>
         </div>
         <div class="form-check mb-3">
           <input class="form-check-input" id="novedades-${index}-es_importante" name="novedades-${index}-es_importante" type="checkbox" value="y" onchange="moverNovedad(this)">
@@ -144,9 +164,51 @@
         </div>
       </div>
     `;
-
     document.getElementById('no-importantes').insertAdjacentHTML('beforeend', newNovedadHtml);
+    activarMicBotones(); // Activar micrófono en nuevos campos
   });
+
+  function activarMicBotones() {
+    const micButtons = document.querySelectorAll(".mic-btn");
+
+    micButtons.forEach(btn => {
+      btn.onclick = () => {
+        const inputId = btn.getAttribute("data-target");
+        const input = document.getElementById(inputId);
+
+        if (!input) return;
+
+        if (!('webkitSpeechRecognition' in window)) {
+          alert("Tu navegador no soporta reconocimiento de voz.");
+          return;
+        }
+
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = "es-ES";
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        btn.classList.add("listening");
+
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          input.value += (input.value ? ' ' : '') + transcript;
+        };
+
+        recognition.onerror = (event) => {
+          console.error("Error de reconocimiento:", event.error);
+        };
+
+        recognition.onend = () => {
+          btn.classList.remove("listening");
+        };
+
+        recognition.start();
+      };
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", activarMicBotones);
 </script>
 
 {% endblock %}

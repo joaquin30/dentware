@@ -135,9 +135,27 @@
     background-color: #f8d7da;
     color: #721c24;
   }
+
+  .input-with-mic {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .mic-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #2a2f65;
+    cursor: pointer;
+  }
+
+  .mic-btn.listening {
+    color: #0d6efd;
+  }
 </style>
 
-<!-- Mensajes flash -->
+<!-- Flash Messages -->
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <div id="flash-messages">
@@ -177,7 +195,6 @@
       </div>
     {% endif %}
 
-
     <!-- Formulario -->
     <form method="POST">
       {{ form.hidden_tag() }}
@@ -200,14 +217,20 @@
         <div class="form-row">
           <div class="form-group" style="flex: 1 1 100%;">
             <label for="descripcion">Descripción del procedimiento realizado:</label>
-            {{ form.descripcion }}
+            <div class="input-with-mic">
+              {{ form.descripcion(id="descripcion") }}
+              <button type="button" class="mic-btn" data-target="descripcion"><i class="bi bi-mic-fill"></i></button>
+            </div>
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group" style="flex: 1 1 100%;">
             <label for="observaciones">Observaciones:</label>
-            {{ form.observaciones }}
+            <div class="input-with-mic">
+              {{ form.observaciones(id="observaciones") }}
+              <button type="button" class="mic-btn" data-target="observaciones"><i class="bi bi-mic-fill"></i></button>
+            </div>
           </div>
         </div>
 
@@ -219,4 +242,47 @@
     </form>
   </div>
 </div>
+
+<!-- JS Reconocimiento de voz -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const micButtons = document.querySelectorAll(".mic-btn");
+
+    micButtons.forEach(btn => {
+      btn.onclick = () => {
+        const inputId = btn.getAttribute("data-target");
+        const input = document.getElementById(inputId);
+
+        if (!input) return;
+
+        if (!('webkitSpeechRecognition' in window)) {
+          alert("Tu navegador no soporta reconocimiento de voz.");
+          return;
+        }
+
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = "es-ES";
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        btn.classList.add("listening");
+
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          input.value += (input.value ? ' ' : '') + transcript;
+        };
+
+        recognition.onerror = (event) => {
+          console.error("Error de reconocimiento:", event.error);
+        };
+
+        recognition.onend = () => {
+          btn.classList.remove("listening");
+        };
+
+        recognition.start();
+      };
+    });
+  });
+</script>
 {% endblock %}

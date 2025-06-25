@@ -146,6 +146,24 @@
     background-color: #f8d7da;
     color: #721c24;
   }
+
+  .input-with-mic {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .mic-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #2a2f65;
+    cursor: pointer;
+  }
+
+  .mic-btn.listening {
+    color: #0d6efd;
+  }
 </style>
 
 <!-- Mensajes flash -->
@@ -160,14 +178,13 @@
 {% endwith %}
 
 <a href="{{ url_for('historia.index', historia_id=historia.historia_id) }}" class="btn btn-secondary" title="Volver">← Volver</a>
-        
+
 <div class="container">
   <div class="card">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h2>Crear tratamiento</h2>
     </div>
 
-    <!-- Paciente info -->
     <div class="paciente-info">
       <img src="{{ url_for('static', filename='img/profile.png') }}" alt="Foto perfil">
       <div>
@@ -184,9 +201,13 @@
         <div class="form-row">
           <div class="form-group" style="flex: 1 1 100%;">
             <label for="descripcion">Descripción</label>
-            {{ form.descripcion }}
+            <div class="input-with-mic">
+              {{ form.descripcion(id="descripcion", class="form-control") }}
+              <button type="button" class="mic-btn" data-target="descripcion"><i class="bi bi-mic-fill"></i></button>
+            </div>
           </div>
         </div>
+
         <div class="form-row">
           <div class="form-group">
             <label for="fecha">Fecha:</label>
@@ -201,14 +222,54 @@
           </div>
         </div>
 
-
         <div class="form-actions">
           <button type="submit" class="btn">Guardar</button>
         </div>
-
       </div>
     </form>
   </div>
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const micButtons = document.querySelectorAll(".mic-btn");
+
+    micButtons.forEach(btn => {
+      btn.onclick = () => {
+        const inputId = btn.getAttribute("data-target");
+        const input = document.getElementById(inputId);
+
+        if (!input) return;
+
+        if (!('webkitSpeechRecognition' in window)) {
+          alert("Tu navegador no soporta reconocimiento de voz.");
+          return;
+        }
+
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = "es-ES";
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        btn.classList.add("listening");
+
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          input.value += (input.value ? ' ' : '') + transcript;
+        };
+
+        recognition.onerror = (event) => {
+          console.error("Error de reconocimiento:", event.error);
+        };
+
+        recognition.onend = () => {
+          btn.classList.remove("listening");
+        };
+
+        recognition.start();
+      };
+    });
+  });
+</script>
 
 {% endblock %}

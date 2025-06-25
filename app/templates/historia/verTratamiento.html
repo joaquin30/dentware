@@ -127,16 +127,36 @@
   }
 
   .scroll-sesiones {
-    max-height: 300px;   /* ajusta según preferencia */
+    max-height: 300px;
     overflow-y: auto;
-    padding-right: 6px;  /* espacio para scroll */
+    padding-right: 6px;
+  }
+
+  .input-with-mic {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .mic-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #2a2f65;
+    cursor: pointer;
+  }
+
+  .mic-btn.listening {
+    color: #0d6efd;
   }
 </style>
 
+<!-- Volver -->
 <div class="btn-volver">
   <a href="{{ url_for('historia.index', historia_id=historia.historia_id) }}">← Volver</a>
 </div>
 
+<!-- Formulario -->
 <form method="POST" action="{{ url_for('historia.ver_tratamiento', tratamiento_id=tratamiento.tratamiento_id) }}">
   {{ form.hidden_tag() }}
 
@@ -144,10 +164,12 @@
     <h2>Ver Tratamiento</h2>
 
     <div class="form-box">
-
       <div class="form-group">
         {{ form.descripcion.label }}
-        {{ form.descripcion(rows=4, class="form-control") }}
+        <div class="input-with-mic">
+          {{ form.descripcion(rows=4, class="form-control", id="descripcion") }}
+          <button type="button" class="mic-btn" data-target="descripcion"><i class="bi bi-mic-fill"></i></button>
+        </div>
       </div>
 
       <div class="form-check">
@@ -164,53 +186,87 @@
         {{ form.odontologo_id.label }}
         {{ form.odontologo_id(class="form-control") }}
       </div>
-
     </div>
 
     <div class="form-box">
       <h4>Sesiones</h4>
       {% if tratamiento.sesiones %}
-          <div class="scroll-sesiones">
-            {% for sesion in tratamiento.sesiones|sort(attribute='fecha', reverse=True) %}
-                <div class="sesion-item" style="display: flex; justify-content: space-between; align-items: center;">
-                  <div>
-                    <strong>{{ sesion.odontologo.nombre }}</strong><br>
-                    <div style="margin: 4px 0;">{{ sesion.descripcion }}</div>
-                    <span>{{ sesion.fecha.strftime('%d/%m/%Y') }}</span>
-                  </div>
-                  <a href="{{ url_for('historia.editar_sesion_tratamiento', tratamiento_id=tratamiento.tratamiento_id, sesion_id=sesion.sesion_id) }}"
-                    class="btn btn-sm btn-outline-secondary ms-1">
-                    Ver sesión
-                  </a>
-                </div>
-            {% endfor %}
-          </div>
+        <div class="scroll-sesiones">
+          {% for sesion in tratamiento.sesiones|sort(attribute='fecha', reverse=True) %}
+            <div class="sesion-item" style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <strong>{{ sesion.odontologo.nombre }}</strong><br>
+                <div style="margin: 4px 0;">{{ sesion.descripcion }}</div>
+                <span>{{ sesion.fecha.strftime('%d/%m/%Y') }}</span>
+              </div>
+              <a href="{{ url_for('historia.editar_sesion_tratamiento', tratamiento_id=tratamiento.tratamiento_id, sesion_id=sesion.sesion_id) }}"
+                 class="btn btn-sm btn-outline-secondary ms-1">Ver sesión</a>
+            </div>
+          {% endfor %}
+        </div>
       {% else %}
-          <p>No hay sesiones registradas.</p>
+        <p>No hay sesiones registradas.</p>
       {% endif %}
       <a href="{{ url_for('historia.crear_sesion_tratamiento', tratamiento_id=tratamiento.tratamiento_id) }}" class="btn-registrar-sesion">
         + Registrar sesión
       </a>
     </div>
 
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+      <a href="{{ url_for('historia.presupuesto', paciente_id=paciente.paciente_id, tratamiento_id=tratamiento.tratamiento_id) }}" class="btn-registrar-sesion">
+        Ver presupuesto
+      </a>
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
-  <a href="{{ url_for('historia.presupuesto', paciente_id=paciente.paciente_id, tratamiento_id=tratamiento.tratamiento_id) }}" class="btn-registrar-sesion">
-  Ver presupuesto
-</a>
+      <a href="{{ url_for('historia.gestionar_procedimientos', tratamiento_id=tratamiento.tratamiento_id) }}" class="btn-registrar-sesion">
+        Ver procedimientos
+      </a>
+    </div>
 
-
-   <a href="{{ url_for('historia.gestionar_procedimientos', tratamiento_id=tratamiento.tratamiento_id) }}" class="btn-registrar-sesion">
-  Ver procedimientos
-</a>
-
-  </div>
-
-  <button type="submit" class="btn-guardar">Guardar cambios</button>
-</div>
-
-
+    <button type="submit" class="btn-guardar">Guardar cambios</button>
   </div>
 </form>
+
+<!-- Script de reconocimiento de voz -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const micButtons = document.querySelectorAll(".mic-btn");
+
+    micButtons.forEach(btn => {
+      btn.onclick = () => {
+        const inputId = btn.getAttribute("data-target");
+        const input = document.getElementById(inputId);
+
+        if (!input) return;
+
+        if (!('webkitSpeechRecognition' in window)) {
+          alert("Tu navegador no soporta reconocimiento de voz.");
+          return;
+        }
+
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = "es-ES";
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        btn.classList.add("listening");
+
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          input.value += (input.value ? ' ' : '') + transcript;
+        };
+
+        recognition.onerror = (event) => {
+          console.error("Error de reconocimiento:", event.error);
+        };
+
+        recognition.onend = () => {
+          btn.classList.remove("listening");
+        };
+
+        recognition.start();
+      };
+    });
+  });
+</script>
 
 {% endblock %}
