@@ -15,7 +15,7 @@ def create_app(config_class=Config):
     with app.app_context():
         db.create_all()
         # gen_fake_data()  # Uncomment to populate test data
-        # importar_procedimientos_desde_json()
+        #importar_procedimientos_desde_json()
 
     from app.extensions import csrf
     csrf.init_app(app)
