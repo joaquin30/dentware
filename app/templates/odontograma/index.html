@@ -144,7 +144,7 @@ class Diente {
         h: this.height
       };
       ctx.restore();
-      currentY += this.height + this.scale / 2;
+      currentY += this.height + (this.flipV ? this.scale : this.scale / 2);
     };
 
     if (this.flipV) {
@@ -270,6 +270,98 @@ const hallazgosClinicosFns = {
     'Pigmentación del esmalte': (ctx, diente, color) => {
       diente.addTag('PE', color);
     },
+    'Restauración definitiva con resina': (ctx, diente, color) => {
+      diente.addTag('R', color);
+      // Dibujar un cuadrado de lineas en la raiz
+      const r = diente.getDienteRect();
+      const y1 = diente.flipV ? r.y + r.h / 8 : r.y + 5 * r.h / 8;
+
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.fillRect(r.x + r.w / 5, y1, 3 * r.w / 5, r.h / 4);
+      ctx.restore();
+    },
+    'Restauración temporal': (ctx, diente, color) => {
+      diente.addTag('R', color);
+      // Dibujar un cuadrado con color en la raiz
+      const r = diente.getDienteRect();
+      const y1 = diente.flipV ? r.y + r.h / 8 : r.y + 5 * r.h / 8;
+
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+      ctx.strokeRect(r.x + r.w / 5, y1, 3 * r.w / 5, r.h / 4);
+      ctx.restore();
+    },
+    'Sellante': (ctx, diente, color) => {
+      diente.addTag('S', color);
+      // Dibujar una cruz en la raiz
+      const r = diente.getDienteRect();
+      const y1 = diente.flipV ? r.y + r.h / 8 : r.y + 5 * r.h / 8;
+      const y2 = diente.flipV ? r.y + 3 * r.h / 8 : r.y + 7 * r.h / 8;
+      const y3 = diente.flipV ? r.y + r.h / 4 : r.y + 3 * r.h / 4;
+
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+
+      ctx.beginPath();
+      ctx.moveTo(r.x + r.w / 2, y1);
+      ctx.lineTo(r.x + r.w / 2, y2);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(r.x + r.w / 5, y3);
+      ctx.lineTo(r.x + 4 * r.w / 5, y3);
+      ctx.stroke();
+
+      ctx.restore();
+    },
+    'Espigo - muñón': (ctx, diente, color) => {
+      // Dibujar un cuadrado en la raiz y una linea hacia arriba
+      const r = diente.getDienteRect();
+      const y1 = diente.flipV ? r.y + r.h / 8 : r.y + 5 * r.h / 8;
+      const y2 = diente.flipV ? r.y + 3 * r.h / 8 : r.y + 5 * r.h / 8;
+      const y3 = diente.flipV ? r.y + r.h : r.y;
+
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+
+      ctx.strokeRect(r.x + r.w / 5, y1, 3 * r.w / 5, r.h / 4);
+      ctx.beginPath();
+      ctx.moveTo(r.x + r.w / 2, y2);
+      ctx.lineTo(r.x + r.w / 2, y3);
+      ctx.stroke();
+
+      ctx.restore();
+    },
+    'Tratamiento de conducto': (ctx, diente, color) => {
+      // dibujar una linea de la raiz hacia arriba
+      diente.addTag('TC', color);
+      const r = diente.getDienteRect();
+      const y1 = diente.flipV ? r.y + r.h / 4 : r.y + 3 * r.h / 4;
+      const y2 = diente.flipV ? r.y + r.h : r.y;
+      
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+
+      ctx.beginPath();
+      ctx.moveTo(r.x + r.w / 2, y1);
+      ctx.lineTo(r.x + r.w / 2, y2);
+      ctx.stroke();
+
+      ctx.restore();
+    },
+    'Implante dental': (ctx, diente, color) => {
+      // Solo añadir tag
+      diente.addTag('IMP', color);
+    },
+    'Movilidad patológica': (ctx, diente, color) => {
+      // Solo añadir tag
+      diente.addTag('M1', color);
+    },
   },
   doble: {
     'Fusión': (ctx, diente1, diente2, color) => {
@@ -386,6 +478,57 @@ const hallazgosClinicosFns = {
 
       ctx.restore();
     },
+    'Prótesis parcial fija': (ctx, diente1, diente2, color) => {
+      // Linea arriba de los diente que empieze y termine en el centro
+      // con dos lineas para abajo
+      const r1 = diente1.getDienteRect();
+      const r2 = diente2.getDienteRect();
+      const y = diente1.flipV ? r1.y + r1.h : r1.y;
+      const offsetY = diente1.flipV ? 6 : -6;
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+
+      ctx.beginPath();
+      ctx.moveTo(r1.x + r1.w / 2, y + offsetY);
+      ctx.lineTo(r2.x + r2.w / 2, y + offsetY);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(r1.x + r1.w / 2, y + offsetY);
+      ctx.lineTo(r1.x + r1.w / 2, y);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(r2.x + r2.w / 2, y + offsetY);
+      ctx.lineTo(r2.x + r2.w / 2, y);
+      ctx.stroke();
+
+      ctx.restore();
+    },
+    'Prótesis completa': (ctx, diente1, diente2, color) => {
+      // Linea arriba de los diente que empieze y termine en el centro
+      // con dos lineas para abajo
+      const r1 = diente1.getDienteRect();
+      const r2 = diente2.getDienteRect();
+      const y = diente1.flipV ? r1.y + r1.h : r1.y;
+      const offsetY = diente1.flipV ? 6 : -6;
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+
+      ctx.beginPath();
+      ctx.moveTo(r1.x + r1.w / 2, y + offsetY);
+      ctx.lineTo(r2.x + r2.w / 2, y + offsetY);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(r1.x + r1.w / 2, y + offsetY / 2);
+      ctx.lineTo(r2.x + r2.w / 2, y + offsetY / 2);
+      ctx.stroke();
+
+      ctx.restore();
+    },
   }
 };
 
@@ -438,8 +581,8 @@ function createDientes(images) {
 
   currentX = 0 + offsetX, currentY = 440;
   dienteIds = [];
-  for (let i = 18; i >= 11; i--) dienteIds.push(i);
-  for (let i = 21; i <= 28; i++) dienteIds.push(i);
+  for (let i = 38; i >= 31; i--) dienteIds.push(i);
+  for (let i = 41; i <= 48; i++) dienteIds.push(i);
   dienteIds.forEach((id, index) => {
     let shape = 'doble';
     if (id % 10 == 6) shape = 'doble-5';
