@@ -1,27 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Exámenes auxiliares de {{ paciente.nombres }} {{ paciente.apellidos }}{% endblock %}
 {% block content %}
-<style>
-  /* Encabezado principal con logo */
-  .header-top {
-    border-bottom: 1px solid #d3d3d3;
-    padding: 12px 24px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background-color: #fff;
-  }
-  .header-top img {
-    height: 40px;
-  }
-  .header-top h1 {
-    font-weight: 700;
-    font-size: 1.25rem;
-    color: #2a2f65;
-    margin: 0;
-  }
 
-  /* Título y botón volver */
+<!-- Bootstrap Icons para el micrófono -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+
+<style>
   .header-main {
     display: flex;
     align-items: center;
@@ -41,7 +25,6 @@
     color: #5a5f9e;
   }
 
-  /* Cards estilo */
   .examenes-lista .card {
     border-radius: 10px;
     box-shadow: 0 3px 6px rgb(0 0 0 / 0.12);
@@ -56,136 +39,97 @@
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
   }
-  .card-body {
-    padding: 12px 16px;
-  }
-  .card-title {
-    font-size: 1rem;
-    font-weight: 700;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .card-text {
-    font-size: 0.875rem;
-    margin-bottom: 10px;
-  }
-  .card-footer {
-    padding: 8px 16px 16px;
-    display: flex;
-    gap: 6px;
-    justify-content: center;
-  }
-  .card-footer form {
-    margin: 0;
-  }
 
-  /* Botón subir archivo al centro */
-  .upload-btn-container {
-    margin: 32px 0 16px;
-    display: flex;
-    justify-content: center;
-  }
-  .upload-btn-container button {
-    background-color: #2a2f65;
-    color: white;
+  .mic-btn {
+    background: none;
     border: none;
-    padding: 10px 28px;
-    border-radius: 28px;
-    font-weight: 600;
-    font-size: 1.05rem;
+    position: absolute;
+    right: 10px;
+    top: 34px;
+    font-size: 1.2rem;
+    color: #2a2f65;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  .upload-btn-container button:hover {
-    background-color: #454c9b;
   }
 
-  /* Ajuste formulario archivo para alineación horizontal */
-  form.enviar-examen {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 24px;
+  .mic-btn.listening {
+    color: #0d6efd;
   }
-  form.enviar-examen label {
-    margin-bottom: 0;
-    font-weight: 600;
-    font-size: 1rem;
-  }
-  form.enviar-examen input[type="file"] {
-    flex-grow: 1;
+
+  .mic-container {
+    position: relative;
   }
 </style>
 
-<!-- Título y botón regresar -->
 <div class="header-main">
   <a href="{{ url_for('historia.index', historia_id=historia.historia_id) }}" class="back-btn" title="Volver">&#x2190;</a>
   <span>Exámenes auxiliares de {{ paciente.nombres }} {{ paciente.apellidos }}</span>
 </div>
 
-<!-- Lista de exámenes -->
-  <div class="examenes-lista row row-cols-1 row-cols-md-4 g-4">
-    {% for examen in examenes %}
-      <div class="col">
-        <div class="card h-100">
-          {% if examen.ruta_archivo.endswith(('.jpg', '.jpeg', '.png')) %}
-            <img src="{{ url_for('static', filename='examenes/' + examen.ruta_archivo) }}" class="card-img-top" alt="{{ examen.titulo }}">
-          {% else %}
-            <img src="{{ url_for('static', filename='img/pdf.jpg') }}" class="card-img-top img-fluid" style="max-height: 120px; object-fit: contain;" alt="PDF icon">
-          {% endif %}
-          <div class="card-body">
-            <h5 class="card-title">{{ examen.titulo }}</h5>
-            <p class="card-text">Fecha: {{ examen.fecha.strftime('%Y-%m-%d') }}</p>
-          </div>
-          <div class="card-footer">
-            <a href="{{ url_for('historia.ver_examen', historia_id=historia.historia_id, examen_id=examen.examen_id) }}" class="btn btn-sm btn-primary">Ver</a>
-            <a href="{{ url_for('historia.descargar_examen', historia_id=historia.historia_id, examen_id=examen.examen_id) }}" class="btn btn-sm btn-success">Descargar</a>
-            <form action="{{ url_for('historia.borrar_examen', historia_id=historia.historia_id, examen_id=examen.examen_id) }}" 
-                  method="post" 
-                  style="display:inline;" 
-                  class="form-borrar-examen">
-              {{ form.csrf_token }}
-              <button type="submit" class="btn btn-sm btn-danger">Borrar</button>
-            </form>
-          </div>
-          <div class="card-footer">
-            <form action="{{ url_for('historia.actualizar_observacion', historia_id=historia.historia_id, examen_id=examen.examen_id) }}" method="post" class="w-100 mt-2">
-              {{ form.csrf_token }}
-              <label for="observaciones-{{ examen.examen_id }}" class="form-label mt-2">Observaciones:</label>
-              <textarea name="observaciones" id="observaciones-{{ examen.examen_id }}" rows="3" class="form-control">{{ examen.observaciones }}</textarea>
-              <button type="submit" class="btn btn-sm btn-primary mt-2">Guardar observaciones</button>
-            </form>
-          </div>
+<div class="examenes-lista row row-cols-1 row-cols-md-4 g-4">
+  {% for examen in examenes %}
+    <div class="col">
+      <div class="card h-100">
+        {% if examen.ruta_archivo.endswith(('.jpg', '.jpeg', '.png')) %}
+          <img src="{{ url_for('static', filename='examenes/' + examen.ruta_archivo) }}" class="card-img-top" alt="{{ examen.titulo }}">
+        {% else %}
+          <img src="{{ url_for('static', filename='img/pdf.jpg') }}" class="card-img-top img-fluid" style="max-height: 120px; object-fit: contain;" alt="PDF icon">
+        {% endif %}
+        <div class="card-body">
+          <h5 class="card-title">{{ examen.titulo }}</h5>
+          <p class="card-text">Fecha: {{ examen.fecha.strftime('%Y-%m-%d') }}</p>
         </div>
-        
+        <div class="card-footer">
+          <a href="{{ url_for('historia.ver_examen', historia_id=historia.historia_id, examen_id=examen.examen_id) }}" class="btn btn-sm btn-primary">Ver</a>
+          <a href="{{ url_for('historia.descargar_examen', historia_id=historia.historia_id, examen_id=examen.examen_id) }}" class="btn btn-sm btn-success">Descargar</a>
+          <form action="{{ url_for('historia.borrar_examen', historia_id=historia.historia_id, examen_id=examen.examen_id) }}" 
+                method="post" 
+                style="display:inline;" 
+                class="form-borrar-examen">
+            {{ form.csrf_token }}
+            <button type="submit" class="btn btn-sm btn-danger">Borrar</button>
+          </form>
+        </div>
+        <div class="card-footer">
+          <form action="{{ url_for('historia.actualizar_observacion', historia_id=historia.historia_id, examen_id=examen.examen_id) }}" method="post" class="w-100 mt-2">
+            {{ form.csrf_token }}
+            <label for="observaciones-{{ examen.examen_id }}" class="form-label mt-2">Observaciones:</label>
+            <div class="mic-container">
+              <textarea name="observaciones" id="observaciones-{{ examen.examen_id }}" rows="3" class="form-control">{{ examen.observaciones }}</textarea>
+              <button type="button" class="mic-btn" title="Dictar observación" data-textarea="observaciones-{{ examen.examen_id }}">
+                <i class="bi bi-mic-fill"></i>
+              </button>
+            </div>
+            <button type="submit" class="btn btn-sm btn-primary mt-2">Guardar observaciones</button>
+          </form>
+        </div>
       </div>
-    {% else %}
-      <p>No hay exámenes auxiliares registrados.</p>
+    </div>
+  {% else %}
+    <p>No hay exámenes auxiliares registrados.</p>
+  {% endfor %}
+</div>
+
+<!-- Formulario subir examen -->
+<form method="post" enctype="multipart/form-data">
+  {{ form.hidden_tag() }}
+
+  <div class="mb-3">
+    {{ form.archivo.label(class="form-label") }}
+    {{ form.archivo(class="form-control") }}
+    <div class="form-text">Solo se aceptan archivos de imagen (.PNG, .JPG, .JPEG) o PDF.</div>
+    {% for error in form.archivo.errors %}
+      <div class="text-danger">{{ error }}</div>
     {% endfor %}
   </div>
 
-  <!-- Formulario subir examen -->
-  <form method="post" enctype="multipart/form-data">
-    {{ form.hidden_tag() }}
+  {{ form.historia_id }}
+  <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+</form>
 
-    <div class="mb-3">
-      {{ form.archivo.label(class="form-label") }}
-      {{ form.archivo(class="form-control") }}
-      <div class="form-text">Solo se aceptan archivos de imagen (.PNG, .JPG, .JPEG) o PDF.</div>
-      {% for error in form.archivo.errors %}
-        <div class="text-danger">{{ error }}</div>
-      {% endfor %}
-    </div>
+<hr/>
 
-    {{ form.historia_id }}
-
-    <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
-  </form>
-
-  <hr/>
-
-  <script>
+<script>
+  // Borrar examen con confirmación AJAX
   document.querySelectorAll('form.form-borrar-examen').forEach(form => {
     form.addEventListener('submit', function(event) {
       event.preventDefault();
@@ -206,6 +150,41 @@
         }
       })
       .catch(() => alert('Error en la conexión.'));
+    });
+  });
+
+  // Voz a texto
+  document.querySelectorAll('.mic-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const textareaId = btn.getAttribute('data-textarea');
+      const textarea = document.getElementById(textareaId);
+
+      if (!('webkitSpeechRecognition' in window)) {
+        alert("Tu navegador no soporta reconocimiento de voz.");
+        return;
+      }
+
+      const recognition = new webkitSpeechRecognition();
+      recognition.lang = "es-ES";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      btn.classList.add("listening");
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        textarea.value += (textarea.value ? ' ' : '') + transcript;
+      };
+
+      recognition.onerror = (event) => {
+        console.error("Error de reconocimiento:", event.error);
+      };
+
+      recognition.onend = () => {
+        btn.classList.remove("listening");
+      };
+
+      recognition.start();
     });
   });
 </script>
