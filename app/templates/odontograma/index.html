@@ -725,8 +725,8 @@ function createDientes(images) {
 
   currentX = 0 + offsetX, currentY = 440;
   dienteIds = [];
-  for (let i = 38; i >= 31; i--) dienteIds.push(i);
-  for (let i = 41; i <= 48; i++) dienteIds.push(i);
+  for (let i = 48; i >= 41; i--) dienteIds.push(i);
+  for (let i = 31; i <= 38; i++) dienteIds.push(i);
   dienteIds.forEach((id, index) => {
     let shape = 'doble';
     if (id % 10 == 6) shape = 'doble-5';
@@ -907,8 +907,17 @@ function drawSecondaryCanvas() {
     ctxSecondary.fillText('...', 135, dientesSecondary[0].flipV ? 35 : 100);
   }
   if (dientesSecondary.length > 0 && currentHallazgo) {
-    if (tipoHallazgo === 'simple') getFunc(tipoHallazgo, currentHallazgo)(ctxSecondary, dientesSecondary[0], currentColor);
-    else getFunc(tipoHallazgo, currentHallazgo)(ctxSecondary, dientesSecondary[0], dientesSecondary[1], currentColor);
+    if (tipoHallazgo === 'simple') {
+      getFunc(tipoHallazgo, currentHallazgo)(ctxSecondary, dientesSecondary[0], currentColor);
+    } else {
+      const func = getFunc(tipoHallazgo, currentHallazgo);
+      if (!func && tipoHallazgo === 'doble') {
+        // Si no hay función para el hallazgo doble, usamos la de múltiple
+        getFunc('multiple', currentHallazgo)(ctxSecondary, dientesSecondary[0], dientesSecondary[1], currentColor);
+      } else {
+        func(ctxSecondary, dientesSecondary[0], dientesSecondary[1], currentColor);
+      }
+    }
   }
   dientesSecondary.forEach(diente => diente.drawTags(ctxSecondary));
 }
