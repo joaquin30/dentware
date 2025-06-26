@@ -56,9 +56,11 @@
             <label for="{{ field.id }}">{{ field.label.text }}</label>
             <div class="input-group">
               {{ field(class="form-control", id=field.id) }}
-              <button type="button" class="btn btn-outline-secondary mic-btn" data-target="{{ field.id }}">
-                <i class="bi bi-mic-fill"></i>
-              </button>
+              {% if field.id not in ['fecha_nacimiento', 'estado_civil', 'telefono'] %}
+                <button type="button" class="btn btn-outline-secondary mic-btn" data-target="{{ field.id }}">
+                  <i class="bi bi-mic-fill"></i>
+                </button>
+              {% endif %}
             </div>
           </div>
         {% endif %}
@@ -90,7 +92,6 @@
         recognition.interimResults = false;
         recognition.maxAlternatives = 1;
 
-        // Indicar que está escuchando
         btn.classList.remove("btn-outline-secondary");
         btn.classList.add("btn-primary");
 
