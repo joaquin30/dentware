@@ -66,7 +66,22 @@ div.canvas-container canvas {
 <script>
 'use strict';
 
+/*
+C-Diente
+Clase que representa un diente dentro de una interfaz gráfica, con capacidades
+para dibujarse, mostrar etiquetas, identificarse por número, y reflejar su estado
+de selección o transformación (espejado, escala).
+*/
+
+
 class Diente {
+
+  /*
+  F-constructor
+  Inicializa una instancia de la clase Diente con su imagen, posición, identificación,
+  configuración de volteo horizontal/vertical, escala, y rectángulo de interacción.
+  */
+
   constructor(image, x, y, id, lineId, flipH = false, flipV = false, scale = 8) {
     this.scale = scale;
     this.flipH = flipH;
@@ -90,6 +105,11 @@ class Diente {
     this.tags = [];
   }
 
+  /*
+  F-getRect
+  Devuelve las dimensiones actuales del área total ocupada por el diente,
+  incluidas etiquetas y número.
+  */
   getRect() {
     return {
       x: this.x,
@@ -99,10 +119,19 @@ class Diente {
     };
   }
 
+  /*
+  F-getDienteRect
+  Devuelve las dimensiones exactas de la imagen del diente (sin etiquetas ni número).
+  */
   getDienteRect() {
     return this.dienteRect;
   }
 
+  /*
+  F-draw
+  Dibuja el diente en el contexto de canvas proporcionado, con sus etiquetas,
+  número identificador, imagen del diente y estado de selección.
+  */
   draw(ctx) {
     this.tags = [];
     const tagsHeight = 20;
@@ -170,9 +199,18 @@ class Diente {
     }
   }
 
+  /*
+  F-addTag
+  Agrega una etiqueta de texto y color al diente.
+  */
   addTag(tag, color) {
     this.tags.push([tag, color]);
   }
+
+  /*
+  F-drawTags
+  Dibuja todas las etiquetas asociadas al diente encima del mismo.
+  */
 
   drawTags(ctx) {
     const fontSize = 12;
@@ -211,6 +249,12 @@ let hallazgosClinicos = JSON.parse({{ odontograma.hallazgos_clinicos|tojson }});
 
 const hallazgosClinicosFns = {
   simple: {
+
+    /*
+    F-CoronaMetalica
+    Dibuja una corona metálica representada como un rectángulo que ocupa la mitad inferior del diente (o superior si flipV está activo). 
+    Añade la etiqueta 'CM' al diente.
+    */
     'Corona metálica': (ctx, diente, color) => {
       diente.addTag('CM', color);
       const rect = diente.getDienteRect();
@@ -227,6 +271,11 @@ const hallazgosClinicosFns = {
       ctx.strokeRect(x, y, rect.w, rect.h / 2);
       ctx.restore();
     },
+    /*
+      F-CariesDentina
+      Dibuja una pequeña lesión rectangular en la dentina, centrada en la parte inferior del diente (o superior si flipV). 
+      Añade la etiqueta 'CD'.
+    */
     'Lesión de caries a nivel de la dentina': (ctx, diente, color) => {
       diente.addTag('CD', color);
       const rect = diente.getDienteRect();
@@ -246,9 +295,18 @@ const hallazgosClinicosFns = {
       ctx.fillRect(x, y, rectWidth, rectHeight);
       ctx.restore();
     },
+    /*
+      F-Impactacion
+      Solo añade la etiqueta 'I' para indicar que el diente está impactado. No realiza ningún dibujo.
+    */
     'Impactación': (ctx, diente, color) => {
       diente.addTag('I', color);
     },
+    /*
+      F-PiezaAusente
+      Representa una pieza dentaria ausente mediante una "X" dibujada sobre el diente. 
+      Añade la etiqueta 'DEX'.
+    */
     'Pieza dentaria ausente': (ctx, diente, color) => {
       diente.addTag('DEX', color);
       const rect = diente.getDienteRect();
@@ -270,9 +328,18 @@ const hallazgosClinicosFns = {
 
       ctx.restore();
     },
+    /*
+      F-PigmentacionEsmalte
+      Solo añade la etiqueta 'PE' para indicar pigmentación del esmalte. No realiza dibujo.
+    */
     'Pigmentación del esmalte': (ctx, diente, color) => {
       diente.addTag('PE', color);
     },
+    /*
+      F-RestauracionDefinitiva
+      Dibuja un rectángulo relleno en la raíz del diente para indicar restauración definitiva con resina.
+      Añade la etiqueta 'R'.
+    */
     'Restauración definitiva con resina': (ctx, diente, color) => {
       diente.addTag('R', color);
       // Dibujar un cuadrado de lineas en la raiz
@@ -284,6 +351,11 @@ const hallazgosClinicosFns = {
       ctx.fillRect(r.x + r.w / 5, y1, 3 * r.w / 5, r.h / 4);
       ctx.restore();
     },
+    /*
+      F-RestauracionTemporal
+      Dibuja un rectángulo vacío (solo contorno) en la raíz del diente para representar una restauración temporal.
+      Añade la etiqueta 'R'.
+    */
     'Restauración temporal': (ctx, diente, color) => {
       diente.addTag('R', color);
       // Dibujar un cuadrado con color en la raiz
@@ -296,6 +368,11 @@ const hallazgosClinicosFns = {
       ctx.strokeRect(r.x + r.w / 5, y1, 3 * r.w / 5, r.h / 4);
       ctx.restore();
     },
+    /*
+      F-Sellante
+      Dibuja una cruz (una línea vertical y otra horizontal) en la raíz del diente para indicar presencia de sellante.
+      Añade la etiqueta 'S'.
+    */
     'Sellante': (ctx, diente, color) => {
       diente.addTag('S', color);
       // Dibujar una cruz en la raiz
@@ -320,6 +397,11 @@ const hallazgosClinicosFns = {
 
       ctx.restore();
     },
+    /*
+      F-EspigoMunon
+      Dibuja un rectángulo en la raíz y una línea vertical hacia la corona para representar espigo-muñón.
+      No añade etiqueta.
+    */
     'Espigo - muñón': (ctx, diente, color) => {
       // Dibujar un cuadrado en la raiz y una linea hacia arriba
       const r = diente.getDienteRect();
@@ -339,6 +421,11 @@ const hallazgosClinicosFns = {
 
       ctx.restore();
     },
+    /*
+      F-TratamientoConducto
+      Dibuja una línea vertical desde la raíz hacia la corona del diente para indicar tratamiento de conducto.
+      Añade la etiqueta 'TC'.
+    */
     'Tratamiento de conducto': (ctx, diente, color) => {
       // dibujar una linea de la raiz hacia arriba
       diente.addTag('TC', color);
@@ -357,16 +444,29 @@ const hallazgosClinicosFns = {
 
       ctx.restore();
     },
+    /*
+      F-ImplanteDental
+      Solo añade la etiqueta 'IMP' para indicar que el diente es un implante. No realiza dibujo.
+    */
     'Implante dental': (ctx, diente, color) => {
       // Solo añadir tag
       diente.addTag('IMP', color);
     },
+    /*
+      F-MovilidadPatologica
+      Solo añade la etiqueta 'M1' para indicar que el diente tiene movilidad patológica. No realiza dibujo.
+    */
     'Movilidad patológica': (ctx, diente, color) => {
       // Solo añadir tag
       diente.addTag('M1', color);
     },
   },
   doble: {
+    /*
+      F-Fusion
+      Representa una fusión dentaria dibujando dos óvalos (uno sobre cada diente) conectados por una línea. 
+      Los óvalos se ubican por encima de los dientes, o por debajo si flipV está activo.
+    */
     'Fusión': (ctx, diente1, diente2, color) => {
       // Dibujar dos ovalos arriba de los dientes (o abajo si flipV = true)
       // tal que los ovalos se conecten
@@ -406,6 +506,12 @@ const hallazgosClinicosFns = {
 
       ctx.restore();
     },
+    /*
+      F-Diastema
+      Representa un diastema (separación entre dientes) dibujando un arco curvado hacia afuera a la derecha del primer diente 
+      y otro hacia afuera a la izquierda del segundo diente. 
+      Se dibujan en la parte media vertical del diente, ya sea superior o inferior según flipV.
+    */
     'Diastema': (ctx, diente1, diente2, color) => {
       // Dibujar dos arcos, uno en diente1 a la derecha y otro en diente2
       // a la izquierda con altura h/2 en la parte inferior (o superior si flipV = true)
@@ -444,6 +550,11 @@ const hallazgosClinicosFns = {
     },
   },
   multiple: {
+    /*
+      F-AparatoOdontologico
+      Representa un aparato odontológico fijo, dibujando una línea horizontal que conecta los dientes seleccionados,
+      con pequeños rectángulos en ambos extremos. La línea se dibuja por debajo o por encima de los dientes según flipV.
+    */
     'Aparato odontológico': (ctx, diente1, diente2, color) => {
       // Línea por debajo de los dientes con rectangulos en sus puntos extremos
       const r1 = diente1.getDienteRect();
@@ -465,6 +576,11 @@ const hallazgosClinicosFns = {
 
       ctx.restore();
     },
+    /*
+      F-EdentuloTotal
+      Representa una zona edéntula (sin dientes) total, dibujando una sola línea que atraviesa horizontalmente los dientes seleccionados,
+      a una altura correspondiente a la base del diente o su corona según flipV.
+    */
     'Edéntulo total': (ctx, diente1, diente2, color) => {
       // Línea que cruza los dientes
       const r1 = diente1.getDienteRect();
@@ -481,6 +597,13 @@ const hallazgosClinicosFns = {
 
       ctx.restore();
     },
+    /*
+      F-ProtesisParcialFija
+      Representa una prótesis parcial fija dibujando una línea superior entre los dientes, 
+      comenzando y terminando en el centro de cada uno, y descendiendo en forma de dos líneas verticales.
+      Se adapta al lado superior o inferior del diente dependiendo de flipV.
+    */
+
     'Prótesis parcial fija': (ctx, diente1, diente2, color) => {
       // Linea arriba de los diente que empieze y termine en el centro
       // con dos lineas para abajo
@@ -509,6 +632,11 @@ const hallazgosClinicosFns = {
 
       ctx.restore();
     },
+    /*
+      F-ProtesisCompleta
+      Representa una prótesis completa dibujando dos líneas horizontales conectadas por los centros de los dientes.
+      Se dibuja en la parte superior o inferior del diente según flipV.
+    */
     'Prótesis completa': (ctx, diente1, diente2, color) => {
       // Linea arriba de los diente que empieze y termine en el centro
       // con dos lineas para abajo
@@ -535,10 +663,23 @@ const hallazgosClinicosFns = {
   }
 };
 
+
+/*
+  F-getFunc
+  Recupera la función correspondiente a un hallazgo clínico específico en base a su tipo (simple, doble, múltiple) 
+  y nombre (como "Corona metálica", "Fusión", etc.). Se utiliza para acceder dinámicamente a las funciones de dibujo
+  asociadas a cada condición dental.
+*/
 function getFunc(tipo, nombre) {
   return hallazgosClinicosFns[tipo][nombre];
 }
 
+/*
+  F-createDientes
+  Crea y posiciona objetos "Diente" para representar la dentadura completa (superior e inferior, temporal y permanente).
+  Cada grupo de dientes es generado con una forma específica dependiendo de su tipo anatómico y ubicación (simple, doble, etc.).
+  Además, considera la orientación (superior/inferior) y si el diente se encuentra a la derecha o izquierda de la línea media.
+*/
 function createDientes(images) {
   dientes = [];
   const offsetX = 130;
@@ -596,7 +737,12 @@ function createDientes(images) {
     currentX += diente.width + 10;
   });
 }
-
+/*
+  F-drawPrimaryCanvas
+  Limpia y dibuja el canvas principal (`canvasPrimary`) con los dientes base,
+  luego recorre la lista de hallazgos clínicos (`hallazgosClinicos`) para renderizar 
+  visualmente cada uno (según su tipo: simple, doble o múltiple) y finalmente dibuja las etiquetas.
+*/
 function drawPrimaryCanvas() {
   ctxPrimary.clearRect(0, 0, canvasPrimary.width, canvasPrimary.height);
   dientes.forEach(diente => diente.draw(ctxPrimary));
@@ -615,7 +761,12 @@ function drawPrimaryCanvas() {
 
   dientes.forEach(diente => diente.drawTags(ctxPrimary));
 }
-
+/*
+  F-preloadImages
+  Carga imágenes SVG de dientes desde el servidor y las convierte en objetos `Image`,
+  devolviendo una promesa que resuelve en un diccionario indexado por nombre.
+  Se usa para cargar las formas necesarias antes de renderizar.
+*/
 function preloadImages(shapeList) {
   const images = {};
   const loadPromises = shapeList.map(shape => {
@@ -638,7 +789,11 @@ function preloadImages(shapeList) {
 
   return Promise.all(loadPromises).then(() => images);
 }
-
+/*
+  F-drawSelectionCanvas
+  Dibuja el área de selección rectangular durante una operación de clic y arrastre 
+  del usuario sobre el canvas de selección (`canvasSelection`), resaltando con un borde punteado.
+*/
 function drawSelectionCanvas(e) {
   // Limpia el canvas (transparente)
   ctxSelection.clearRect(0, 0, canvasSelection.width, canvasSelection.height);
@@ -660,7 +815,11 @@ function drawSelectionCanvas(e) {
     ctxSelection.setLineDash([]); // Restablecer patrón de línea
   }
 }
-
+/*
+  F-rectsCollide
+  Determina si dos rectángulos se superponen en el espacio 2D. 
+  Se usa para saber si un diente ha sido seleccionado por un área rectangular.
+*/
 function rectsCollide(rectA, rectB) {
   return !(
     rectA.x + rectA.w <= rectB.x || // A está completamente a la izquierda de B
@@ -669,7 +828,11 @@ function rectsCollide(rectA, rectB) {
     rectA.y >= rectB.y + rectB.h    // A está completamente debajo de B
   );
 }
-
+/*
+  F-updateLeftPanel
+  Actualiza dinámicamente las opciones del panel izquierdo (`select`) dependiendo del tipo 
+  de hallazgo clínico actual (`tipoHallazgo`) y genera una vista previa en `dientesSecondary`.
+*/
 function updateLeftPanel(images) {
   select.innerHTML = '<option value="">-- Elegir --</option>';
   currentHallazgo = null;
@@ -730,7 +893,11 @@ function updateLeftPanel(images) {
 
   drawSecondaryCanvas();
 }
-
+/*
+  F-drawSecondaryCanvas
+  Dibuja los dientes secundarios (`dientesSecondary`) para la vista previa de un hallazgo.
+  Si hay un hallazgo seleccionado (`currentHallazgo`), lo renderiza sobre los dientes.
+*/
 function drawSecondaryCanvas() {
   ctxSecondary.clearRect(0, 0, canvasSecondary.width, canvasSecondary.height);
   dientesSecondary.forEach(diente => diente.draw(ctxSecondary));
@@ -751,15 +918,25 @@ preloadImages(['doble-5', 'doble-punteado', 'doble-separado-5',
 ]).then(images => {
   createDientes(images);
   drawPrimaryCanvas();
-
+  /*
+  F-onMouseDown (canvasSelection)
+  Captura el punto inicial de una selección rectangular del usuario.
+  */
   canvasSelection.onmousedown = (e) => {
     selectionOrigin = {x: e.offsetX, y: e.offsetY};
   };
-
+  /*
+  F-onMouseMove (canvasSelection)
+  Dibuja dinámicamente el área de selección mientras el usuario mueve el mouse.
+  */
   canvasSelection.onmousemove = (e) => {
     if (selectionOrigin) drawSelectionCanvas(e);
   };
-
+  /*
+  F-onMouseUp (canvasSelection)
+  Finaliza la selección de dientes y determina si se trata de un hallazgo simple, doble o múltiple.
+  Luego actualiza el canvas y el panel izquierdo en base a la selección.
+  */
   canvasSelection.onmouseup = (e) => {
     if (!selectionOrigin) {
       selectionOrigin = null;
@@ -801,7 +978,11 @@ preloadImages(['doble-5', 'doble-punteado', 'doble-separado-5',
     drawPrimaryCanvas();
     updateLeftPanel(images);
   };
-
+  /*
+  F-selectChange
+  Controla el cambio de selección de hallazgo en el panel izquierdo.
+  Actualiza el hallazgo actual (`currentHallazgo`) y redibuja la vista previa.
+  */
   select.addEventListener('change',() => {
     if (!tipoHallazgo || !select.value) {
       currentHallazgo = null;
@@ -811,6 +992,11 @@ preloadImages(['doble-5', 'doble-punteado', 'doble-separado-5',
     drawSecondaryCanvas();
   });
 
+  /*
+  F-colorChange
+  Actualiza el color actual seleccionado (`currentColor`) para el hallazgo clínico.
+  Redibuja la vista previa con el nuevo color.
+  */
   document.getElementsByName('color').forEach(radio => {
     radio.addEventListener('change', () => {
       if (radio.checked) {
@@ -819,7 +1005,11 @@ preloadImages(['doble-5', 'doble-punteado', 'doble-separado-5',
       }
     });
   });
-
+  /*
+  F-onSaveClick
+  Guarda el hallazgo clínico actual (si hay selección) en la lista `hallazgosClinicos`
+  y actualiza la vista.
+  */
   document.getElementById('btn-save').addEventListener('click', () => {
     if (!tipoHallazgo || !currentHallazgo) return;
     hallazgosClinicos.push([currentHallazgo, ...selectedDientesIndexes, currentColor]);
@@ -828,7 +1018,10 @@ preloadImages(['doble-5', 'doble-punteado', 'doble-separado-5',
     dientes.forEach(diente => diente.selected = false);
     drawPrimaryCanvas();
   });
-
+  /*
+  F-onPopClick
+  Elimina el último hallazgo clínico añadido y actualiza la vista.
+  */
   document.getElementById('btn-pop').addEventListener('click', () => {
     tipoHallazgo = null;
     if (hallazgosClinicos.length > 0) hallazgosClinicos.pop();
@@ -836,7 +1029,11 @@ preloadImages(['doble-5', 'doble-punteado', 'doble-separado-5',
     dientes.forEach(diente => diente.selected = false);
     drawPrimaryCanvas();
   });
-
+  /*
+  F-onSaveAllClick
+  Envía todos los hallazgos clínicos al servidor usando `fetch` con método POST.
+  Incluye también especificaciones y observaciones.
+  */
   document.getElementById('btn-save-all').addEventListener('click', (e) => {
     const csrf_token = "{{ csrf_token() }}";
     const url = window.location.href;
