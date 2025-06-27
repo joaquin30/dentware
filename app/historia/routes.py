@@ -453,20 +453,14 @@ def pagos(paciente_id):
     paciente = db.get_or_404(Paciente, paciente_id)
     historia = paciente.historias[0]  # Obtener la primera historia del paciente
 
-    # Obtener todos los tratamientos asociados a la historia clínica
-    tratamientos = db.session.query(Tratamiento).filter_by(historia_id=historia.historia_id).all()
-
     # Calcular el presupuesto total sumando los costos de los tratamientos
     total_presupuestos = 0.0
-    for tratamiento in tratamientos:
+    for tratamiento in historia.tratamientos:
         if tratamiento.costo:
             total_presupuestos += float(tratamiento.costo)
 
-    # Obtener todos los pagos del paciente
-    pagos = paciente.pagos
-
     # Calcular el total de pagos realizados
-    total_pagos = sum(pago.monto for pago in pagos)
+    total_pagos = sum(pago.monto for pago in paciente.pagos)
 
     return render_template(
         'historia/pagos.html',
@@ -474,7 +468,7 @@ def pagos(paciente_id):
         historia=historia,
         total_presupuestos=round(total_presupuestos, 2),
         total_pagos=round(total_pagos, 2),
-        pagos=pagos
+        pagos=paciente.pagos
     )
 
 
@@ -485,12 +479,25 @@ Función que permite agregar un pago a un tratamiento específico.
 @bp.route('/paciente/<int:paciente_id>/pago', methods=['GET', 'POST'])
 def agregar_pago(paciente_id):
     paciente = db.get_or_404(Paciente, paciente_id)
+    historia = paciente.historias[0]  # Obtener la primera historia del paciente
 
+    # Calcular el presupuesto total sumando los costos de los tratamientos
+    total_presupuestos = 0.0
+    for tratamiento in historia.tratamientos:
+        if tratamiento.costo:
+            total_presupuestos += float(tratamiento.costo)
+
+    # Calcular el total de pagos realizados
+    total_pagos = sum(pago.monto for pago in paciente.pagos)
     form = FormularioPago()
 
     if form.validate_on_submit():
         monto = float(form.monto.data)
         metodo = form.metodo.data
+        total_pagos += monto
+        if total_pagos > total_presupuestos:
+            flash("El monto del pago excede el total del presupuesto.", "danger")
+            return redirect(url_for('historia.pagos', paciente_id=paciente_id))
 
         nuevo_pago = Pago(
             monto=monto,
