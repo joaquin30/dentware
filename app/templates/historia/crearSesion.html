@@ -1,7 +1,10 @@
+<!--HTML para registrar una nueva sesión-->
+
 {% extends "base.html" %}
 {% block title %}Registrar Sesión{% endblock %}
 
 {% block content %}
+<!-- Estilos-->
 <style>
   .container {
     width: 90%;
@@ -155,7 +158,7 @@
   }
 </style>
 
-<!-- Flash Messages -->
+<!-- Flash Msj -->
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <div id="flash-messages">
@@ -165,6 +168,8 @@
     </div>
   {% endif %}
 {% endwith %}
+
+<!-- Estructura del formulario para registrar una nueva sesión -->
 
 <a href="{{ url_for('historia.ver_tratamiento', tratamiento_id=tratamiento.tratamiento_id) }}" class="btn btn-secondary" title="Volver">← Volver</a>
 
@@ -195,7 +200,7 @@
       </div>
     {% endif %}
 
-    <!-- Formulario -->
+    <!-- Formulario para registrar una nueva sesión -->
     <form method="POST">
       {{ form.hidden_tag() }}
       {{ form.tratamiento_id }}
@@ -243,7 +248,7 @@
   </div>
 </div>
 
-<!-- JS Reconocimiento de voz -->
+<!-- Reconocimiento de voz -->
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const micButtons = document.querySelectorAll(".mic-btn");

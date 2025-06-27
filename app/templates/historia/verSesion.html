@@ -1,7 +1,11 @@
+<!--HTML para la edición de la sesión-->
+
 {% extends "base.html" %}
 {% block title %}Editar Sesión{% endblock %}
 
 {% block content %}
+<!-- Estilos-->
+
 <style>
   .container {
     width: 90%;
@@ -155,7 +159,7 @@
   }
 </style>
 
-<!-- Flash messages -->
+<!-- Mensaje Flash -->
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <div id="flash-messages">
@@ -167,6 +171,8 @@
 {% endwith %}
 
 <a href="{{ url_for('historia.ver_tratamiento', tratamiento_id=tratamiento.tratamiento_id) }}" class="btn btn-secondary">← Volver</a>
+
+<!-- Tarjeta de información del paciente-->
 
 <div class="container">
   <div class="card">
@@ -198,7 +204,8 @@
             {{ form.fecha(type="date") }}
           </div>
         </div>
-
+<!-- Estructura del formulario de sesiones-->
+ 
         <div class="form-row">
           <div class="form-group" style="flex: 1 1 100%;">
             <label for="descripcion">Descripción del procedimiento realizado:</label>

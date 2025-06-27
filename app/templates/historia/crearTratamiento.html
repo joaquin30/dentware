@@ -1,7 +1,10 @@
+<!--HTML para crear un nuevo tratamiento-->
+
 {% extends "base.html" %}
 {% block title %}Crear tratamiento{% endblock %}
 {% block content %}
 
+<!-- Estilos -->
 <style>
   .container {
     width: 90%;
@@ -179,6 +182,8 @@
 
 <a href="{{ url_for('historia.index', historia_id=historia.historia_id) }}" class="btn btn-secondary" title="Volver">← Volver</a>
 
+<!-- Estructura del formulario para crear un nuevo tratamiento -->
+
 <div class="container">
   <div class="card">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -193,7 +198,7 @@
       </div>
     </div>
 
-    <!-- Formulario -->
+    <!-- Formulario para crear un nuevo tratamiento -->
     <form method="POST">
       {{ form.hidden_tag() }}
 
@@ -230,6 +235,7 @@
   </div>
 </div>
 
+<!-- Script para reconocimiento de voz -->
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const micButtons = document.querySelectorAll(".mic-btn");

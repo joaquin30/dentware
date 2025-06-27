@@ -1,8 +1,13 @@
+<!--HTML del formulario para agregar un nuevo pago-->
+
 {% extends "base.html" %}
 
 {% block title %}Agregar Pago{% endblock %}
 
 {% block content %}
+
+<!--  Estilos de la página de pagos -->
+
 <style>
   .form-container {
     max-width: 600px;
@@ -65,13 +70,14 @@
     display: inline-block;
   }
   
-  /* Estilos para los errores generales del formulario */
   .form-errors {
     margin-bottom: 20px;
     color: red;
   }
 </style>
 
+
+<!-- Estructura del formulario para agregar un nuevo pago -->
 <div class="form-container">
   <div class="form-header">Agregar nuevo pago</div>
 

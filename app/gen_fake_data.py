@@ -1,3 +1,5 @@
+# Generación de datos falsos para la base de datos y pruebas
+
 from faker import Faker
 from app.models import (
     Paciente, Historia, HistoriaAntecedentesMedicos,

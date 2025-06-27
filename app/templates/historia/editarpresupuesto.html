@@ -1,3 +1,5 @@
+<!--HTML para editar un presupuesto-->
+
 {% extends "base.html" %}
 {% block title %}Presupuesto{% endblock %}
 {% block content %}
@@ -10,7 +12,7 @@
   <a href="{{ url_for('historia.ver_tratamiento', tratamiento_id=tratamiento.tratamiento_id) }}" class="btn-volver">&larr; Volver</a>
 </div>
 
-
+<!-- Información del paciente -->
 <div class="paciente-info">
   <img src="{{ url_for('static', filename='img/profile.png') }}" alt="Foto de perfil">
   <div>
@@ -21,7 +23,7 @@
   </div>
 </div>
 
-<!-- Flash messages -->
+<!-- Mensaje Flash -->
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <ul class="flashes">
@@ -32,6 +34,7 @@
   {% endif %}
 {% endwith %}
 
+<!-- Estructura del formulario para editar un presupuesto -->
 <form method="POST">
   {{ form.hidden_tag() }}
 
@@ -55,6 +58,7 @@
   <button type="submit" class="btn-crear">Guardar</button>
 </form>
 
+<!-- Script para agregar nuevas líneas al presupuesto -->
 <script>
   let index = {{ form.lineas|length }};
 
@@ -74,6 +78,7 @@
     newItem.querySelector('.costo-input').addEventListener('input', calcularTotal);
   });
 
+  // Función para calcular el total del presupuesto
   function calcularTotal() {
     let total = 0;
     document.querySelectorAll('.costo-input').forEach(input => {
@@ -90,7 +95,7 @@
   });
 </script>
 
-
+<!-- Estructura de la tabla para mostrar los presupuestos registrados -->
 <h3>Presupuestos registrados</h3>
 <table style="width: 100%; margin-top: 20px; border-collapse: collapse;">
   <thead>

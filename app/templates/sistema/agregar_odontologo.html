@@ -1,8 +1,11 @@
+<!--HTML para agregar un nuevo odontólogo-->
+
 {% from 'bootstrap5/form.html' import render_field %}
 {% extends "base.html" %}
 {% block title %}Agregar Odontólogo{% endblock %}
 
 {% block content %}
+<!-- Estilos -->
 <style>
   .form-box {
     border: 1px solid #d3d3d3;
@@ -44,6 +47,7 @@
   }
 </style>
 
+<!-- Estructura del formulario para agregar un odontólogo -->
 <div class="container">
   <div class="form-box">
     <div class="form-title">Agregar nuevo odontólogo</div>
@@ -80,6 +84,7 @@
   </div>
 </div>
 
+<!-- Script para el reconocimiento de voz -->
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const micButtons = document.querySelectorAll(".mic-btn");

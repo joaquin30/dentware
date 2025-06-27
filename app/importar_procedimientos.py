@@ -1,3 +1,5 @@
+# Importación de los procedimientos desde un archivo JSON a la base de dato, para tenerlos como datos predefinidos
+
 import json
 import os
 from app import create_app

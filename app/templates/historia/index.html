@@ -1,7 +1,9 @@
+<!--HTML para la historia clínica del paciente-->
+
 {% extends "base.html" %}
 {% block title %}{{ paciente.nombres }} {{ paciente.apellidos }}{% endblock %}
 {% block content %}
-
+<!--Estilos para la historia clínica-->
 <style>
   body {
     background-color: {% if tiene_grave %}#D0342C{% else %}#f4f6fb{% endif %};
@@ -42,16 +44,16 @@
   }
 
 .btn-editar {
-  display: inline-block;           /* Hace que el botón se ajuste al contenido */
+  display: inline-block;           
   text-decoration: none;
   margin-top: 10px;
   background-color: #2a2f65;
   color: white;
   border: none;
-  padding: 6px 10px;               /* Puedes ajustar esto si quieres más aire */
+  padding: 6px 10px;               
   border-radius: 6px;
   font-size: 0.9rem;
-  white-space: nowrap;             /* Evita que el texto se divida en dos líneas */
+  white-space: nowrap;             
 }
 
   .tratamientos-box {
@@ -184,6 +186,7 @@
   <a href="{{ url_for('sistema.index') }}">← Volver</a>
 </div>
 
+<!-- Estructura de la tarjeta de historia clínica -->
 <div class="card-historia">
   <div class="datos-paciente">
     <h3>{{ historia.paciente.nombres }} {{ historia.paciente.apellidos }}</h3>
@@ -200,7 +203,7 @@
       <a href="{{ url_for('sistema.editar_antecedentes', historia_id=paciente.historias[0].historia_id) }}" class="btn-editar">🩺 Antecedentes médicos</a>
     </div>
 
-
+<!-- Información de los tratamientos -->
     <div class="tratamientos-box">
       <h4>Tratamientos</h4>
       {% if historia.tratamientos %}
@@ -230,7 +233,7 @@
       </a>
     </div>
   </div>
-
+<!--Panel de acciones: Contraindicaciones, Odontogramas, Exámenes auxiliares, Exámenes Estomatológicos, Pagos, Novedades-->
   <div class="acciones-panel">
     <a href="{{ url_for('historia.contraindicaciones', historia_id=historia.historia_id) }}" class="boton-accion">
       Contraindicaciones Médicas

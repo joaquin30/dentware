@@ -1,7 +1,12 @@
+<!--HTML para la lista de odontólogos-->
+
 {% extends "base.html" %}
 {% block title %}Odontólogos{% endblock %}
 
 {% block content %}
+
+<!--Estilos-->
+
 <style>
   .section-box {
     border: 1px solid #d3d3d3;
@@ -63,6 +68,8 @@
     <a href="{{ url_for('sistema.index') }}">← Volver</a>
   </div>
 
+<!-- Estructura de listado de odontólogos-->
+ 
   <div class="section-box">
     <div class="section-title">Odontólogos Internos</div>
     <ul class="odontologos-list">
@@ -80,6 +87,8 @@
         {% endfor %}
     </ul>
   </div>
+
+<!--Categorías de Odontólogos-->
 
   <div class="section-box">
     <div class="section-title">Odontólogos Externos</div>

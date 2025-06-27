@@ -1,7 +1,9 @@
+<!--HTML para el presupuesto del paciente-->
 {% extends "base.html" %}
 {% block title %}Presupuesto{% endblock %}
 {% block content %}
 
+<!-- Estilos para el presupuesto -->
 <style>
   .btn-volver {
     background-color: #6c757d;
@@ -90,6 +92,7 @@
 
 <a href="{{ url_for('historia.ver_tratamiento', tratamiento_id=tratamiento.tratamiento_id) }}" class="btn-volver">← Volver</a>
 
+<!-- Estructura de la tarjeta de presupuesto -->
 <div class="card-historia">
   <div class="presupuesto-header">
     <h2>Presupuesto del tratamiento</h2>
@@ -102,7 +105,7 @@
       ⚠️ <strong>Nota:</strong> Algunos procedimientos no tienen un costo referencial predefinido. Si ves un valor de <strong>0</strong> en la tabla, por favor ingresa manualmente el costo correspondiente, ya que este debe ser definido por el profesional tratante.
     </div>
   </div>
-
+<!-- Formulario para el presupuesto -->
   <form method="POST">
     {{ form.hidden_tag() }}
 
@@ -136,6 +139,7 @@
       <input type="number" id="descuento" name="descuento" min="0" max="100" value="{{ descuento or 0 }}" class="form-control" style="max-width: 120px;">
     </div>
 
+    <!-- Información de totales y descuentos -->
     <div class="total-text">Total sin descuento: S/ {{ total_costo }}</div>
     {% if descuento %}
       <div class="total-text">Total con descuento: S/ {{ total_con_descuento }}</div>

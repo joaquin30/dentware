@@ -1,8 +1,11 @@
+<!--HTML para las novedades del paciente-->
+
 {% extends "base.html" %}
 {% block title %}Novedades de {{ paciente.nombres }} {{ paciente.apellidos }}{% endblock %}
 
 {% block content %}
 
+<!-- Estilos para las novedades -->
 <style>
   .header-top {
     border-bottom: 1px solid #d3d3d3;
@@ -72,11 +75,14 @@
   }
 </style>
 
+
+<!-- Estructura de pantalla novedades -->
 <div class="header-main">
   <a href="{{ url_for('historia.index', historia_id=historia.historia_id) }}" class="back-btn" title="Volver">&#x2190;</a>
   <span>Novedades de {{ historia.paciente.nombres }} {{ historia.paciente.apellidos }}</span>
 </div>
 
+<!-- Formulario para agregar novedades. Se divide en importantes y no importantes -->
 <form method="post">
   {{ form.csrf_token }}
 
@@ -127,6 +133,7 @@
   <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
 </form>
 
+<!-- Script para borrado y ordenado de novedades-->
 <script>
   function removeNovedad(button) {
     button.closest('.novedad-item').remove();
@@ -168,6 +175,7 @@
     activarMicBotones(); // Activar micrófono en nuevos campos
   });
 
+  // Función para reconocimiento de voz
   function activarMicBotones() {
     const micButtons = document.querySelectorAll(".mic-btn");
 

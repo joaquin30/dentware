@@ -1,7 +1,9 @@
+<!--HTML para gestionar procedimientos del tratamiento-->
 {% extends "base.html" %}
 {% block title %}Procedimientos del Tratamiento{% endblock %}
 
 {% block content %}
+<!-- Estilos -->
 <style>
   .btn-volver {
     background-color: #6c757d;
@@ -95,6 +97,8 @@
 
 <a href="{{ url_for('historia.ver_tratamiento', tratamiento_id=tratamiento.tratamiento_id) }}" class="btn-volver">← Volver</a>
 
+<!-- Información de los procedimientos -->
+
 <div class="card-historia">
   <h2 class="titulo-seccion">Procedimientos Asociados</h2>
 
@@ -117,6 +121,8 @@
   {% endif %}
 
   <hr>
+
+  <!-- Agregación de procedimientos a la lista de procedimientos asociados-->
 
   <h3 class="titulo-seccion">Agregar procedimiento</h3>
   <form method="POST">

@@ -1,8 +1,11 @@
+<!--HTML para editar antecedentes médicos-->
+
 {% from 'bootstrap5/form.html' import render_field %}
 {% extends "base.html" %}
 {% block title %}Editar antecedentes médicos{% endblock %}
 {% block content %}
 
+<!-- Estilos -->
 <style>
   .form-container {
     background-color: #fff;
@@ -60,6 +63,8 @@
   }
 </style>
 
+
+<!-- Estructura del formulario para editar antecedentes médicos -->
 <div class="container mt-3">
   <div class="form-container">
     <form method="POST">
@@ -102,6 +107,7 @@
   </div>
 </div>
 
+<!-- Script para reconocimiento de voz -->
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const micButtons = document.querySelectorAll(".mic-btn");
@@ -143,5 +149,4 @@
     });
   });
 </script>
-
 {% endblock %}

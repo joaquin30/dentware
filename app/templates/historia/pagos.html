@@ -1,8 +1,10 @@
+<!--HTML para los pagos del paciente-->
 {% extends "base.html" %}
 
 {% block title %}Pagos{% endblock %}
 
 {% block content %}
+<!-- Estilos para los pagos -->
 <style>
   .container-pagos {
     max-width: 900px;
@@ -131,6 +133,7 @@
   }
 </style>
 
+<!-- Estructura de la pantalla pagos -->
 <div class="header-main">
   <a href="{{ url_for('historia.index', historia_id=historia.historia_id) }}" class="back-btn" title="Volver">&#x2190;</a>
   <span>Pagos de {{ historia.paciente.nombres }} {{ historia.paciente.apellidos }}</span>
@@ -177,7 +180,8 @@
       <p>No hay tratamientos registrados.</p>
     {% endif %}
   </div>
-
+  
+  <!-- Lista de pagos realizados -->
   <h5 class="fw-semibold">Historial de pagos</h5>
   <div class="historial">
     {% for pago in pagos %}

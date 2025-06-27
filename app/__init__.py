@@ -1,3 +1,5 @@
+# Archivo de inicialización de la aplicación Flask
+
 from flask import Flask
 from config import Config
 

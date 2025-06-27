@@ -1,8 +1,10 @@
+<!--HTML para los exámenes clínicos estomatológicos-->
 {% from 'bootstrap5/form.html' import render_field %}
 {% extends "base.html" %}
 {% block title %}Exámenes clínicos estomatológicos de {{ paciente.nombres }} {{ paciente.apellidos }}{% endblock %}
 {% block content %}
 
+<!-- Estilos -->
 <style>
   .header-top {
     border-bottom: 1px solid #d3d3d3;
@@ -127,11 +129,13 @@
   }
 </style>
 
+<!-- Estructura de la pantalla de exámenes estomatológicos-->
 <div class="header-main">
   <a href="{{ url_for('historia.index', historia_id=historia.historia_id) }}" class="back-btn" title="Volver">&#x2190;</a>
   <span>Exámenes clínicos estomatológicos de {{ historia.paciente.nombres }} {{ historia.paciente.apellidos }}</span>
 </div>
 
+<!-- Formulario para los exámenes clínicos estomatológicos -->
 <form class="row row-cols-2" action="" method="post">
   {{ form_examen.csrf_token }}
   {% for field in form_examen %}
@@ -157,6 +161,7 @@
   </div>
 </form>
 
+<!-- Script para reconocimiento de voz -->
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const micButtons = document.querySelectorAll(".mic-btn");
