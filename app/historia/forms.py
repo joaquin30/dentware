@@ -60,7 +60,7 @@ class PacienteNovedadesForm(FlaskForm):
 # Formulario para registrar tratamientos odontológicos. Relacionado con la entidad CCTratamiento
 
 class FormularioTratamiento(FlaskForm):
-    descripcion = StringField('Descripción', validators=[DataRequired()])
+    descripcion = StringField('Nombre del tratamiento', validators=[DataRequired()])
     odontologo_id = SelectField('Odontólogo', coerce=int, validators=[DataRequired()])
     en_curso = BooleanField('¿En curso?')
     fecha_creacion = DateField('Fecha', format='%Y-%m-%d', validators=[DataRequired()])
@@ -73,7 +73,7 @@ class FormularioTratamientoSesion(ModelForm):
     sesion_id = HiddenField()  # Se asigna incremental en la ruta, no se valida en el formulario
     odontologo_id = SelectField('Odontólogo', coerce=str, validators=[DataRequired()])
     fecha = DateField('Fecha', format='%Y-%m-%d', validators=[DataRequired()])
-    descripcion = TextAreaField('Descripción', validators=[DataRequired()])
+    descripcion = TextAreaField('Nombre del tratamiento', validators=[DataRequired()])
     observaciones = TextAreaField('Observaciones', validators=[Optional()])
     submit = SubmitField('Guardar sesión')
 
