@@ -39,13 +39,26 @@ Dentware es una aplicación de escritorio que permite gestionar la información 
 ## 📁 Estructura del proyecto
 ```bash
 dentware/
-├── app/                # Módulos principales de la aplicación
-│   ├── models/         # Modelos SQLAlchemy
-│   ├── templates/      # Plantillas HTML (Jinja2)
-│   ├── static/         # Recursos estáticos (CSS, JS, imgs, PDF)
-│   └── routes/         # Rutas y vistas
-├── migrations/         # Archivos de migración de la base de datos
-├── config.py           # Configuración del sistema
-├── run.py              # Script de arranque
-└── requirements.txt    # Dependencias del proyecto
+├── app/                          # Módulos principales de la aplicación
+│   ├── __init__.py                # Inicializa la aplicación Flask y los blueprints
+│   ├── extensions.py              # Extensiones de Flask (ej. SQLAlchemy, Migrate)
+│   ├── gen_fake_data.py          # Script para generar datos falsos de prueba
+│   ├── importar_procedimientos.py # Carga masiva de procedimientos desde JSON
+│   ├── models.py                 # Definición de modelos con SQLAlchemy
+│   ├── procedimientos.json       # Datos base con procedimientos odontológicos
+│   ├── utils.py                  # Funciones auxiliares reutilizables
+│   ├── historia/                 # Módulo de historia clínica (routes, forms)
+│   ├── odontograma/              # Módulo del odontograma (routes, forms)
+│   ├── sistema/                  # Módulo administrativo (routes, forms)
+│   ├── static/                   # Archivos estáticos (CSS, imágenes, JS)
+│   └── templates/                # Plantillas HTML (Jinja2)
+├── db/                           # Scripts o archivos relacionados a la base de datos
+├── venv/                         # Entorno virtual de Python (no incluir en control de versiones)
+├── .env                          # Variables de entorno para configuración
+├── .gitignore                    # Archivos y carpetas ignoradas por git
+├── app.db                        # Base de datos SQLite (solo para desarrollo)
+├── config.py                     # Configuración global del sistema
+├── README.md                     # Documentación del proyecto
+└── requirements.txt              # Lista de dependencias del entorno Python
+
 ```
