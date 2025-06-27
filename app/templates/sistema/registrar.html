@@ -79,7 +79,21 @@
   </div>
 </div>
 
+
+
+
+
 <!-- Script para el reconocimiento de voz -->
+
+<!--
+  F-voiceInputForFields
+  Habilita la entrada de voz en campos del formulario usando `webkitSpeechRecognition`.
+  Al hacer clic en el ícono de micrófono, inicia el reconocimiento de voz en español (es-ES),
+  captura el resultado y lo asigna automáticamente al campo de entrada correspondiente.
+  Aplica solo a campos específicos, excluyendo fecha de nacimiento, estado civil y teléfono.
+  Cambia el estilo del botón durante la grabación para indicar que el micrófono está activo.
+*/
+-->
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const micButtons = document.querySelectorAll(".mic-btn");

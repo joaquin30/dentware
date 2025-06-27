@@ -195,6 +195,17 @@
 
 <!--Script para la búsqueda de pacientes-->
 
+<!--
+
+  F-voiceSearchPaciente
+  Activa el reconocimiento de voz al presionar el botón de micrófono en la búsqueda de pacientes.
+  Utiliza `webkitSpeechRecognition` para convertir voz a texto en español (es-ES) y coloca el resultado
+  directamente en el campo de búsqueda. Luego, simula la entrada del usuario para activar la función
+  de búsqueda automática con AJAX. Cambia la clase del botón para indicar que el micrófono está activo
+  y vuelve al estado normal cuando finaliza la grabación.
+-->
+
+
 <script>
   $(document).ready(function () {
     const $input = $("#paciente_search");
