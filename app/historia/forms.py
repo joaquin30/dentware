@@ -15,6 +15,8 @@ from wtforms.validators import DataRequired, NumberRange, ValidationError
 from wtforms import TextAreaField
 from wtforms.validators import Optional
 
+# Formulario para registrar un examen auxiliar en la historia clínica de un paciente. Relacionado con la entidad CCHistoriaExam
+
 class HistoriaExamenForm(FlaskForm):
     archivo = FileField('Archivo', validators=[
         FileRequired(),
@@ -26,6 +28,7 @@ class HistoriaExamenForm(FlaskForm):
 
 
 
+# Formulario de contraindicaciones médicas. Relacionado con la entidad CCHistoriaContraindicacion
 
 class HistoriaContraindicacionForm(FlaskForm):
     descripcion = StringField('Descripción', validators=[DataRequired()])
@@ -33,21 +36,28 @@ class HistoriaContraindicacionForm(FlaskForm):
     submit = SubmitField('Guardar')
     historia_id = HiddenField()
 
+# Formulario para registrar las contraindicaciones médicas de un paciente en su historia clínica. Relacionado con la entidad CCHistoriaContraindicacion
 # Para manejar múltiples contraindicaciones, puedes usar FieldList y FormField:
+
 class ContraindicacionesForm(FlaskForm):
     contraindicaciones = FieldList(FormField(HistoriaContraindicacionForm))
     submit = SubmitField('Guardar')
     historia_id = HiddenField()
 
+# Formulario para registrar las novedades de un paciente. Relación con la entidad CCHistoriaNovedad
 
 class NovedadForm(FlaskForm):
     novedad_id = HiddenField()
     descripcion = StringField('Descripción', validators=[DataRequired()])
     es_importante = BooleanField('Es importante')
 
+# Formulario para manejar múltiples novedades de un paciente en su historia clínica. Relacionado con la entidad CCHistoriaNovedad
+
 class PacienteNovedadesForm(FlaskForm):
     novedades = FieldList(FormField(NovedadForm), min_entries=1)
     submit = SubmitField('Guardar')
+
+# Formulario para registrar tratamientos odontológicos. Relacionado con la entidad CCTratamiento
 
 class FormularioTratamiento(FlaskForm):
     descripcion = StringField('Descripción', validators=[DataRequired()])
@@ -55,6 +65,8 @@ class FormularioTratamiento(FlaskForm):
     en_curso = BooleanField('¿En curso?')
     fecha_creacion = DateField('Fecha', format='%Y-%m-%d', validators=[DataRequired()])
 
+# Formulario para registrar una sesión de tratamiento odontológico. Relacionado con la entidad CCTratamientoSesion
+# class Meta significa que este formulario está basado en un modelo de base de datos, en este caso TratamientoSesion.
 
 class FormularioTratamientoSesion(ModelForm):
     tratamiento_id = HiddenField(validators=[DataRequired()])
@@ -69,15 +81,23 @@ class FormularioTratamientoSesion(ModelForm):
         model = TratamientoSesion
         include_primary_keys = True
 
+# Formulario para registrar un presupuesto de tratamiento odontológico. Relacionado con la entidad CCProcedimiento
+
 class LineaPresupuestoForm(FlaskForm):
     procedimiento = StringField('Procedimiento', validators=[DataRequired()])
     material = StringField('Material', validators=[Optional()])
     costo = DecimalField('Costo', validators=[DataRequired(), NumberRange(min=0)])
 
+# Formulario para manejar un presupuesto de tratamiento odontológico. Relacionado con la entidad CCProcedimiento
+# Este formulario permite registrar múltiples líneas de presupuesto para un tratamiento específico.
+
 class PresupuestoForm(FlaskForm):
     tratamiento_id = HiddenField(validators=[DataRequired()])
     lineas = FieldList(FormField(LineaPresupuestoForm), min_entries=1)
         
+# Formulario para registrar un pago realizado por un paciente. Relacionado con la entidad CCPago
+# Este formulario permite registrar el método de pago y el monto a pagar.
+
 class FormularioPago(FlaskForm):
     # Método de pago
     metodo = SelectField(
@@ -91,7 +111,7 @@ class FormularioPago(FlaskForm):
             ('Otros', 'Otros'),
         ],
         validators=[DataRequired()],
-        render_kw={"aria-label": "Método de pago"}  # Mejora accesibilidad
+        render_kw={"aria-label": "Método de pago"}
     )
 
     # Monto
@@ -102,17 +122,16 @@ class FormularioPago(FlaskForm):
     
     submit = SubmitField('Registrar pago', render_kw={"class": "btn-submit"})
 
-    # Custom validation if needed (for example, if you want to check if the monto is a valid amount)
+    # Validación para el campo monto, verifica que sea un valor positivo
     def validate_monto(form, field):
         if field.data <= 0:
             raise ValidationError("El monto debe ser un valor positivo.")
 
-
+# Formulario para registrar un procedimiento odontológico. Relacionado con la entidad CCProcedimiento
 class FormularioAgregarProcedimiento(FlaskForm):
     nombre = StringField('Nombre del procedimiento', validators=[DataRequired()])
     #costo_referencial = DecimalField('Costo referencial (S/.), en caso el costo varíe por procedimiento, coloque 0', validators=[DataRequired(), NumberRange(min=0)])
     submit = SubmitField('Registrar')
-
 
 class FormularioPresupuesto(FlaskForm):
     pass  # no necesita campos visibles, solo para CSRF

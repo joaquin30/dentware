@@ -5,6 +5,10 @@ from app.models import Historia, Odontograma
 import json
 import datetime
 
+'''
+F-odonto_index
+Función que muestra la información del odontograma de un paciente
+'''
 @bp.route('/<int:historia_id>/<tipo_odontograma>', methods=['GET', 'POST'])
 def index(historia_id, tipo_odontograma):
     # Para traducir entre la url y los nombres verdaderos de los tipos

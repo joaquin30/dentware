@@ -18,6 +18,7 @@ class Base(DeclarativeBase):
 
 '''
 CCOdontologo
+Entidad odontologo que representa a un profesional odontológico.
 ''' 
 class Odontologo(Base):
     __tablename__ = 'odontologo'
@@ -35,6 +36,7 @@ class Odontologo(Base):
 
 '''
 CCPaciente
+Entidad paciente que representa a un cliente de la clínica.
 '''
 class Paciente(Base):
     __tablename__ = 'paciente'
@@ -68,6 +70,7 @@ class Paciente(Base):
 
 '''
 CCPacienteNovedad
+Entidad que representa la sección de novedades de un paciente en la historia clínica.
 '''
 class PacienteNovedad(Base):
     __tablename__ = 'paciente_novedades'
@@ -86,6 +89,8 @@ class PacienteNovedad(Base):
 
 '''
 CCHistoria
+Entidad que representa la historia clínica de un paciente, guarda relación con las entidades 
+HistoriaAntecedentesMedicos, HistoriaExamenesEstomatologicos y Odontograma.
 '''
 class Historia(Base):
     __tablename__ = 'historia'
@@ -106,6 +111,7 @@ class Historia(Base):
 
 '''
 CCHistoriaAntecedentes
+Entidad que representa los antecedentes médicos de un paciente en su historia clínica.
 '''
 class HistoriaAntecedentesMedicos(Base):
     __tablename__ = 'historia_antecedentes_medicos'
@@ -133,6 +139,7 @@ class HistoriaAntecedentesMedicos(Base):
 
 '''
 CCHistContraindicacion
+Entidad que representa las contraindicaciones médicas de un paciente en su historia clínica.
 '''
 class HistoriaContraindicacion(Base):
     __tablename__ = 'historia_contraindicacion'
@@ -150,6 +157,7 @@ class HistoriaContraindicacion(Base):
 
 '''
 CCHistExamen
+Entidad que representa los exámenes auxiliares realizados a un paciente en su historia clínica.
 '''
 class HistoriaExamen(Base):
     __tablename__ = 'historia_examen'
@@ -169,6 +177,7 @@ class HistoriaExamen(Base):
 
 '''
 CCHistEstomatologicos
+Entidad que representa los exámenes estomatológicos realizados a un paciente en su historia clínica.
 '''
 class HistoriaExamenesEstomatologicos(Base):
     __tablename__ = 'historia_examenes_estomatologicos'
@@ -208,6 +217,7 @@ class HistoriaExamenesEstomatologicos(Base):
 
 '''
 CCOdontograma
+Entidad que representa el odontograma (inicial, tratamiento, evolución) de un paciente, guarda relación con la entidad Historia.
 '''
 class Odontograma(Base):
     __tablename__ = 'odontograma'
@@ -235,6 +245,8 @@ tratamiento_procedimiento = Table(
 
 '''
 CCTratamiento
+Entidad que representa un tratamiento odontológico realizado a un paciente, guarda relación con las entidades Historia, Odontologo, 
+Procedimiento y TratamientoSesion.
 '''
 class Tratamiento(Base):
     __tablename__ = 'tratamiento'
@@ -250,6 +262,7 @@ class Tratamiento(Base):
     en_curso: Mapped[bool] = mapped_column(Boolean)
     costo: Mapped[int] = mapped_column(BigInteger)
     descuento_porcentaje: Mapped[int] = mapped_column(Integer, default=0)
+
     odontologo_id: Mapped[str] = mapped_column(String)
     historia_id: Mapped[int] = mapped_column(Integer)
 
@@ -260,6 +273,8 @@ class Tratamiento(Base):
 
 '''
 CCProcedimiento
+Entidad que representa un procedimiento odontológico realizado a un paciente, 
+guarda relación con las entidades Historia, Odontologo y Tratamiento.
 '''
 class Procedimiento(Base):
     __tablename__ = 'procedimiento'
@@ -273,6 +288,7 @@ class Procedimiento(Base):
 
 '''
 CCPago
+Entidad que representa un pago realizado por un paciente.
 '''
 class Pago(Base):
     __tablename__ = 'pago'
@@ -291,6 +307,7 @@ class Pago(Base):
 
 '''
 CCTratSesion
+Entidad que representa una sesión de tratamiento odontológico de un paciente.
 '''
 class TratamientoSesion(Base):
     __tablename__ = 'tratamiento_sesion'
