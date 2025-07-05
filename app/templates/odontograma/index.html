@@ -272,6 +272,111 @@ const hallazgosClinicosFns = {
       ctx.restore();
     },
     /*
+    F-CoronaFenestrada
+    Dibuja una corona fenestrada representada como un rectángulo que ocupa la mitad inferior del diente (o superior si flipV está activo). 
+    Añade la etiqueta 'CF' al diente.
+    */
+    'Corona fenestrada': (ctx, diente, color) => {
+      diente.addTag('CF', color);
+      const rect = diente.getDienteRect();
+      // Dibujar un rectangulo de h/2 x w en la parte inferior del diente
+      // o superior si flipV es verdadero
+
+      // Determinar la posición del rectángulo según la orientación
+      const x = rect.x;
+      const y = diente.flipV ? rect.y : rect.y + rect.h / 2;
+
+      ctx.save();
+      ctx.strokeStyle = color; // Color del borde
+      ctx.lineWidth = 3;
+      ctx.strokeRect(x, y, rect.w, rect.h / 2);
+      ctx.restore();
+    },
+    /*
+    F-CoronaMetalCeramica
+    Dibuja una corona metal cerámica representada como un rectángulo que ocupa la mitad inferior del diente (o superior si flipV está activo). 
+    Añade la etiqueta 'CMC' al diente.
+    */
+    'Corona metal cerámica': (ctx, diente, color) => {
+      diente.addTag('CMC', color);
+      const rect = diente.getDienteRect();
+      // Dibujar un rectangulo de h/2 x w en la parte inferior del diente
+      // o superior si flipV es verdadero
+
+      // Determinar la posición del rectángulo según la orientación
+      const x = rect.x;
+      const y = diente.flipV ? rect.y : rect.y + rect.h / 2;
+
+      ctx.save();
+      ctx.strokeStyle = color; // Color del borde
+      ctx.lineWidth = 3;
+      ctx.strokeRect(x, y, rect.w, rect.h / 2);
+      ctx.restore();
+    },
+    /*
+    F-CoronaMetalica
+    Dibuja una corona veneer representada como un rectángulo que ocupa la mitad inferior del diente (o superior si flipV está activo). 
+    Añade la etiqueta 'CV' al diente.
+    */
+    'Corona veneer': (ctx, diente, color) => {
+      diente.addTag('CV', color);
+      const rect = diente.getDienteRect();
+      // Dibujar un rectangulo de h/2 x w en la parte inferior del diente
+      // o superior si flipV es verdadero
+
+      // Determinar la posición del rectángulo según la orientación
+      const x = rect.x;
+      const y = diente.flipV ? rect.y : rect.y + rect.h / 2;
+
+      ctx.save();
+      ctx.strokeStyle = color; // Color del borde
+      ctx.lineWidth = 3;
+      ctx.strokeRect(x, y, rect.w, rect.h / 2);
+      ctx.restore();
+    },
+    /*
+    F-CoronaMetalica
+    Dibuja una corona libre de metal representada como un rectángulo que ocupa la mitad inferior del diente (o superior si flipV está activo). 
+    Añade la etiqueta 'CLM' al diente.
+    */
+    'Corona libre de metal': (ctx, diente, color) => {
+      diente.addTag('CM', color);
+      const rect = diente.getDienteRect();
+      // Dibujar un rectangulo de h/2 x w en la parte inferior del diente
+      // o superior si flipV es verdadero
+
+      // Determinar la posición del rectángulo según la orientación
+      const x = rect.x;
+      const y = diente.flipV ? rect.y : rect.y + rect.h / 2;
+
+      ctx.save();
+      ctx.strokeStyle = color; // Color del borde
+      ctx.lineWidth = 3;
+      ctx.strokeRect(x, y, rect.w, rect.h / 2);
+      ctx.restore();
+    },
+    /*
+    F-CoronaMetalica
+    Dibuja una corona temporal representada como un rectángulo que ocupa la mitad inferior del diente (o superior si flipV está activo). 
+    Añade la etiqueta 'CT' al diente.
+    */
+    'Corona temporal': (ctx, diente, color) => {
+      diente.addTag('CT', color);
+      const rect = diente.getDienteRect();
+      // Dibujar un rectangulo de h/2 x w en la parte inferior del diente
+      // o superior si flipV es verdadero
+
+      // Determinar la posición del rectángulo según la orientación
+      const x = rect.x;
+      const y = diente.flipV ? rect.y : rect.y + rect.h / 2;
+
+      ctx.save();
+      ctx.strokeStyle = color; // Color del borde
+      ctx.lineWidth = 3;
+      ctx.strokeRect(x, y, rect.w, rect.h / 2);
+      ctx.restore();
+    },
+    /*
       F-CariesDentina
       Dibuja una pequeña lesión rectangular en la dentina, centrada en la parte inferior del diente (o superior si flipV). 
       Añade la etiqueta 'CD'.
@@ -296,6 +401,144 @@ const hallazgosClinicosFns = {
       ctx.restore();
     },
     /*
+      F-CariesEsmalte
+      Dibuja una pequeña lesión rectangular en el esmalte, centrada en la parte inferior del diente (o superior si flipV). 
+      Añade la etiqueta 'CE'.
+    */
+    'Lesión de caries a nivel de esmalte': (ctx, diente, color) => {
+      diente.addTag('CE', color);
+      const rect = diente.getDienteRect();
+      // Dibujar un pequeño rectangulo en la parte central inferior del diente
+      // o superior si flipV es verdadero
+
+      const rectWidth = rect.w * 0.4;
+      const rectHeight = rect.h * 0.15;
+
+      const x = rect.x + (rect.w - rectWidth) / 2;
+      const y = diente.flipV
+        ? rect.y + rect.h / 4 - rectHeight / 2 // parte superior
+        : rect.y + 3 * rect.h / 4 - rectHeight / 2; // parte inferior
+
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, rectWidth, rectHeight);
+      ctx.restore();
+    },
+    /*
+      F-CariesDentinaPulpa
+      Dibuja una pequeña lesión rectangular en la pulpa, centrada en la parte inferior del diente (o superior si flipV). 
+      Añade la etiqueta 'CDP'.
+    */
+    'Lesión de caries a nivel de pulpa': (ctx, diente, color) => {
+      diente.addTag('CDP', color);
+      const rect = diente.getDienteRect();
+      // Dibujar un pequeño rectangulo en la parte central inferior del diente
+      // o superior si flipV es verdadero
+
+      const rectWidth = rect.w * 0.4;
+      const rectHeight = rect.h * 0.15;
+
+      const x = rect.x + (rect.w - rectWidth) / 2;
+      const y = diente.flipV
+        ? rect.y + rect.h / 4 - rectHeight / 2 // parte superior
+        : rect.y + 3 * rect.h / 4 - rectHeight / 2; // parte inferior
+
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, rectWidth, rectHeight);
+      ctx.restore();
+    },
+    /*
+      F-ManchaBlanca
+      Dibuja una pequeña lesión rectangular en la pieza dental, centrada en la parte inferior del diente (o superior si flipV). 
+      Añade la etiqueta 'CE'.
+    */
+    'Mancha blanca': (ctx, diente, color) => {
+      diente.addTag('MB', color);
+      const rect = diente.getDienteRect();
+      // Dibujar un pequeño rectangulo en la parte central inferior del diente
+      // o superior si flipV es verdadero
+
+      const rectWidth = rect.w * 0.4;
+      const rectHeight = rect.h * 0.15;
+
+      const x = rect.x + (rect.w - rectWidth) / 2;
+      const y = diente.flipV
+        ? rect.y + rect.h / 4 - rectHeight / 2 // parte superior
+        : rect.y + 3 * rect.h / 4 - rectHeight / 2; // parte inferior
+
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, rectWidth, rectHeight);
+      ctx.restore();
+    },
+    /*
+      F-Pulpotomia
+      Dibuja una pequeña lesión rectangular en la pieza dental, centrada en la parte inferior del diente (o superior si flipV). 
+      Añade la etiqueta 'PP'.
+    */
+    'Pulpotomía': (ctx, diente, color) => {
+      diente.addTag('PP', color);
+      const rect = diente.getDienteRect();
+      // Dibujar un pequeño rectangulo en la parte central inferior del diente
+      // o superior si flipV es verdadero
+
+      const rectWidth = rect.w * 0.4;
+      const rectHeight = rect.h * 0.15;
+
+      const x = rect.x + (rect.w - rectWidth) / 2;
+      const y = diente.flipV
+        ? rect.y + rect.h / 4 - rectHeight / 2 // parte superior
+        : rect.y + 3 * rect.h / 4 - rectHeight / 2; // parte inferior
+
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, rectWidth, rectHeight);
+      ctx.restore();
+    },
+    /*
+      F-Mesializado
+      Solo añade la etiqueta 'M' para indicar que el diente está mesializado. No realiza ningún dibujo.
+    */
+    'Mesializado': (ctx, diente, color) => {
+      diente.addTag('M', color);
+    },
+    /*
+      F-Distalizado
+      Solo añade la etiqueta 'D' para indicar que el diente está distalizado. No realiza ningún dibujo.
+    */
+    'Distalizado': (ctx, diente, color) => {
+      diente.addTag('D', color);
+    },
+    /*
+      F-Vestibularizado
+      Solo añade la etiqueta 'V' para indicar que el diente está vestibularizado. No realiza ningún dibujo.
+    */
+    'Vestibularizado': (ctx, diente, color) => {
+      diente.addTag('V', color);
+    },
+    /*
+      F-Palatinizado
+      Solo añade la etiqueta 'P' para indicar que el diente está palatinizado. No realiza ningún dibujo.
+    */
+    'Palatinizado': (ctx, diente, color) => {
+      diente.addTag('P', color);
+    },
+    /*
+      F-Lingualizado
+      Solo añade la etiqueta 'L' para indicar que el diente está lingualizado. No realiza ningún dibujo.
+    */
+    'Lingualizado': (ctx, diente, color) => {
+      diente.addTag('L', color);
+    },
+    /*
+      F-RemanenteRadicular
+      Solo añade la etiqueta 'RR' para indicar que el diente está impactado. No realiza ningún dibujo.
+    */
+    'Remanente Radicular': (ctx, diente, color) => {
+      diente.addTag('RR', color);
+    },
+    /*
       F-Impactacion
       Solo añade la etiqueta 'I' para indicar que el diente está impactado. No realiza ningún dibujo.
     */
@@ -303,11 +546,25 @@ const hallazgosClinicosFns = {
       diente.addTag('I', color);
     },
     /*
-      F-PiezaAusente
+      F-Macrodoncia
+      Solo añade la etiqueta 'MAC' para indicar que el diente está macrodóntico. No realiza ningún dibujo.
+    */
+    'Macrodoncia': (ctx, diente, color) => {
+      diente.addTag('MAC', color);
+    },
+    /*
+      F-Microdoncia
+      Solo añade la etiqueta 'MIC' para indicar que el diente está microdoncico. No realiza ningún dibujo.
+    */
+    'Microdoncia': (ctx, diente, color) => {
+      diente.addTag('MIC', color);
+    },
+    /*
+      F-PiezaAusenteDEX
       Representa una pieza dentaria ausente mediante una "X" dibujada sobre el diente. 
       Añade la etiqueta 'DEX'.
     */
-    'Pieza dentaria ausente': (ctx, diente, color) => {
+    'Diente ausente por extracción': (ctx, diente, color) => {
       diente.addTag('DEX', color);
       const rect = diente.getDienteRect();
       // Dibujar una X en el diente
@@ -329,11 +586,167 @@ const hallazgosClinicosFns = {
       ctx.restore();
     },
     /*
+      F-PiezaAusenteDNE
+      Representa una pieza dentaria ausente mediante una "X" dibujada sobre el diente. 
+      Añade la etiqueta 'DNE'.
+    */
+    'Diente no erupcionado': (ctx, diente, color) => {
+      diente.addTag('DNE', color);
+      const rect = diente.getDienteRect();
+      // Dibujar una X en el diente
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+
+      // Línea diagonal de esquina a esquina
+      ctx.beginPath();
+      ctx.moveTo(rect.x, rect.y);
+      ctx.lineTo(rect.x + rect.w, rect.y + rect.h);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(rect.x + rect.w, rect.y);
+      ctx.lineTo(rect.x, rect.y + rect.h);
+      ctx.stroke();
+
+      ctx.restore();
+    },
+    /*
+      F-PiezaAusenteDAO
+      Representa una pieza dentaria ausente mediante una "X" dibujada sobre el diente. 
+      Añade la etiqueta 'DAO'.
+    */
+    'Diente ausente por otras razones': (ctx, diente, color) => {
+      diente.addTag('DAO', color);
+      const rect = diente.getDienteRect();
+      // Dibujar una X en el diente
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+
+      // Línea diagonal de esquina a esquina
+      ctx.beginPath();
+      ctx.moveTo(rect.x, rect.y);
+      ctx.lineTo(rect.x + rect.w, rect.y + rect.h);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(rect.x + rect.w, rect.y);
+      ctx.lineTo(rect.x, rect.y + rect.h);
+      ctx.stroke();
+
+      ctx.restore();
+    },
+    /*
+      F-PiezaDentariaEnClavija
+      Dibuja un triángulo encima del diente, representando una pieza en clavija.
+    */
+    'Pieza Dentaria en Clavija': (ctx, diente, color) => {
+      const r = diente.getDienteRect();
+
+      const triangleHeight = 8;
+      const triangleBase = 12;
+
+      const centerX = r.x + r.w / 2;
+      const topY = diente.flipV ? r.y + r.h + 2 : r.y - 2;
+      const direction = diente.flipV ? 1 : -1;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(centerX, topY + triangleHeight * direction);         // punta
+      ctx.lineTo(centerX - triangleBase / 2, topY);                   // izquierda base
+      ctx.lineTo(centerX + triangleBase / 2, topY);                   // derecha base
+      ctx.closePath();
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.stroke(); // solo borde, del color indicado
+
+      ctx.restore();
+    },
+    /*
+      F-Erupción
+      Dibuja una flecha en zigzag desde la parte superior de la pieza dental hasta su centro.
+    */
+    'Erupción': (ctx, diente, color) => {
+      const r = diente.getDienteRect();
+      const centerX = r.x + r.w / 2;
+
+      const isFlipped = diente.flipV;
+
+      // Si no está volteado, va de arriba a centro; si sí, de abajo a centro
+      const startY = isFlipped ? (r.y + r.h) : r.y;
+      const endY = r.y + r.h / 2;
+
+      const segments = 4;
+      const zigzagWidth = 6;
+      const totalHeight = endY - startY;
+      const zigzagHeight = totalHeight / segments;
+
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+
+      let currentX = centerX;
+      let currentY = startY;
+      ctx.moveTo(currentX, currentY);
+
+      for (let i = 0; i < segments; i++) {
+        const dir = i % 2 === 0 ? -1 : 1;
+        currentX = centerX + dir * zigzagWidth;
+        currentY += zigzagHeight;
+        ctx.lineTo(currentX, currentY);
+      }
+
+      // Flecha al final (hacia abajo si no está volteado, hacia arriba si sí)
+      const arrowSize = 5;
+      const arrowDir = isFlipped ? 1 : -1; // invertimos la dirección
+
+      ctx.moveTo(currentX, currentY);
+      ctx.lineTo(currentX - arrowSize, currentY + arrowSize * arrowDir);
+      ctx.moveTo(currentX, currentY);
+      ctx.lineTo(currentX + arrowSize, currentY + arrowSize * arrowDir);
+      ctx.stroke();
+      ctx.restore();
+    },
+    /*
+      F-Ectopica
+      Solo añade la etiqueta 'E' para indicar una pieza dentaria ectópica. No realiza dibujo.
+    */
+    'Pieza dentaria ectópica': (ctx, diente, color) => {
+      diente.addTag('E', color);
+    },
+    /*
       F-PigmentacionEsmalte
       Solo añade la etiqueta 'PE' para indicar pigmentación del esmalte. No realiza dibujo.
     */
     'Pigmentación del esmalte': (ctx, diente, color) => {
       diente.addTag('PE', color);
+    },
+    /*
+      F-OpacidadEsmalte
+      Solo añade la etiqueta 'O' para indicar opacidad del esmalte. No realiza dibujo.
+    */
+    'Opacidad de esmalte': (ctx, diente, color) => {
+      diente.addTag('O', color);
+    },
+    /*
+      F-FluorosisEsmalte
+      Solo añade la etiqueta 'PE' para indicar pigmentación del esmalte. No realiza dibujo.
+    */
+    'Fluorosis de esmalte': (ctx, diente, color) => {
+      diente.addTag('Fluor', color);
+    },
+    /*
+      F-FosasFisurasProfundas
+      Solo añade la etiqueta 'FFP' para indicar fosas y fisuras profundas. No realiza dibujo.
+    */
+    'Fosas y fisuras profundas': (ctx, diente, color) => {
+      diente.addTag('FFP', color);
+    },
+    'Fosas y fisuras profundas': (ctx, diente, color) => {
+      diente.addTag('FFP', color);
     },
     /*
       F-RestauracionDefinitivaAmalgama
@@ -461,6 +874,29 @@ const hallazgosClinicosFns = {
       ctx.restore();
     },
     /*
+      F-Pulpectomia
+      Dibuja una línea vertical desde la raíz hacia la corona del diente para indicar tratamiento de conducto.
+      Añade la etiqueta 'PC'.
+    */
+    'Pulpectomía': (ctx, diente, color) => {
+      // dibujar una linea de la raiz hacia arriba
+      diente.addTag('PC', color);
+      const r = diente.getDienteRect();
+      const y1 = diente.flipV ? r.y + r.h / 4 : r.y + 3 * r.h / 4;
+      const y2 = diente.flipV ? r.y + r.h : r.y;
+      
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+
+      ctx.beginPath();
+      ctx.moveTo(r.x + r.w / 2, y1);
+      ctx.lineTo(r.x + r.w / 2, y2);
+      ctx.stroke();
+
+      ctx.restore();
+    },
+    /*
       F-ImplanteDental
       Solo añade la etiqueta 'IMP' para indicar que el diente es un implante. No realiza dibujo.
     */
@@ -475,6 +911,129 @@ const hallazgosClinicosFns = {
     'Movilidad patológica': (ctx, diente, color) => {
       // Solo añadir tag
       diente.addTag('M1', color);
+    },
+    /*
+      F-Geminacion
+      Dibuja un óvalo encima (o debajo si flipV = true) del diente seleccionado,
+      y muestra el número del diente dentro del óvalo.
+    */
+    'Geminacion': (ctx, diente, color) => {
+      const r = diente.getDienteRect();
+
+      const ovalWidth = r.w;
+      const ovalHeight = 14;
+
+      const y = diente.flipV
+        ? r.y + r.h + 15 // debajo del diente
+        : r.y - ovalHeight - 2; // encima del diente
+
+      const centerX = r.x + r.w / 2;
+
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = 'white';
+      ctx.lineWidth = 3;
+
+      // Dibujar óvalo
+      ctx.beginPath();
+      ctx.ellipse(centerX, y, ovalWidth / 2, ovalHeight / 2, 0, 0, 2 * Math.PI);
+      ctx.stroke(); // borde de color
+
+      ctx.restore();
+    },
+    /*
+      F-PiezaDentariaExtruida
+      Dibuja una flecha vertical debajo o encima del diente según flipV.
+    */
+    'Pieza Extruida': (ctx, diente, color) => {
+      const r = diente.getDienteRect();
+      const isFlipped = diente.flipV;
+
+      const centerX = r.x + r.w / 2;
+      const y = isFlipped ? r.y + r.h + 10 : r.y + r.h + 10; // Ajuste para ambas vistas
+
+      const flecha = isFlipped ? '⬆' : '⬇';
+
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.font = '20px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      // Ajuste fino para flipV: subir solo un poco respecto a la base del diente
+      const adjustedY = isFlipped ? r.y - 10 : y;
+
+      ctx.fillText(flecha, centerX, adjustedY);
+
+      ctx.restore();
+    },
+    /*
+      F-PiezaDentariaIntruida
+      Dibuja una flecha hacia arriba debajo del diente, indicando intrusión.
+    */
+    'Pieza Intruida': (ctx, diente, color) => {
+      const r = diente.getDienteRect();
+      const isFlipped = diente.flipV;
+
+      const centerX = r.x + r.w / 2;
+      const y = isFlipped ? r.y + r.h + 10 : r.y + r.h + 10; // Ajuste para ambas vistas
+
+      const flecha = isFlipped ? '⬇' : '⬆';
+
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.font = '20px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      // Ajuste fino para flipV: subir solo un poco respecto a la base del diente
+      const adjustedY = isFlipped ? r.y - 10 : y;
+
+      ctx.fillText(flecha, centerX, adjustedY);
+
+      ctx.restore();
+    },
+
+
+
+    /*
+      GiroversiónIzquierda
+      Dibuja una flecha curva hacia la izquierda debajo del diente.
+    */
+    'GiroversiónIzquierda': (ctx, diente, color) => {
+      const r = diente.getDienteRect();
+      const y = diente.flipV ? r.y - 20 : r.y + r.h + 10;
+      const centerX = r.x + r.w / 2;
+
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.font = '20px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      ctx.fillText('⤾', centerX, y); // Unicode flecha curva izquierda
+
+      ctx.restore();
+    },
+
+    /*
+      GiroversiónDerecha
+      Dibuja una flecha curva hacia la derecha debajo del diente.
+    */
+    'GiroversiónDerecha': (ctx, diente, color) => {
+      const r = diente.getDienteRect();
+      const y = diente.flipV ? r.y - 20 : r.y + r.h + 10;
+      const centerX = r.x + r.w / 2;
+
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.font = '20px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      ctx.fillText('⤿', centerX, y); // Unicode flecha curva derecha
+
+      ctx.restore();
     },
   },
   doble: {
@@ -522,6 +1081,50 @@ const hallazgosClinicosFns = {
 
       ctx.restore();
     },
+    /*
+      F-PiezaSupernumeraria
+      Dibuja un círculo con una "S" dentro, entre dos dientes adyacentes.
+      Se ajusta según el flipV para ubicarlo por encima o por debajo de las piezas.
+    */
+    'Pieza Supernumeraria': (ctx, diente1, diente2, color) => {
+      const r1 = diente1.getDienteRect();
+      const r2 = diente2.getDienteRect();
+
+      const isFlipped = diente1.flipV || diente2.flipV;
+
+      // Centro horizontal entre los dos dientes
+      const centerX = (r1.x + r1.w / 2 + r2.x + r2.w / 2) / 2;
+
+      // Centro vertical aproximado entre ambos dientes
+      const centerY1 = r1.y + r1.h / 2;
+      const centerY2 = r2.y + r2.h / 2;
+      let centerY = (centerY1 + centerY2) / 2;
+
+      // Desplazar un poco hacia arriba o abajo, según flip
+      const verticalOffset = 10;
+      centerY = isFlipped ? centerY + verticalOffset : centerY - verticalOffset;
+
+      const radius = 8;
+
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+
+      // Círculo sin relleno
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+      ctx.stroke();
+
+      // Letra "S" centrada
+      ctx.fillStyle = color;
+      ctx.font = '12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('S', centerX, centerY);
+
+      ctx.restore();
+    },
+
     /*
       F-Diastema
       Representa un diastema (separación entre dientes) dibujando un arco curvado hacia afuera a la derecha del primer diente 
@@ -571,7 +1174,7 @@ const hallazgosClinicosFns = {
       Representa un aparato odontológico fijo, dibujando una línea horizontal que conecta los dientes seleccionados,
       con pequeños rectángulos en ambos extremos. La línea se dibuja por debajo o por encima de los dientes según flipV.
     */
-    'Aparato odontológico': (ctx, diente1, diente2, color) => {
+    'Aparato odontológico fijo': (ctx, diente1, diente2, color) => {
       // Línea por debajo de los dientes con rectangulos en sus puntos extremos
       const r1 = diente1.getDienteRect();
       const r2 = diente2.getDienteRect();
@@ -589,6 +1192,48 @@ const hallazgosClinicosFns = {
       ctx.fillStyle = color;
       ctx.fillRect(r1.x, y + offsetY, 8, 8);
       ctx.fillRect(r2.x + r2.w - 8, y + offsetY, 8, 8);
+
+      ctx.restore();
+    },
+    /*
+      F-AparatoOdontologicoRemovible
+      Representa un aparato odontológico removible, dibujando una línea en zig-zag que atraviesa
+      los dientes seleccionados.
+    */
+    'Aparato odontológico removible': (ctx, diente1, diente2, color) => {
+      // Línea en zig-zag que atraviesa los dientes
+      const r1 = diente1.getDienteRect();
+      const r2 = diente2.getDienteRect();
+      
+      // 1. Se calcula la 'y' para que la línea pase por encima de la corona del diente
+      const y = diente1.flipV ? r1.y + r1.h / 4 : r1.y + 0.01 * r1.h / 4;
+
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+
+      // 2. Se ajusta el inicio y el fin para que vaya del centro del primer diente al centro del último
+      const startX = r1.x + r1.w / 2;
+      const endX = r2.x + r2.w / 2;
+      
+      const amplitude = 5;  // Altura del zig-zag
+      const frequency = 25; // Longitud de cada segmento del zig-zag
+
+      ctx.beginPath();
+      ctx.moveTo(startX, y);
+      
+      let currentX = startX;
+      let up = true; // Para alternar la dirección del zig-zag
+
+      while (currentX < endX) {
+        currentX = Math.min(currentX + frequency / 2, endX);
+        const nextY = y + (up ? -amplitude : amplitude);
+        ctx.lineTo(currentX, nextY);
+        up = !up; // Invertir la dirección para el siguiente segmento
+      }
+      ctx.stroke();
+
+      // 3. Se eliminó el código que dibujaba los rectángulos en los extremos
 
       ctx.restore();
     },
@@ -859,20 +1504,26 @@ function updateLeftPanel(images) {
     return;
   }
 
-  Object.keys(hallazgosClinicosFns[tipoHallazgo]).forEach(key => {
-    const option = document.createElement('option');
-    option.value = key;
-    option.textContent = key;
-    select.appendChild(option);
-  });
-
-  if (tipoHallazgo == 'doble') {
-    Object.keys(hallazgosClinicosFns['multiple']).forEach(key => {
+  // Obtenemos las claves, las ordenamos alfabéticamente y luego las añadimos
+  Object.keys(hallazgosClinicosFns[tipoHallazgo])
+    .sort((a, b) => a.localeCompare(b, 'es')) // Usamos localeCompare para un orden correcto en español (acentos, etc.)
+    .forEach(key => {
       const option = document.createElement('option');
       option.value = key;
       option.textContent = key;
       select.appendChild(option);
     });
+
+  if (tipoHallazgo == 'doble') {
+    // Hacemos lo mismo aquí para las opciones de tipo 'multiple'
+    Object.keys(hallazgosClinicosFns['multiple'])
+      .sort((a, b) => a.localeCompare(b, 'es'))
+      .forEach(key => {
+        const option = document.createElement('option');
+        option.value = key;
+        option.textContent = key;
+        select.appendChild(option);
+      });
   }
 
   const length = Object.keys(hallazgosClinicosFns).indexOf(tipoHallazgo) + 1;
